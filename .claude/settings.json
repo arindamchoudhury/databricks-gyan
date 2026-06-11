@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//c/opt/learn/spark/notes/**)",
-      "WebSearch",
-      "WebFetch(domain:www.databricks.com)"
-    ]
-  }
-}
