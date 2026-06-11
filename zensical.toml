@@ -1,0 +1,42 @@
+[project]
+site_name = "Databricks Data Engineering — Learning Notes"
+site_description = "Personal notes and book from learning Databricks Data Engineering."
+site_author = "arindam@live.com"
+
+nav = [
+    { "Home" = "index.md" },
+    { "Learning Path" = "learning-path.md" },
+    { "Book" = [
+        { "Contents" = "book/index.md" },
+    ]},
+    { "Release Notes" = [
+        { "Overview & LP Flags" = "release-notes/index.md" },
+        { "Platform" = [
+            { "June 2026" = "release-notes/platform/2026-june.md" },
+            { "May 2026" = "release-notes/platform/2026-may.md" },
+            { "April 2026" = "release-notes/platform/2026-april.md" },
+            { "March 2026" = "release-notes/platform/2026-march.md" },
+            { "February 2026" = "release-notes/platform/2026-february.md" },
+            { "January 2026" = "release-notes/platform/2026-january.md" },
+            { "December 2025" = "release-notes/platform/2025-december.md" },
+        ]},
+        { "Runtime" = [
+            { "DBR 18 (Spark 4.1.0)" = "release-notes/runtime/dbr-18.md" },
+            { "DBR 17.3 LTS (Spark 4.0.0)" = "release-notes/runtime/dbr-17-3-lts.md" },
+            { "DBR 16.4 LTS (Spark 3.5.2)" = "release-notes/runtime/dbr-16-4-lts.md" },
+        ]},
+        { "Lakeflow Pipelines 2026" = "release-notes/lakeflow/2026.md" },
+        { "Databricks SQL 2026" = "release-notes/sql/2026.md" },
+        { "DABs Changelog" = "release-notes/dabs/changelog.md" },
+        { "Serverless Changelog" = "release-notes/serverless/changelog.md" },
+    ]},
+    { "Reference" = [
+        { "Glossary" = "reference/glossary.md" },
+        { "Resources" = "reference/resources.md" },
+    ]},
+]
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+]

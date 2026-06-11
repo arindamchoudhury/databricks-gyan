@@ -1,0 +1,31 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working in this repository.
+
+## Commands
+
+```bash
+# Recommended: Docker with live-reload (port 8001 to avoid conflict with spark notes)
+docker compose up          # http://localhost:8000; auto-rebuilds on docs/ or zensical.toml changes
+
+# Local Python alternative
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install zensical
+zensical serve
+```
+
+## Architecture
+
+Zensical static site. Content in `docs/` as Markdown. `zensical.toml` holds all nav — **every new page must be added to nav or it won't appear**.
+
+Book chapters live in `docs/book/`. One chapter per learning-path topic. The book skill (`databricks-book`) writes these.
+
+## Current stable version
+
+Databricks Runtime 18 (released 2026-06-10) — Apache Spark 4.1.0.
+Databricks Runtime 17.3 LTS (released 2025-10-22) — Apache Spark 4.0.0.
+
+Key naming note: Delta Live Tables (DLT) is now **Lakeflow Spark Declarative Pipelines** as of DAIS 2025. Use the new name in all content.
+
+## `[project.theme]` intentionally absent — Zensical 0.0.x raises an error if set.

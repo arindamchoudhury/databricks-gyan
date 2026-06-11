@@ -1,0 +1,647 @@
+# Learning Path: Databricks Data Engineering
+
+> **Last updated:** 2026-06-11 (resources updated to reflect current Databricks training catalog)
+> **Current stable version:** Databricks Runtime 18 (released 2026-06-10) · Apache Spark 4.1.0
+> **LTS version:** DBR 17.3 LTS (released 2025-10-22) · Apache Spark 4.0.0
+>
+> **How to read this page.** Topics are the primary unit. Each topic has a "How to learn it"
+> section that recommends a multi-modal path — video first, then exercises, then depth reading.
+> Resources (books, courses, docs) serve the topics; they are not the organizing structure.
+>
+> **Naming note:** Delta Live Tables (DLT) is now officially called **Lakeflow Spark Declarative Pipelines**.
+> Databricks Workflows is now **Lakeflow Jobs**. Both old and new names appear in resources.
+
+---
+
+## Resources at a glance
+
+| Abbrev | Name | Type | URL |
+|---|---|---|---|
+| **DCDE-SG** | Databricks Certified Data Engineer Associate Study Guide (Alhussein, O'Reilly 2025) | Book | https://www.oreilly.com/library/view/databricks-certified-data/9781098166823/ |
+| **UDEDW** | Ultimate Data Engineering with Databricks (Malhotra, 2024) | Book | https://www.amazon.com/dp/8196994788 |
+| **BBDE** | Big Book of Data Engineering, 4th Edition (Databricks, free) | Ebook | https://www.databricks.com/resources/ebook/big-book-of-data-engineering |
+| **DA-FREE** | Get Started with Databricks for Data Engineering (Databricks Academy, 2 hrs, free) | Official Course | https://www.databricks.com/training/catalog/get-started-with-databricks-for-data-engineering-1511 |
+| **DA-DE** | Data Engineering with Databricks (Databricks Academy, 16 hrs) — M1: Lakeflow Connect · M2: Lakeflow Jobs · M3: Spark Declarative Pipelines · M4: DevOps Essentials | Official Course | https://www.databricks.com/training/catalog/data-engineering-with-databricks-911 |
+| **DA-ADE** | Advanced Data Engineering with Databricks (Databricks Academy, 16 hrs) — M1: Advanced Pipelines · M2: Data Privacy · M3: Performance Optimization · M4: Automated DABs Deployment | Official Course | https://www.databricks.com/training/catalog/advanced-data-engineering-with-databricks-971 |
+| **DA-MGUC** | Data Management and Governance with Unity Catalog (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/data-management-and-governance-with-unity-catalog-3145 |
+| **DA-DIUC** | Data Interoperability with Unity Catalog (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/data-interoperability-with-unity-catalog-4557 |
+| **DA-SQL** | SQL Analytics on Databricks (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/sql-analytics-on-databricks-3928 |
+| **DB-DOCS** | Databricks official documentation | Docs | https://docs.databricks.com/aws/en/ |
+| **DB-DELTA** | Delta Lake documentation | Docs | https://docs.delta.io/latest/ |
+| **REPO-DLT** | delta-live-tables-notebooks — official Databricks DLT/Lakeflow example pipelines (CDC, streaming, Kimball, ML) | GitHub repo | https://github.com/databricks/delta-live-tables-notebooks |
+| **REPO-NBP** | notebook-best-practices — before/after modularization example (COVID EDA); shared module `covid_analysis/transforms.py`; 4 pytest unit tests in `tests/transforms_test.py`; `notebooks/run_unit_tests.py` runs pytest via `pytest.main()` inside a Databricks notebook; GitHub Actions CI using `databricks/run-notebook` action | GitHub repo | https://github.com/databricks/notebook-best-practices |
+| **REPO-TF** | terraform-databricks-lakehouse-blueprints — production lakehouse infra (Unity Catalog, Private Link, multi-cloud) | GitHub repo | https://github.com/databricks/terraform-databricks-lakehouse-blueprints |
+
+---
+
+## Certifications
+
+| Cert | Provider | Level | Topics tested (weights) | Fee | When to attempt |
+|---|---|---|---|---|---|
+| **Databricks Certified Data Engineer Associate (DCDEA)** | Databricks | Intermediate | Platform Fundamentals 10%, Development & Ingestion 30%, Data Processing & Transformations 31%, Productionizing Pipelines 18%, Data Governance & Quality 11% | $200 | After Intermediate level |
+| **Databricks Certified Data Engineer Professional (DCDEP)** | Databricks | Advanced | Python/SQL Code 22%, Cost & Performance Optimization 13%, Monitoring & Alerting 10%, Data Security & Compliance 10%, Debugging & Deploying 10%, Data Transformation/Quality 10%, Data Ingestion 7%, Data Governance 7%, Data Modelling 6%, Data Sharing & Federation 5% | $200 | After Advanced level |
+
+Both exams: online proctored, multiple choice, valid 2 years, no formal prerequisites.
+
+---
+
+## Beginner
+
+**Goal:** Understand the Databricks Lakehouse platform, write PySpark and Spark SQL transformations, read/write Delta tables, and build simple batch pipelines following the Medallion pattern.
+**Estimated time:** ~30 hrs
+
+---
+
+### ⬜ B1 — Databricks Platform & Workspace
+
+**What it is:** The Databricks control/data plane architecture, workspace UI, cluster types, and notebook environment.
+
+**Why you need it:** Everything else runs on top of this platform; without a mental model of how it works you can't reason about cost, connectivity, or failures.
+
+**How to learn it:**
+
+1. **Free course — DA-FREE** (~2 hrs) — Official Databricks workspace tour covering platform architecture, cluster types, Delta Lake intro, and Lakeflow overview. Self-paced, no cost; complete all demos.
+2. **Hands-on — Sign up for Databricks Free Edition** (~1 hr) — Create an all-purpose cluster, run a `spark.range(10).show()` notebook, browse a Unity Catalog Volume in the Data Explorer, and look at the cluster event log. Sign up at [docs.databricks.com/aws/en/getting-started/free-edition](https://docs.databricks.com/aws/en/getting-started/free-edition).
+3. **Book chapter — DCDE-SG Ch 1** (~2 hrs) — Read "Introducing the Databricks Platform", "Understanding High-Level Architecture", "Creating Clusters", and "Working with Notebooks". Skip the chapter on Deployment of Databricks Resources (not needed yet).
+4. **Reference — DB-DOCS** — Bookmark the [Clusters](https://docs.databricks.com/aws/en/compute/) and [Notebooks](https://docs.databricks.com/aws/en/notebooks/) docs pages for cluster config reference.
+
+**Milestone:** You can create a cluster in Free Edition, run a notebook, explain the difference between all-purpose and job clusters, and describe what the control plane and data plane are.
+
+---
+
+### ⬜ B2 — Apache Spark Architecture on Databricks
+
+**What it is:** The Spark driver/executor model, DAG execution, stages, and tasks — how Spark actually runs your code.
+
+**Why you need it:** Performance problems, OOM errors, and slow jobs all trace back to this model; you can't tune what you don't understand.
+
+**How to learn it:**
+
+1. **Book chapter — DCDE-SG Ch 1, "Apache Spark on Databricks" section** (~30 min) — Since you know Spark, focus on the Databricks-specific layer: AQE enabled by default, serverless compute vs classic clusters, and where Photon fits. A quick skim rather than a deep read.
+2. **Interactive — Spark UI in Free Edition** (~1 hr) — Run a join between two DataFrames and inspect the DAG, stages, and tasks in the Spark UI. Look at shuffle read/write sizes.
+3. **Reference — DB-DOCS: [Spark UI](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide.html)** — Bookmark for when you tune jobs later.
+
+**Milestone:** You can explain what happens between `df.count()` and a result appearing — job → stages → tasks → executors — and find the corresponding DAG in the Spark UI.
+
+---
+
+### ⬜ B3 — PySpark DataFrame API Fundamentals
+
+**What it is:** The core PySpark API: reading data, selecting/filtering/transforming columns, aggregations, joins, and writing output.
+
+**Why you need it:** Every data pipeline starts here; this is the language you write ETL in.
+
+**How to learn it:**
+
+1. **Interactive — Free Edition** (~1 hr) — Since you know PySpark, this is an orientation run: read a JSON file, apply transforms with `F.col()` / `F.when()`, join two DataFrames, write the result as a Delta table. Confirm the Databricks notebook environment works as expected before moving on.
+2. **Book chapter — DCDE-SG Ch 4, "Transforming Data with Apache Spark"** (~2 hrs) — Focus on Databricks-specific additions: higher-order functions (`filter`, `transform`), SQL UDFs, and nested JSON flattening. These may differ from vanilla PySpark you've used elsewhere.
+3. **Reference — [PySpark API docs](https://spark.apache.org/docs/latest/api/python/)** — `pyspark.sql.functions` module; bookmark and consult while coding.
+
+> ⚠️ **DBR 18 Python UDF change:** Arrow is now the default interchange format for Python UDFs (was opt-in). TIMESTAMP inputs to UDFs no longer carry timezone metadata. If your UDFs rely on timezone-aware timestamps, test on DBR 18 before upgrading.
+
+**Milestone:** You can read a JSON file into a DataFrame, flatten nested fields, join it with a second dataset, aggregate by a key, and write the result as a partitioned Delta table — all in PySpark.
+
+---
+
+### ⬜ B4 — Spark SQL & Relational Entities
+
+**What it is:** SQL syntax on Databricks: databases, tables, views (temporary and persisted), DDL statements, and the Hive metastore.
+
+**Why you need it:** Most data engineers use SQL for 80% of transformations; relational entities are how you make data shareable across notebooks and jobs.
+
+**How to learn it:**
+
+1. **Free course — DA-FREE, "Data Transformation Overview" section** (~30 min) — Covers creating databases, tables, and views in the Databricks context, including the managed vs external table distinction.
+2. **Interactive — Free Edition SQL notebook** (~2 hrs) — Create a database, build a managed table from a CSV with CTAS, create a temp view and a persisted view, then query across all three.
+3. **Book chapter — DCDE-SG Ch 3, "Mastering Relational Entities in Databricks"** (~1.5 hrs) — CTAS, table constraints, cloning Delta tables, view types comparison. Read the "CTAS Statements" and "Exploring Views" sections carefully.
+4. **Reference — DB-DOCS: [SQL language reference](https://docs.databricks.com/aws/en/sql/language-manual/)** — Bookmark for DDL syntax lookup.
+
+**Milestone:** You can explain the difference between a managed and external table, create both, create a view backed by a query, and describe what happens to data when you `DROP TABLE` on each type.
+
+---
+
+### ⬜ B5 — Delta Lake Fundamentals
+
+**What it is:** Delta Lake's ACID transaction model, the transaction log (_delta_log), and basic table operations: CREATE, INSERT, UPDATE, DELETE, MERGE.
+
+**Why you need it:** Delta Lake is the default storage format for all Databricks tables; every pipeline you write reads or writes Delta.
+
+**How to learn it:**
+
+1. **Free course — DA-FREE, "Delta Lake Overview" and "Demo: Creating and Working with a Delta Table"** (~30 min) — Official Databricks walkthrough of Delta table internals, the transaction log, and basic table operations.
+2. **Interactive — Free Edition** (~2 hrs) — Create a Delta table, INSERT rows, UPDATE a subset, view `DESCRIBE HISTORY`, run `SELECT * VERSION AS OF 0`.
+3. **Book chapter — DCDE-SG Ch 2, "Managing Data with Delta Lake"** (~2 hrs) — Transaction log mechanics, time travel, OPTIMIZE, VACUUM. Read all sections; this is the densest beginner chapter.
+4. **Reference — DB-DELTA docs** — [Delta Lake quickstart](https://docs.delta.io/latest/quick-start.html) and [table operations](https://docs.delta.io/latest/delta-update.html).
+
+**Milestone:** You can explain what the `_delta_log` contains, run a time-travel query using both `VERSION AS OF` and `TIMESTAMP AS OF`, and describe why VACUUM is needed and what it does.
+
+---
+
+### ⬜ B6 — Data Ingestion Basics
+
+**What it is:** The three core batch ingestion patterns — CTAS (Create Table As Select from file), COPY INTO, and reading raw file formats (Parquet, JSON, CSV, Avro).
+
+**Why you need it:** Every pipeline starts with ingestion; knowing which method to use and why prevents full-table rewrites.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 1, "Cloud Storage Ingestion with LakeFlow Connect Standard Connectors"** (~2 hrs) — Hands-on lab covering CTAS, COPY INTO, and cloudFiles.
+2. **Book chapter — DCDE-SG Ch 5, "Processing Incremental Data" — COPY INTO section** (~1 hr) — Covers idempotency guarantees and when to prefer COPY INTO vs CTAS.
+3. **Interactive — Free Edition** (~1.5 hrs) — Upload a CSV to DBFS, ingest it three ways: plain `spark.read.csv()`, CTAS, and COPY INTO. Verify row counts match and check COPY INTO's idempotency by running it twice.
+4. **Reference — DB-DOCS: [COPY INTO](https://docs.databricks.com/aws/en/ingestion/copy-into/)** — Syntax and supported formats reference.
+
+**Milestone:** You can ingest a JSON file using COPY INTO, explain why running it twice doesn't duplicate rows, and describe when you'd choose CTAS over COPY INTO.
+
+---
+
+### ⬜ B7 — Medallion Architecture
+
+**What it is:** The multi-hop data design pattern — Bronze (raw ingest), Silver (validated/cleaned), Gold (aggregated/business-ready) — and the principles behind it.
+
+**Why you need it:** This is the foundational design pattern for Databricks pipelines; all production work is structured around it.
+
+**How to learn it:**
+
+1. **Free course — DA-FREE, "Data Transformation Overview" and "Demo: Transforming Data Using the Medallion Architecture"** (~30 min) — Official Databricks walkthrough of Bronze/Silver/Gold layers with a live demo.
+2. **Book chapter — BBDE Chapter: "Applying Software Development and DevOps Best Practices to Delta Live Tables Pipelines"** (~1 hr) — Shows how the Medallion pattern maps to production Lakeflow pipeline code.
+3. **Hands-on — Free Edition** (~2 hrs) — Build a 3-table pipeline: raw JSON → Bronze Delta table → Silver with deduplication and type casting → Gold with aggregation. No orchestration yet — just run each notebook manually.
+4. **Reference — DB-DOCS: [Medallion architecture](https://docs.databricks.com/aws/en/lakehouse/medallion.html)**
+
+**Milestone:** You can build a 3-layer Medallion pipeline in notebooks, explain why Bronze preserves raw data unchanged, and describe the difference between Silver validation logic and Gold aggregation logic.
+
+---
+
+### ✅ Beginner Checkpoint
+
+You are ready to advance when you can:
+- Write a PySpark pipeline that reads from a file, applies joins and aggregations, and writes a Delta table
+- Explain the Delta transaction log and run a time-travel query
+- Build a 3-hop Medallion pipeline across Bronze/Silver/Gold tables
+- Describe the Databricks control/data plane architecture and cluster types
+
+**Certification target:** These topics are prerequisite context for the DCDEA — not yet sufficient. Continue through Intermediate before attempting the exam.
+
+---
+
+## Intermediate
+
+**Goal:** Build production-grade incremental pipelines with Auto Loader and Lakeflow Spark Declarative Pipelines, implement CDC, orchestrate multi-task jobs, and govern data with Unity Catalog.
+**Estimated time:** ~45 hrs
+
+---
+
+### ⬜ I1 — Auto Loader & Incremental Ingestion
+
+**What it is:** The `cloudFiles` Auto Loader source: continuously discovers and ingests new files from cloud storage with exactly-once guarantees and automatic schema inference.
+
+**Why you need it:** COPY INTO is idempotent but batch; Auto Loader is streaming-based and handles high-volume, continuously arriving files at scale.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 1, "Ingestion Alternatives" and Auto Loader lab** (~1.5 hrs) — The hands-on lab is essential; run it.
+2. **Book chapter — DCDE-SG Ch 5, "Incremental Data Ingestion — Auto Loader section"** (~1 hr) — Covers schema inference, schema evolution, checkpoint locations, and the difference between directory listing mode and file notification mode.
+3. **Interactive — Free Edition** (~2 hrs) — Build an Auto Loader stream from a DBFS landing zone: write 10 JSON files, start the stream, write 10 more, verify they appear in the target Delta table. Check the checkpoint directory.
+4. **Reference — DB-DOCS: [Auto Loader](https://docs.databricks.com/aws/en/ingestion/auto-loader/)** — Schema evolution and configuration options reference.
+
+> ⚠️ **DBR 17.3+ breaking change:** `input_file_name()` is removed. Use `df.select("_metadata.file_name")` instead. Any Auto Loader pipeline using `input_file_name()` will fail on DBR 17.3+.
+
+**Milestone:** You can write an Auto Loader stream that ingests new JSON files incrementally, handles schema evolution with `mergeSchema`, and explain what the checkpoint directory contains and why it matters.
+
+---
+
+### ⬜ I2 — Structured Streaming with Spark
+
+**What it is:** Spark Structured Streaming: the streaming query model, triggers (once, continuous, available-now), output modes (append, complete, update), watermarks, and stateful aggregations.
+
+**Why you need it:** Lakeflow Spark Declarative Pipelines and Auto Loader both build on Structured Streaming; understanding it lets you reason about latency, state, and late-data handling.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 3, streaming tables sections** (~1.5 hrs) — Covers the micro-batch model, triggers, checkpointing, and how Structured Streaming maps to Lakeflow Declarative Pipelines syntax.
+2. **Book chapter — DCDE-SG Ch 5, "Streaming Data with Apache Spark" and "Spark Structured Streaming"** (~1.5 hrs) — Output modes, query configurations, streaming guarantees. Read carefully.
+3. **Official course — DA-DE Module 3, Streaming Tables section** (~1 hr) — Shows how streaming concepts map to Lakeflow Declarative Pipelines syntax.
+4. **Local repo — REPO-DLT** — Read the `kafka-fraud-detection` or `twitter-sentiment-analysis` example to see a complete streaming Lakeflow pipeline (Kafka source → Bronze streaming table → Silver transformations). Read the notebook code for patterns; don't worry about running it.
+5. **Interactive — Free Edition** (~2 hrs) — Build a streaming word count with a 10-second trigger, using a Delta table as source and another as sink. Run with Trigger.AvailableNow, then with Trigger.Once. Compare behavior.
+6. **Reference — DB-DOCS: [Structured Streaming](https://docs.databricks.com/aws/en/structured-streaming/)** — Trigger types and watermark reference.
+
+**Milestone:** You can write a streaming aggregation with a watermark, explain the difference between `Trigger.AvailableNow` and `Trigger.Once`, and describe why append mode is preferred over complete mode for large tables.
+
+---
+
+### ⬜ I3 — Lakeflow Spark Declarative Pipelines
+
+**What it is:** Databricks' declarative ETL framework (formerly Delta Live Tables): define tables as SQL SELECT or Python function results; the engine manages execution order, incremental updates, data quality, and retries.
+
+**Why you need it:** It's the standard way to build production pipelines on Databricks — handles incremental logic, observability, and data quality enforcement that you'd otherwise write manually.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 3, "Build Data Pipelines with Lakeflow Spark Declarative Pipelines"** (~4 hrs) — The most authoritative hands-on intro; complete all labs including the multi-hop pipeline lab.
+2. **Book chapter — DCDE-SG Ch 6, "Exploring Delta Live Tables" through "Extending DLT Pipelines"** (~2 hrs) — Pipeline definitions, expectations syntax, live tables vs materialized views vs streaming tables, the LIVE schema.
+3. **Reference — DB-DOCS: [Lakeflow Spark Declarative Pipelines](https://docs.databricks.com/aws/en/dlt/)** (~1 hr) — Walk through the pipeline syntax reference: streaming tables vs materialized views, CONSTRAINT syntax, pipeline configuration options. More current than any published book on this topic.
+4. **Local repo — REPO-DLT** — Browse `wikipedia` and `divvy-bikesharing` examples first (clean, well-commented multi-hop pipelines). Then study `cdc-from-dms` and `apply-changes-from-snapshot` once you reach I4.
+5. **Reference — DB-DOCS: [Lakeflow Spark Declarative Pipelines](https://docs.databricks.com/aws/en/dlt/)** — Pipeline configuration and Python/SQL syntax reference.
+
+> 📌 DCDE-SG (Feb 2025) uses the term "Delta Live Tables" throughout. The framework is now **Lakeflow Spark Declarative Pipelines** but the SQL/Python API is identical. Treat the names as synonyms when reading the book.
+
+**Milestone:** You can build a 3-layer Medallion Lakeflow pipeline in SQL with at least two `CONSTRAINT` expectations, explain the difference between a Materialized View and a Streaming Table, and describe what happens when an expectation fails with `ON VIOLATION DROP ROW`.
+
+---
+
+### ⬜ I4 — Change Data Capture with APPLY CHANGES
+
+**What it is:** The `APPLY CHANGES INTO` API for consuming CDC events (INSERT, UPDATE, DELETE) and materializing SCD Type 1 (upsert) or SCD Type 2 (full history) target tables.
+
+**Why you need it:** Real production systems constantly change source data; CDC is the pattern for keeping lakehouse tables in sync without full reloads.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 3, "Capturing Data Changes" lab** (~2 hrs) — Hands-on with `APPLY CHANGES INTO`; complete the lab.
+2. **Book chapter — DCDE-SG Ch 6, "Capturing Data Changes" through "Processing Change Data Capture"** (~1.5 hrs) — CDC feed mechanics, source types (append-only vs complete), SCD Type 1 vs 2.
+3. **Interactive — Free Edition** (~2 hrs) — Build a CDC pipeline: simulate a source that appends change events (op=I/U/D), run `APPLY CHANGES INTO` for SCD Type 1, then modify for SCD Type 2 history. Verify the history table has correct `__START_AT`/`__END_AT` columns.
+4. **Local repo — REPO-DLT** — Study the `cdc-from-dms` folder (AWS DMS → Lakeflow CDC pipeline) and the `apply-changes-from-snapshot` folder (snapshot-based CDC without a CDC stream). Both are well-structured real examples.
+5. **Reference — DB-DOCS: [APPLY CHANGES INTO](https://docs.databricks.com/aws/en/dlt/cdc.html)** — Sequence columns, KEYS, IGNORE NULL UPDATES options.
+
+**Milestone:** You can write an `APPLY CHANGES INTO` statement for both SCD Type 1 and Type 2, explain what the `SEQUENCE BY` column is and why it's required, and describe what `AUTO CDC` does in Lakeflow pipelines.
+
+---
+
+### ⬜ I5 — Delta Lake Advanced Operations
+
+**What it is:** MERGE INTO for upserts, time travel, OPTIMIZE, VACUUM, Z-order (legacy), Liquid Clustering (current), Change Data Feed, and schema evolution.
+
+**Why you need it:** Production Delta tables need ongoing maintenance; MERGE drives most ETL logic; understanding table optimization prevents query slowdowns.
+
+**How to learn it:**
+
+1. **Book chapter — DCDE-SG Ch 2, "Updating Tables & Exploring History" through "Optimizing Tables"** (~2 hrs) — MERGE INTO, time travel, VACUUM retention, Z-order (note: now superseded by Liquid Clustering).
+2. **Interactive — Free Edition** (~2 hrs) — Run MERGE INTO for upsert logic on a 1M-row table; then run OPTIMIZE ZORDER; then enable Change Data Feed (`delta.enableChangeDataFeed`) and query `table_changes`.
+3. **Reference — DB-DOCS: [Delta Lake table operations](https://docs.databricks.com/aws/en/delta/)** — MERGE syntax, Change Data Feed, schema evolution options.
+
+> 📌 DCDE-SG covers Z-ORDER extensively. As of DBR 14+, **Liquid Clustering** replaces Z-order as the recommended layout strategy (covered in A2). Both names appear on exams.
+
+> ⚠️ **DBR 18 breaking changes:**
+> - **NULL structs:** NULL structs are now stored as NULL (not as non-null structs with all-NULL fields) in MERGE, INSERT, and streaming with schema evolution. Test any MERGE statements that compared NULL struct fields.
+> - **Time travel hard-errors:** Queries with `VERSION AS OF` or `TIMESTAMP AS OF` beyond the `deletedFileRetentionDuration` threshold now raise an error instead of a warning. Aggressive `VACUUM` (< 7 days) will block time travel.
+
+**Milestone:** You can write a MERGE INTO for SCD logic, explain why `VACUUM` with a short retention window is dangerous, and enable and query Change Data Feed on a Delta table.
+
+---
+
+### ⬜ I6 — Lakeflow Jobs & Workflow Orchestration
+
+**What it is:** Lakeflow Jobs (formerly Databricks Workflows): multi-task pipelines with dependencies, scheduling, retry logic, conditional branching, and task types (notebook, Python script, Lakeflow pipeline, SQL, dbt).
+
+**Why you need it:** Notebooks and pipelines need to be orchestrated into reliable, schedulable production jobs; Jobs is how you do that on Databricks.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 2, "Deploy Workloads with Lakeflow Jobs"** (~4 hrs) — Complete all labs including the multi-task job with notebook and pipeline tasks.
+2. **Book chapter — DCDE-SG Ch 6, "Orchestrating Workflows with Databricks Jobs"** (~1 hr) — Job clusters vs all-purpose clusters for jobs, task dependencies, alerts.
+3. **Interactive — Free Edition** (~2 hrs) — Build a 3-task job: Task 1 ingests data (Auto Loader), Task 2 runs a Lakeflow pipeline, Task 3 runs a SQL query. Add a failure alert via email.
+4. **Reference — DB-DOCS: [Lakeflow Jobs](https://docs.databricks.com/aws/en/workflows/)** — Task type reference and retry configuration.
+
+**Milestone:** You can build a multi-task Lakeflow Job with task dependencies, set up a schedule with a Quartz cron expression, add a failure notification, and explain when to use a job cluster vs an all-purpose cluster for tasks.
+
+---
+
+### ⬜ I7 — Unity Catalog & Data Governance
+
+**What it is:** Unity Catalog's three-level namespace (catalog.schema.table), metastore architecture, identity federation, privilege model (`GRANT`/`REVOKE`), row/column-level security, and data lineage.
+
+**Why you need it:** Unity Catalog is mandatory for production Databricks deployments; all governance, sharing, and lineage flows through it.
+
+**How to learn it:**
+
+1. **Official course — DA-MGUC, "Data Management and Governance with Unity Catalog"** (~4 hrs) — Comprehensive: UC architecture, three-level namespace, privilege model, external storage management, and fine-grained access controls including row/column security. Complete all labs.
+2. **Book chapter — DCDE-SG Ch 8, "Implementing Data Governance"** (~2 hrs) — UC architecture, three-level namespace, identity management, implementing row and column security. Read all sections.
+3. **Interactive — Free Edition or trial workspace** (~2 hrs) — Create a catalog, schema, and table in UC; grant SELECT to a second user; create a row filter and a column mask; inspect lineage in the Data Explorer.
+4. **Reference — DB-DOCS: [Unity Catalog](https://docs.databricks.com/aws/en/data-governance/unity-catalog/)** — Privilege model and securable objects reference.
+
+**Milestone:** You can explain the three-level namespace, implement a `GRANT` for table-level access, create a column mask using a SQL function, and describe how Unity Catalog tracks data lineage automatically.
+
+---
+
+### ⬜ I8 — Databricks SQL & Analytics
+
+**What it is:** SQL Warehouses (serverless and classic), Databricks SQL dashboards, scheduled queries, and alerts.
+
+**Why you need it:** Data analysts and BI tools consume data through SQL Warehouses; as a data engineer you need to provision and configure them correctly.
+
+**How to learn it:**
+
+1. **Official course — DA-SQL, "SQL Analytics on Databricks"** (~4 hrs) — End-to-end: creating and sizing SQL Warehouses, SQL Editor, Unity Catalog data discovery, building dashboards, and setting alerts. Complete all hands-on exercises.
+2. **Book chapter — DCDE-SG Ch 7, "Exploring Databricks SQL"** (~1.5 hrs) — Supplement for exam prep: sample questions, edge cases around SQL Warehouse config and dashboard behavior.
+3. **Interactive — Databricks SQL UI** (~1.5 hrs) — Create a SQL Warehouse, write 3 queries against Gold tables from your Medallion pipeline, build a dashboard, and set an alert for a metric threshold.
+4. **Reference — DB-DOCS: [Databricks SQL](https://docs.databricks.com/aws/en/sql/)** — Warehouse sizing and channel options.
+
+**Milestone:** You can create a serverless SQL Warehouse, build a 3-widget dashboard, schedule a query to run daily, and set up an alert that emails when a row count drops below a threshold.
+
+---
+
+### ✅ Intermediate Checkpoint
+
+You are ready to advance when you can:
+- Build an end-to-end pipeline: Auto Loader ingest → Lakeflow Spark Declarative Pipeline (Bronze/Silver/Gold with expectations) → Lakeflow Job orchestration
+- Implement CDC with `APPLY CHANGES INTO` for SCD Type 1 and Type 2
+- Govern a catalog in Unity Catalog with row/column-level security and inspect lineage
+- Pass a DCDEA practice exam with ≥80% correct
+
+**Certification target:** **DCDEA** — validates B1–I8. Attempt now. Fee: $200, 45 questions, 90 min.
+
+---
+
+## Advanced
+
+**Goal:** Tune Spark performance, design optimal storage layouts, handle enterprise ingestion, enforce data privacy, and deploy pipelines with CI/CD using Declarative Automation Bundles (DABs).
+**Estimated time:** ~40 hrs
+
+---
+
+### ⬜ A1 — Spark Performance Tuning & the Spark UI
+
+**What it is:** Reading the Spark UI (DAG, stages, tasks, executor metrics), diagnosing shuffle, skew, and spill, and applying fixes: broadcast joins, AQE, repartition strategies, and serialization.
+
+**Why you need it:** Production pipelines hit performance walls; knowing how to diagnose and fix them in the Spark UI is the most high-ROI advanced skill.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 3, "Databricks Performance Optimization"** (~4 hrs) — Spark UI analysis lab, data skipping lab, join optimization lab. Complete all labs.
+2. **Official course — Optimizing Apache Spark (Databricks Academy, self-paced)** — The "5 S's" framework: Skew, Spill, Shuffle, Storage, Serialization on production-scale 1TB+ datasets. Take this alongside or after DA-ADE Module 3 for the deepest coverage on this topic.
+3. **Book chapter — UDEDW, performance chapters** (~2 hrs) — Shuffle optimization, serialization, caching strategy.
+4. **Hands-on** (~3 hrs) — Take a deliberately slow join (1M rows × 1M rows without broadcast) and iteratively optimize it: add broadcast hint, enable AQE, fix skew with salting. Compare Spark UI before/after each change.
+5. **Reference — DB-DOCS: [Spark UI guide](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide.html)** and **[AQE](https://docs.databricks.com/aws/en/optimizations/aqe.html)**
+
+**Milestone:** You can open a Spark UI, identify a shuffle-heavy stage, apply a broadcast join hint, and explain what AQE's `coalescePartitions` and `skewJoin` do.
+
+---
+
+### ⬜ A2 — Liquid Clustering & Storage Optimization
+
+**What it is:** Liquid Clustering — the current recommended data layout strategy: cluster columns, incremental clustering, when to use it vs partitioning vs Z-order.
+
+**Why you need it:** Inefficient data layout causes excessive file reads and slow queries; Liquid Clustering replaces the older Z-order approach as of DBR 14+ and is now the default recommendation.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 1, "Multi-flow pipelines and liquid clustering" section** (~1 hr) — Hands-on with clustering on a Lakeflow pipeline.
+2. **Video — Databricks YouTube: search "Liquid Clustering Databricks 2025"** (~30 min) — Official Databricks engineering explanation of why Liquid Clustering supersedes Z-order.
+3. **Interactive — Free Edition** (~2 hrs) — Create a 5M-row Delta table, run queries on an unclustured table (note scan size), add `CLUSTER BY (date, region)`, run `OPTIMIZE`, rerun queries, compare bytes scanned in Spark UI.
+4. **Reference — DB-DOCS: [Liquid Clustering](https://docs.databricks.com/aws/en/delta/clustering.html)**
+
+**Milestone:** You can define Liquid Clustering on a new table with `CLUSTER BY`, run `OPTIMIZE` to apply it, explain why you'd choose Liquid Clustering over partitioning for a high-cardinality filter column, and describe when a partition is still preferable.
+
+---
+
+### ⬜ A3 — Lakeflow Connect & Enterprise Ingestion
+
+**What it is:** Lakeflow Connect's managed connectors for ingesting from enterprise sources: relational databases (CDC via Debezium), SaaS (Salesforce, ServiceNow), and Kafka — without writing custom code.
+
+**Why you need it:** Real enterprise data doesn't live in files; most pipelines require ingesting from operational databases or SaaS systems, and Lakeflow Connect handles the complexity.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 1, "Enterprise Data Ingestion with LakeFlow Connect Managed Connectors"** (~2 hrs) — Complete the hands-on lab for a database connector.
+2. **Official course — DA-ADE Module 1 advanced ingestion sections** (~1 hr) — Multiplex patterns and Kafka ingestion.
+3. **Local repo — REPO-DLT** (~1 hr) — Study the `dms-dlt-cdc-demo` folder: this shows end-to-end AWS DMS → Lakeflow pipeline CDC ingestion from a relational database. Also look at the Fivetran integration example for SaaS ingestion patterns.
+4. **Book chapter — BBDE, "How to Set Up Your First Federated Lakehouse"** (~1 hr) — Context on where managed ingestion fits in the architecture.
+5. **Reference — DB-DOCS: [Lakeflow Connect](https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/)** — Available connectors and configuration.
+
+**Milestone:** You can describe the difference between Lakeflow Connect Standard Connectors (file-based) and Managed Connectors (database/SaaS CDC), configure a managed connector for a database source, and explain when to use it vs Auto Loader.
+
+---
+
+### ⬜ A4 — Data Privacy, PII & Compliance
+
+**What it is:** PII identification, data masking, pseudonymization, row/column-level security in Unity Catalog, audit logs, and Change Data Feed for right-to-deletion (GDPR delete propagation).
+
+**Why you need it:** Regulatory requirements (GDPR, HIPAA, CCPA) are non-negotiable in production; privacy enforcement must be built into the lakehouse architecture.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 2, "Databricks Data Privacy"** (~4 hrs) — Covers all four hours: regulatory frameworks, pseudonymization, CDF-based delete propagation, PII masking. Complete the "Propagating Changes with CDF Lab".
+2. **Book chapter — BBDE, relevant data privacy sections** (~1 hr) — Architecture patterns for PII handling.
+3. **Reference — DB-DOCS: [Column masks](https://docs.databricks.com/aws/en/data-governance/unity-catalog/row-and-column-filters.html)** — SQL syntax for row filters and column masks.
+
+**Milestone:** You can implement a column mask that returns `****` for non-owner users, apply a row filter that restricts data by region, and describe how Change Data Feed enables cascaded deletes for GDPR right-to-erasure.
+
+---
+
+### ⬜ A5 — Declarative Automation Bundles (DABs) & CI/CD
+
+**What it is:** Declarative Automation Bundles (DABs) — formerly "Databricks Asset Bundles", renamed March 2026: define Databricks resources (jobs, pipelines, clusters, permissions) as YAML + code, deploy across dev/staging/prod with variable substitution, and integrate with GitHub Actions. CLI commands (`databricks bundle`) are unchanged.
+
+**Why you need it:** Manual deployment of notebooks and jobs doesn't scale; DABs is the IaC standard for Databricks that enables reproducible, versioned deployments.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 4, "Automated Deployment with Declarative Automation Bundles"** (~4 hrs) — DABs fundamentals, VS Code integration, multi-environment config, GitHub Actions integration. Complete all labs.
+2. **Official course — DA-DE Module 4, "DevOps Essentials for Data Engineering"** (~4 hrs) — Git integration, modularizing PySpark code, unit testing PySpark. Complete the unit testing lab.
+3. **Reference — DB-DOCS: [Declarative Automation Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/)** — Bundle YAML schema and CLI commands.
+
+**Milestone:** You can create a DAB project with `databricks bundle init`, define a job and pipeline in YAML, deploy to dev and prod environments with different cluster sizes via variable substitution, and run the deployment from a GitHub Actions workflow.
+
+---
+
+### ⬜ A6 — Production Pipeline Operations & Observability
+
+**What it is:** Monitoring Lakeflow Spark Declarative Pipelines (expectations metrics, event log), Lakeflow Jobs (run history, failure alerting), and Databricks observability features (system tables, audit logs).
+
+**Why you need it:** Production pipelines fail; you need dashboards and alerts that tell you what broke, when, and why — before your users notice.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 3, Spark UI analysis and monitoring sections** (~2 hrs) — Spark UI for production pipeline diagnosis.
+2. **Book chapter — BBDE, "Orchestrating Data Analytics With Databricks Workflows"** (~1 hr) — Operational patterns for production job management.
+3. **Interactive** (~2 hrs) — Create a Lakeflow pipeline with a deliberate expectation failure; inspect the event log and metrics; build a SQL query using `event_log(table(your_streaming_table))` to find quarantined rows; wire a Databricks SQL alert to the count.
+4. **Reference — DB-DOCS: [Pipeline event log](https://docs.databricks.com/aws/en/dlt/observability.html)** and **[System tables](https://docs.databricks.com/aws/en/admin/system-tables/)**
+
+**Milestone:** You can use `event_log(table(...))` to query the last 5 expectation violations for a Lakeflow pipeline, build a Databricks SQL alert on a system table metric, and describe the difference between pipeline-level and job-level monitoring.
+
+---
+
+### ⬜ A7 — Lakehouse Federation & OpenSharing
+
+**What it is:** Lakehouse Federation for querying external databases (PostgreSQL, MySQL, Redshift) from Unity Catalog without data movement; OpenSharing (formerly Delta Sharing, renamed June 2026) for sharing Delta tables across organizations and cloud platforms via an open protocol.
+
+**Why you need it:** Real data engineering involves data that lives outside Databricks; Federation and OpenSharing solve the access and sharing problem without copying data.
+
+**How to learn it:**
+
+1. **Official course — DA-DIUC, "Data Interoperability with Unity Catalog"** (~4 hrs) — Covers both Lakehouse Federation (Foreign Catalogs) and Delta/Iceberg interoperability with OpenSharing. The authoritative course for this topic; complete all labs before the hands-on exercise below.
+2. **Book chapter — BBDE, "How to Set Up Your First Federated Lakehouse"** (~1 hr) — Architecture walkthrough and setup guide.
+3. **Video — Databricks YouTube: search "OpenSharing Databricks 2026"** (~30 min) — Official explanation of the OpenSharing open protocol (search "Delta Sharing" if no results — same content, renamed June 2026).
+4. **Reference — DB-DOCS: [Lakehouse Federation](https://docs.databricks.com/aws/en/query-federation/)** and **[OpenSharing / Delta Sharing](https://docs.databricks.com/aws/en/delta-sharing/)**
+5. **Interactive** (~1.5 hrs) — Configure a Foreign Catalog connection to a PostgreSQL external database; run a federated query; then create an OpenShare and share a table with an external recipient.
+
+**Milestone:** You can explain the difference between a Foreign Catalog and an OpenShare, configure a federated connection, and describe in what scenario you'd use OpenSharing vs. just granting Unity Catalog access.
+
+---
+
+### ✅ Advanced Checkpoint
+
+You are ready to advance when you can:
+- Diagnose and fix a slow Spark job using the Spark UI (identify shuffle, apply broadcast join, explain AQE)
+- Deploy a full pipeline (job + Lakeflow pipeline) using DABs to two environments with different configs
+- Implement PII masking and CDF-based delete propagation
+- Pass a DCDEP practice exam with ≥75% correct
+
+**Certification target:** **DCDEP** — validates I1–A7. Attempt now. Fee: $200, 59 questions, 120 min.
+
+---
+
+## Expert
+
+**Goal:** Architect end-to-end lakehouse systems at scale: optimize cost, design advanced streaming, automate with the SDK, and own the full DevOps lifecycle.
+**Estimated time:** ~35 hrs
+
+---
+
+### ⬜ E1 — Photon Engine & Cluster Cost Optimization
+
+**What it is:** Databricks' vectorized C++ query engine (Photon), when it accelerates workloads, instance type selection (memory-optimized vs compute-optimized vs GPU), autoscaling strategies, and spot/preemptible instance policies.
+
+**Why you need it:** Compute is 60–80% of Databricks costs; wrong instance types and always-on clusters are the primary source of waste.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 3, "Cluster instance type selection" and "Photon acceleration" sections** (~1 hr)
+2. **Video — Databricks YouTube: search "Photon engine Databricks deep dive"** (~30 min)
+3. **Hands-on** (~2 hrs) — Run the same heavy aggregation workload on a Standard cluster vs a Photon-enabled cluster. Compare runtime and DBU cost. Then reconfigure the cluster as memory-optimized vs compute-optimized for a shuffle-heavy vs CPU-heavy workload.
+4. **Reference — DB-DOCS: [Photon](https://docs.databricks.com/aws/en/compute/photon.html)** and **[Cluster instance types](https://docs.databricks.com/aws/en/compute/cluster-config-best-practices.html)**
+
+**Milestone:** You can explain which query types Photon accelerates (SQL aggregations, sorts, joins) vs what it doesn't (Python UDFs), choose the right instance family for a given workload, and configure spot instance fallback with a reasonable on-demand percentage.
+
+---
+
+### ⬜ E2 — Advanced Streaming Patterns
+
+**What it is:** Multiplex streaming (fan-out from a single Kafka topic to multiple tables), stateful streaming operations (stream-stream joins, session windows), late data handling with watermarks, and continuous execution mode.
+
+**Why you need it:** Simple append streaming is straightforward; stateful and fan-out patterns are where production streaming systems get complex and expensive if done wrong.
+
+**How to learn it:**
+
+1. **Official course — DA-ADE Module 1, "Multiplex streaming patterns with Delta sinks"** (~2 hrs) — The multiplex pattern with routing logic; complete the hands-on build.
+2. **Video — Databricks YouTube: search "Structured Streaming stateful operations 2026"** (~1 hr) — Stream-stream joins and session windows.
+3. **Hands-on** (~3 hrs) — Build a multiplex streaming pipeline: single Auto Loader source → route to 3 different Delta tables based on `event_type`; add a watermark and windowed aggregation. Inspect state store size in Spark UI.
+4. **Reference — DB-DOCS: [Structured Streaming state management](https://docs.databricks.com/aws/en/structured-streaming/stateful-streaming.html)**
+
+**Milestone:** You can build a fan-out streaming pipeline that routes events from one source to multiple targets, explain why stream-stream joins require watermarks on both streams, and describe when to use `Trigger.Continuous` vs `AvailableNow`.
+
+---
+
+### ⬜ E3 — DevOps: Testing, GitHub Actions & Multi-Environment Deployment
+
+**What it is:** Unit testing PySpark transformations with pytest, integration testing Lakeflow pipelines with `nutter` or DLT test tables, GitHub Actions CI pipelines for automated test + bundle deploy.
+
+**Why you need it:** At scale, manual testing breaks down; automated tests and CI/CD are what separate reliable production pipelines from fragile ones.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 4, "Unit Testing for PySpark" and "Integration Testing with Lakeflow Spark Declarative Pipelines and Lakeflow Jobs" labs** (~2 hrs) — Write and run PySpark unit tests; run integration tests via Lakeflow Jobs.
+2. **Official course — DA-ADE Module 4, "GitHub Actions automation pipeline integration"** (~2 hrs) — Full CI/CD loop with DABs and GitHub Actions.
+3. **Local repo — REPO-NBP** (~1 hr) — A concrete before/after modularization example on COVID hospitalization data. Read in this order: (1) `notebooks/covid_eda_raw.py` — monolithic notebook with inline pandas transforms and a Delta write; (2) `notebooks/covid_eda_modular.py` — same logic refactored to import from the shared `covid_analysis/transforms.py` module (`filter_country`, `pivot_and_clean`, `clean_spark_cols`, `index_to_col`); (3) `tests/transforms_test.py` — 4 pytest tests using `@pytest.fixture` and pandas DataFrames, one test per function; (4) `notebooks/run_unit_tests.py` — the key pattern: `%pip install`, `dbutils.library.restartPython()`, then `pytest.main([".", "-p", "no:cacheprovider"])` to run all tests inside a Databricks notebook; (5) `.github/workflows/databricks_pull_request_tests.yml` — GitHub Actions using `databricks/run-notebook@main` to run `run_unit_tests.py` on an existing cluster on every PR.
+4. **Hands-on** (~3 hrs) — Set up a GitHub repo with a DAB project; write 3 pytest unit tests for a transformation function; add a GitHub Actions workflow that runs tests on PR and deploys to dev on merge to main.
+5. **Reference — DB-DOCS: [Testing Databricks Assets](https://docs.databricks.com/aws/en/dev-tools/testing.html)**
+
+**Milestone:** You can write pytest unit tests for a PySpark function that mock the Spark session, configure a GitHub Actions workflow that runs tests and deploys a DAB bundle, and describe the difference between unit testing a transformation function and integration-testing a full pipeline.
+
+---
+
+### ⬜ E4 — Cost Management & FinOps on Databricks
+
+**What it is:** DBU types (All-Purpose, Jobs, Pipeline, SQL, Serverless), system tables for cost attribution (`system.billing.usage`), cluster policies, budget alerts, and cost optimization patterns.
+
+**Why you need it:** Databricks can become expensive fast without discipline; FinOps is the difference between a project that scales and one that gets shut down.
+
+**How to learn it:**
+
+1. **Video — Databricks YouTube: search "Databricks cost optimization FinOps 2026"** (~1 hr)
+2. **Hands-on** (~2 hrs) — Query `system.billing.usage` to build a cost-by-workspace-and-job dashboard in Databricks SQL. Identify the top 3 cost drivers. Configure a cluster policy that caps max workers and enforces auto-termination.
+3. **Reference — DB-DOCS: [System tables billing](https://docs.databricks.com/aws/en/admin/system-tables/billing.html)** and **[Cluster policies](https://docs.databricks.com/aws/en/compute/cluster-policies.html)**
+4. **Book chapter — BBDE relevant FinOps sections** (~30 min)
+
+**Milestone:** You can query `system.billing.usage` to attribute DBU cost by job and workspace, create a cluster policy that enforces auto-termination and max worker count, and explain the DBU cost difference between All-Purpose compute and Jobs compute for the same workload.
+
+---
+
+### ⬜ E5 — End-to-End Lakehouse Architecture Design
+
+**What it is:** Designing a full production lakehouse: storage topology (zones, catalogs), SLA-based pipeline design, multi-tenancy, disaster recovery, and the trade-offs between batch, micro-batch, and streaming for each layer.
+
+**Why you need it:** Individual skills don't automatically compose into a coherent architecture; this topic synthesizes everything into system-level design judgment.
+
+**How to learn it:**
+
+1. **Book — BBDE, all case study chapters** (~3 hrs) — Read the financial services batch processing pattern, the federated lakehouse setup, and the DevOps best practices chapter. These show full architectures, not isolated features.
+2. **Book — UDEDW, "Data Modeling and Storage" chapter** (~1.5 hrs) — Storage design decisions and their trade-offs.
+3. **Local repo — REPO-TF** (~2 hrs) — Browse the `aws_fs_lakehouse` (financial services) and `aws_uc` (Unity Catalog) modules to see how a production-grade lakehouse is laid out in Terraform. You don't need to run it — read the module structure to understand what a real deployment includes (VPC, UC metastore, workspace, cluster policies, IAM).
+4. **Hands-on capstone** (~6 hrs) — Design and build a complete Lakehouse: 2 source systems (file + database CDC), Auto Loader + Lakeflow Connect ingestion, 3-layer Medallion Lakeflow pipeline with expectations, Lakeflow Jobs orchestration, Unity Catalog governance, DABs CI/CD deployment. Document architecture decisions.
+5. **Reference — DB-DOCS: [Data architecture best practices](https://docs.databricks.com/aws/en/lakehouse-architecture/)**
+
+**Milestone:** You can draw an architecture diagram for a production lakehouse covering ingestion, storage, transformation, governance, orchestration, and CI/CD — and defend the key design decisions (batch vs streaming per layer, partitioning strategy, SLA management).
+
+---
+
+### ⬜ E6 — Databricks SDK & API Automation
+
+**What it is:** The Databricks SDK for Python: programmatically managing clusters, jobs, pipelines, secrets, permissions, and workspace state — beyond what YAML configuration covers.
+
+**Why you need it:** Complex automation (dynamic job creation, workspace provisioning, metadata-driven pipeline generation) requires code, not just config.
+
+**How to learn it:**
+
+1. **Official course — DA-DE Module 4, "From Idea to Code: Building With the Databricks SDK for Python" section** (~1 hr)
+2. **Book chapter — BBDE, "Building With the Databricks SDK for Python"** (~1 hr)
+3. **Hands-on** (~3 hrs) — Write a Python script using the SDK that: lists all jobs in a workspace, retrieves the last run status for each, sends a Slack notification for any job with `FAILED` status. Then add a function that dynamically creates a job from a template YAML.
+4. **Reference — DB-DOCS: [Databricks SDK for Python](https://docs.databricks.com/aws/en/dev-tools/sdk-python.html)** and the [GitHub repo](https://github.com/databricks/databricks-sdk-py).
+
+**Milestone:** You can use the Databricks SDK to list, create, and trigger a job programmatically, retrieve its run status, and explain when to use the SDK vs DABs (SDK = runtime automation; DABs = deployment-time config).
+
+---
+
+### ✅ Expert Checkpoint
+
+You are ready to call yourself a Databricks Data Engineering expert when you can:
+- Design a production lakehouse architecture from scratch and defend every major decision
+- Set up complete CI/CD with pytest unit tests and GitHub Actions DAB deployment
+- Optimize cluster cost using system tables, cluster policies, and right-sized instance types
+- Build advanced streaming pipelines with fan-out and stateful aggregations
+- Automate workspace operations with the Databricks SDK
+
+---
+
+## Suggested study sequence
+
+```
+Beginner (B1–B7)      → ~30 hrs  →  Foundation: Spark + Delta + Medallion
+    ↓
+Intermediate (I1–I8)  → ~45 hrs  →  [DCDEA cert: $200 · 45 Q · 90 min]
+    ↓
+Advanced (A1–A7)      → ~40 hrs  →  [DCDEP cert: $200 · 59 Q · 120 min]
+    ↓
+Expert (E1–E6)        → ~35 hrs  →  Architect-level mastery
+```
+
+**Total estimate:** ~150 hrs of deliberate practice.
+
+**You are currently here:** Beginner — no topics completed yet. Start with B1.
+
+---
+
+## Sources consulted
+
+- https://www.databricks.com/learn/certification/data-engineer-associate
+- https://www.databricks.com/learn/certification/data-engineer-professional
+- https://www.databricks.com/training/catalog/data-engineering-with-databricks-911
+- https://www.databricks.com/training/catalog/advanced-data-engineering-with-databricks-971
+- https://www.databricks.com/training/catalog/get-started-with-databricks-for-data-engineering-1511
+- https://www.databricks.com/training/catalog/data-management-and-governance-with-unity-catalog-3145
+- https://www.databricks.com/training/catalog/data-interoperability-with-unity-catalog-4557
+- https://www.databricks.com/training/catalog/sql-analytics-on-databricks-3928
+- https://www.databricks.com/learn/training/data-engineering-courses
+- https://www.oreilly.com/library/view/databricks-certified-data/9781098166823/
+- https://docs.databricks.com/aws/en/release-notes/runtime
+- https://www.amazon.com/dp/8196994788
+- https://www.databricks.com/resources/ebook/big-book-of-data-engineering
