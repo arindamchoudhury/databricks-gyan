@@ -4,13 +4,13 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 
 | # | Topic | Level | Status |
 |---|---|---|---|
-| Ch 01 | Databricks Platform & Workspace | Beginner | ⬜ |
+| Ch 01 | [Databricks Platform & Workspace](ch01-databricks-platform-workspace.md) | Beginner | ✅ |
 | Ch 02 | Apache Spark Architecture on Databricks | Beginner | ⬜ |
 | Ch 03 | PySpark DataFrame API Fundamentals | Beginner | ⬜ |
 | Ch 04 | Spark SQL & Relational Entities | Beginner | ⬜ |
-| Ch 05 | Delta Lake Fundamentals | Beginner | ⬜ |
-| Ch 06 | Data Ingestion Basics | Beginner | ⬜ |
-| Ch 07 | Medallion Architecture | Beginner | ⬜ |
+| Ch 05 | [Delta Lake Fundamentals](ch05-delta-lake-fundamentals.md) | Beginner | ✅ |
+| Ch 06 | [Data Ingestion Basics](ch06-data-ingestion-basics.md) | Beginner | ✅ |
+| Ch 07 | [Medallion Architecture](ch07-medallion-architecture.md) | Beginner | ✅ |
 | Ch 08 | Auto Loader & Incremental Ingestion | Intermediate | ⬜ |
 | Ch 09 | Structured Streaming with Spark | Intermediate | ⬜ |
 | Ch 10 | Lakeflow Spark Declarative Pipelines | Intermediate | ⬜ |
@@ -33,6 +33,6 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 | Ch 27 | End-to-End Lakehouse Architecture Design | Expert | ⬜ |
 | Ch 28 | Databricks SDK & API Automation | Expert | ⬜ |
 
-**Progress: 0 / 28 chapters written.**
+**Progress: 4 / 28 chapters written.**
 
 To trigger a chapter write: tell Claude "I finished topic B1" (or any topic code) and the `databricks-book` skill will write that chapter.

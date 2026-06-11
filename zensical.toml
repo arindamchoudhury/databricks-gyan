@@ -8,6 +8,21 @@ nav = [
     { "Learning Path" = "learning-path.md" },
     { "Book" = [
         { "Contents" = "book/index.md" },
+        { "Ch 01 — Databricks Platform & Workspace" = "book/ch01-databricks-platform-workspace.md" },
+        { "Ch 05 — Delta Lake Fundamentals" = "book/ch05-delta-lake-fundamentals.md" },
+        { "Ch 06 — Data Ingestion Basics" = "book/ch06-data-ingestion-basics.md" },
+        { "Ch 07 — Medallion Architecture" = "book/ch07-medallion-architecture.md" },
+    ]},
+    { "Sources" = [
+        { "All Sources" = "sources/index.md" },
+        { "DA-FREE" = [
+            { "Course Overview" = "sources/da-free/index.md" },
+            { "M1: Workspace Walkthrough" = "sources/da-free/workspace-walkthrough.md" },
+            { "M2-01: Creating a Delta Table" = "sources/da-free/creating-delta-table.md" },
+            { "M2-02: Ingesting Data" = "sources/da-free/ingesting-data.md" },
+            { "M2-03: Medallion Architecture" = "sources/da-free/medallion-architecture.md" },
+            { "M2-04: Lakeflow Jobs" = "sources/da-free/lakeflow-jobs.md" },
+        ]},
     ]},
     { "Release Notes" = [
         { "Overview & LP Flags" = "release-notes/index.md" },
