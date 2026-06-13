@@ -40,6 +40,7 @@ extra_javascript = ["javascripts/sidebar-toggle.js"]
 ```
 
 **Sidebar collapse toggle** (`docs/javascripts/sidebar-toggle.js` + `docs/stylesheets/extra.css`):
+- Both sidebars are `position: sticky` so they float in place as the main content scrolls
 - Adds a ◀/▶ button to each sidebar; click to collapse/expand
 - Collapsed state persists in `localStorage` across page navigations
 - Left nav uses key `sidebar-nav-collapsed`, right TOC uses `sidebar-toc-collapsed`
