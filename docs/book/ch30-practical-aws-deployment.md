@@ -48,8 +48,8 @@ Before running a single `terraform init`:
    | **Admin access** | **On** | Required to manage catalogs, schemas, grants, and workspace-level config |
 
    Click **Add service principal**
-4. Open the SP's detail page and assign the **Account Admin** role — this is the account-level role required for `databricks_mws_*` and metastore operations
-5. Generate an OAuth secret — save the **client ID** and **client secret**
+4. Back in the **account console** (`accounts.cloud.databricks.com`) → **Settings → Identity and access → Service Principals** → click `terraform-deployer` → **Roles** → assign **Account Admin** — this is the account-level role required for `databricks_mws_*` and metastore operations (separate from the workspace Admin access above)
+5. In the workspace SP detail page (**Workspace settings → Identity and access → Service principals → terraform-deployer**), click the **Secrets** tab → **Generate secret** — save the **Application Id** as `client_id` and the generated value as `client_secret`
 
 ---
 
