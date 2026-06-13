@@ -638,7 +638,7 @@ The canonical split (from Databricks engineering):
 
 ## The Databricks Terraform provider
 
-The `databricks/databricks` provider (>75M downloads, top 5% of all Terraform providers) covers almost every Databricks resource. It runs in two distinct modes, which must never be mixed in the same provider block:
+The `databricks/databricks` provider (~160M downloads, top 5% of all Terraform providers) covers almost every Databricks resource. It runs in two distinct modes, which must never be mixed in the same provider block:
 
 > **Versions as of June 2026:** Databricks provider **1.117.0**, AWS provider **6.50.0** (6.0 GA April 2026 — see the [v6 upgrade guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade) if migrating from 5.x), Terraform **1.15.6**. The Databricks provider releases roughly weekly; use `~> 1.117` to allow patch and minor updates without crossing a breaking major. The AWS provider constraint `>= 5.76, <7.0` is intentional: it accepts both 5.x and 6.x so teams can migrate at their own pace.
 
