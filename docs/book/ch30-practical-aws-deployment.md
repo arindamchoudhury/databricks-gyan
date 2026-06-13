@@ -48,7 +48,7 @@ Before running a single `terraform init`:
 | **Admin access** | **On** | Required to manage catalogs, schemas, grants, and workspace-level config |
 
 <ol start="4">
-<li><strong>Paid account only</strong> — in the <strong>account console</strong> (<code>accounts.cloud.databricks.com</code>, a separate URL from the workspace) → <strong>Settings → Identity and access → Service Principals</strong> → click <code>terraform-deployer</code> → <strong>Roles</strong> → assign <strong>Account Admin</strong>. Required for <code>databricks_mws_*</code> (Steps 1–3). <em>Free Edition users skip this — workspace Admin access already set above is sufficient for Step 4.</em></li>
+<li><strong>Paid account only</strong> — in the <strong>account console</strong> (<code>accounts.cloud.databricks.com</code>, a separate URL from the workspace) → <strong>User management → Service principals</strong> → click <code>terraform-deployer</code> → <strong>Roles</strong> → assign <strong>Account Admin</strong>. Required for <code>databricks_mws_*</code> (Steps 1–3). <em>Free Edition users skip this — workspace Admin access already set above is sufficient for Step 4.</em></li>
 <li>In the workspace SP page (<strong>Workspace settings → Identity and access → Service principals → terraform-deployer</strong>) → <strong>Secrets</strong> tab → <strong>Generate secret</strong> — save the <strong>Application Id</strong> as <code>client_id</code> and the generated value as <code>client_secret</code></li>
 </ol>
 
