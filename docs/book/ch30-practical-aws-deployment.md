@@ -124,10 +124,13 @@ Verify the bucket in the AWS console under S3 — it should show the bucket name
 ## Step 2 — Networking layer
 
 ```powershell
+# Get the generated bucket name from bootstrap output
+terraform -chdir=C:\opt\learn\databricks\databricks-aws-terraform\bootstrap output -raw state_bucket_name
+
 cd environments/dev/01-networking
 
 cp backend.tfvars.example backend.tfvars
-# Edit: bucket = "myorg-databricks-tf-state-abc123", region = "us-east-1"
+# Edit: bucket = "<value from above>", region = "eu-central-1"
 
 cp terraform.tfvars.example terraform.tfvars
 # Edit if needed: change AZs for your region
