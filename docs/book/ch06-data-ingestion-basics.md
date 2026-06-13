@@ -73,7 +73,7 @@ FORMAT_OPTIONS (
 );
 ```
 
-The return value contains `num_affected_rows`, `num_inserted_rows`, `num_skipped_correct_files`. When `num_inserted_rows = 0`, no new files were found.
+The return value contains `num_affected_rows`, `num_inserted_rows`, `num_skipped_corrupt_files`. When `num_inserted_rows = 0`, no new files were found.
 
 In Python (when you need to interpolate a variable path):
 
