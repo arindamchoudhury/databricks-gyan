@@ -135,7 +135,7 @@ cp backend.tfvars.example backend.tfvars
 cp terraform.tfvars.example terraform.tfvars
 # Edit if needed: change AZs for your region
 
-terraform init -backend-config=backend.tfvars
+terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform apply
 ```
 
@@ -174,7 +174,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 $env:TF_VAR_databricks_client_secret = "your-service-principal-secret"
 
-terraform init -backend-config=backend.tfvars
+terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform apply
 ```
 
@@ -214,7 +214,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 $env:TF_VAR_databricks_client_secret = "your-service-principal-secret"
 
-terraform init -backend-config=backend.tfvars
+terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform apply
 ```
 
