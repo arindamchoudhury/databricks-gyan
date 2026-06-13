@@ -38,8 +38,9 @@ Before running a single `terraform init`:
 
 1. In the Databricks account console go to **Settings → Identity and access → Service Principals → Add service principal**
 2. Give it a name, e.g. `terraform-deployer`
-3. Assign the **Account Admin** role under the service principal's details
-4. Generate an OAuth secret — save the **client ID** and **client secret**
+3. On the workspace entitlements screen, turn **Admin access → On** (leave the others as-is); click **Add service principal**
+4. Open the SP's detail page and assign the **Account Admin** role — this is the account-level role required for `databricks_mws_*` and metastore operations
+5. Generate an OAuth secret — save the **client ID** and **client secret**
 
 ---
 
