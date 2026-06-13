@@ -261,13 +261,15 @@ All notebooks in the folder are immediately available. No import step needed.
 
 #### Interactive — cell by cell (Databricks Connect)
 
-Spark operations execute on the cluster; all other code runs locally. Feels identical to a local Jupyter notebook.
+Spark operations execute on remote Databricks compute; all other code runs locally. Feels identical to a local Jupyter notebook.
 
-- Requires a **classic All-Purpose cluster** running DBR 13.3 or above.
-- **Does not work with Serverless compute.**
+- Works with **either a classic All-Purpose cluster** (DBR 13.3+) **or Serverless compute**. Serverless requires Databricks Connect **15.4 LTS or above** — pick a recent version and it works out of the box.
+- Select serverless by setting `serverless_compute_id = "auto"` in your connection config (or the `DATABRICKS_SERVERLESS_COMPUTE_ID` env var) instead of pointing at a `cluster_id`.
 - Install Databricks Connect inside the extension when prompted.
 - Open any `.ipynb` → run cells with the standard notebook toolbar.
 - `spark`, `dbutils`, `display`, and `sql` are pre-injected — no setup code needed.
+
+> **Historical note:** early Databricks Connect "v2" (released with DBR 13.3 in 2023) targeted only classic clusters — serverless support arrived in the 15.x line. Notes written before mid-2024 often still claim serverless is unsupported; that restriction no longer applies.
 
 #### Run as Job
 
@@ -277,7 +279,7 @@ Open the `.ipynb` → click the **Run on Databricks** icon in the title bar → 
 
 ### Creating an All-Purpose cluster for Databricks Connect
 
-If you only have Serverless, create a classic cluster for interactive work:
+Serverless is enough for most interactive work. Create a classic All-Purpose cluster only if you need a custom library, GPU support, or a Spark configuration that Serverless doesn't expose:
 
 ```
 Databricks UI → Compute → Create compute
