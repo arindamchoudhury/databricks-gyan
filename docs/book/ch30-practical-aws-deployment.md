@@ -38,7 +38,16 @@ Before running a single `terraform init`:
 
 1. In the Databricks account console go to **Settings → Identity and access → Service Principals → Add service principal**
 2. Give it a name, e.g. `terraform-deployer`
-3. On the workspace entitlements screen, turn **Admin access → On** (leave the others as-is); click **Add service principal**
+3. On the workspace entitlements screen set:
+
+   | Entitlement | Setting | Why |
+   |---|---|---|
+   | Consumer access | On | Default; allows read access to shared data |
+   | Databricks SQL access | On | Needed to manage SQL warehouses via Terraform |
+   | Workspace access | On | Required to authenticate into the workspace at all |
+   | **Admin access** | **On** | Required to manage catalogs, schemas, grants, and workspace-level config |
+
+   Click **Add service principal**
 4. Open the SP's detail page and assign the **Account Admin** role — this is the account-level role required for `databricks_mws_*` and metastore operations
 5. Generate an OAuth secret — save the **client ID** and **client secret**
 
