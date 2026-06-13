@@ -26,7 +26,9 @@ Book chapters live in `docs/book/`. One chapter per learning-path topic. The boo
 Databricks Runtime 18 (released 2026-06-10) — Apache Spark 4.1.0.
 Databricks Runtime 17.3 LTS (released 2025-10-22) — Apache Spark 4.0.0.
 
-Key naming note: Delta Live Tables (DLT) is now **Lakeflow Spark Declarative Pipelines** as of DAIS 2025. Use the new name in all content.
+Key naming notes (use the new names in all content):
+- Delta Live Tables (DLT) is now **Lakeflow Spark Declarative Pipelines** as of DAIS 2025.
+- Delta Sharing is now **OpenSharing** as of June 2026 (announced 2026-06-10; same open protocol, now a Linux Foundation project extended to AI models, agent skills, and unstructured data). Use "OpenSharing" in new content; "Databricks-to-Databricks" remains the term for the DB↔DB sub-protocol. Keep "Delta Sharing" only in point-in-time release notes dated before June 2026.
 
 ## `[project.theme]` intentionally absent — Zensical 0.0.x raises an error if set.
 

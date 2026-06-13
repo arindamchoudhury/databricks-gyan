@@ -236,7 +236,7 @@ In organisations with multiple business units sharing a metastore, two patterns 
 
 Naming convention in both patterns: `{bu}_{env}` catalogs (`central_prd`, `bu1_dev`, `bu1_stg`, `bu1_prd`) make ownership and stage obvious in every `SELECT` statement.
 
-For **cross-region** multi-BU setups, **Databricks-to-Databricks Delta Sharing** links metastores across AWS regions. Region 2 BUs see shared tables from region 1's metastore as read-only views in their own metastore — no data copy required. An alternative is Lakehouse Federation for heterogeneous sources. Both are separate topics from workspace provisioning but must be planned in the UC topology design.
+For **cross-region** multi-BU setups, **Databricks-to-Databricks OpenSharing** (the open protocol formerly called Delta Sharing, renamed June 2026) links metastores across AWS regions. Region 2 BUs see shared tables from region 1's metastore as read-only views in their own metastore — no data copy required. An alternative is Lakehouse Federation for heterogeneous sources. Both are separate topics from workspace provisioning but must be planned in the UC topology design.
 
 ---
 
@@ -1560,7 +1560,7 @@ For a new production deployment, the recommended workflow is:
 - **Three environment separation strategies:** workspace-per-env (strongest, most expensive), catalog-per-env (recommended default), schema-per-env (weakest — only for small teams).
 - **Hybrid catalog topology scales best:** `{env}_{domain}` catalog names (e.g., `prod_marketing`, `dev_marketing`) give both domain ownership and environment isolation in one consistent naming scheme.
 - **Match the isolation mechanism to the requirement:** catalog grants for coarse isolation; `isolation_mode = "ISOLATED"` + `databricks_workspace_binding` for preventing catalog discovery across workspaces; row filters for row-level RBAC; column masking for PII; dynamic views for complex multi-table logic.
-- **Multi-BU governance follows two patterns:** distributed publishing (each BU governs its own catalogs) or centralized publishing (central team quality-gates all published data). Cross-region data sharing uses Databricks-to-Databricks Delta Sharing between metastores.
+- **Multi-BU governance follows two patterns:** distributed publishing (each BU governs its own catalogs) or centralized publishing (central team quality-gates all published data). Cross-region data sharing uses Databricks-to-Databricks OpenSharing (formerly Delta Sharing) between metastores.
 - **A deployment stage is a validation + approval boundary:** dev → staging (automated tests) → prod (human approval). Staging data should read raw prod inputs but write to an isolated catalog.
 - **Config-driven Terraform replaces copy-pasted HCL:** drive catalog and grant structure from `locals` maps with `for_each`; stop at two nesting levels before explicit resources become clearer. For platform-team self-service, externalise the config into YAML files read with `yamldecode()`.
 - **IAM from JSON:** keep users, groups, and group membership in a committed `iam.json`; assign the workspace admin group via `databricks_mws_permission_assignment` rather than an individual user — membership changes stay out of HCL.
