@@ -36,7 +36,7 @@ Before running a single `terraform init`:
 
 **Creating the service principal** (works on both Free and paid):
 
-1. In the Databricks account console go to **Settings → Service Principals → Add service principal**
+1. In the Databricks account console go to **Settings → Identity and access → Service Principals → Add service principal**
 2. Give it a name, e.g. `terraform-deployer`
 3. Assign the **Account Admin** role under the service principal's details
 4. Generate an OAuth secret — save the **client ID** and **client secret**
