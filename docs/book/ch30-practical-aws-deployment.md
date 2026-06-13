@@ -98,6 +98,8 @@ cp terraform.tfvars.example terraform.tfvars
 # Edit terraform.tfvars: set region and prefix (bucket name is auto-generated)
 
 terraform init
+terraform validate
+terraform plan
 terraform apply
 ```
 
@@ -136,6 +138,8 @@ cp terraform.tfvars.example terraform.tfvars
 # Edit if needed: change AZs for your region
 
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
+terraform validate
+terraform plan
 terraform apply
 ```
 
@@ -173,6 +177,8 @@ cp terraform.tfvars.example terraform.tfvars
 # Edit: databricks_account_id, databricks_client_id, state_bucket, workspace_name = "dev"
 
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
+terraform validate
+terraform plan
 terraform apply
 ```
 
@@ -211,6 +217,8 @@ cp terraform.tfvars.example terraform.tfvars
 # Also set: admin_user = "your.email@example.com"
 
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
+terraform validate
+terraform plan
 terraform apply
 ```
 
