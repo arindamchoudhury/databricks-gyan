@@ -262,14 +262,14 @@ Filter rows a user sees based on their identity or group membership. The filter 
 ```sql
 -- Create a filter function
 CREATE FUNCTION main.silver.customer_region_filter(region STRING)
-  RETURN is_member('emea-team') = TRUE OR region = current_region();
+  RETURN is_member('emea-team') = TRUE OR is_member('region-' || region) = TRUE;
 
 -- Attach it to a table
 ALTER TABLE main.silver.customers
   SET ROW FILTER main.silver.customer_region_filter ON (region);
 ```
 
-Now EMEA team members see all rows; everyone else sees only rows matching their region. The function itself can be as complex as needed — it evaluates per row.
+Now members of `emea-team` see all rows; everyone else sees only rows for regions whose group they belong to — a user in the `region-US` group sees only `US` rows. Note there is no built-in `current_region()` function: mapping a user to their region is your own logic. Here it's a `region-<value>` group-naming convention, but a lookup table joined inside the function works equally well. The function evaluates per row and can be as complex as needed.
 
 Use for: multi-tenant data in a shared table, regional data residency requirements, row-level RBAC without duplicating tables.
 
@@ -312,31 +312,31 @@ Grant on the view, not the underlying table. Use when you need JOIN-based filter
 
 ### 5. Workspace-catalog binding
 
-By default every catalog in a metastore is visible to all workspaces assigned to that metastore (subject to grants). Setting `isolation_mode = "ISOLATED"` makes a catalog invisible to every workspace — it does not appear in `SHOW CATALOGS` — until you explicitly bind it with `databricks_catalog_workspace_binding`. This is stricter than catalog grants alone: even a metastore admin cannot discover the catalog from an unbound workspace.
+By default every catalog in a metastore is visible to all workspaces assigned to that metastore (subject to grants). Setting `isolation_mode = "ISOLATED"` restricts a catalog to explicitly bound workspaces only — it stops appearing in `SHOW CATALOGS` from any *other* workspace. When you set ISOLATED via Terraform, the catalog is automatically bound to the workspace it was created from; every additional workspace must be bound explicitly with `databricks_workspace_binding`. This is stricter than catalog grants alone: even a metastore admin cannot discover the catalog from an unbound workspace.
 
 ```hcl
 resource "databricks_catalog" "prod" {
   provider       = databricks.workspace
   name           = "prod_main"
-  isolation_mode = "ISOLATED"   # invisible to all workspaces until bound
+  isolation_mode = "ISOLATED"   # only bound workspaces can see it (creating workspace auto-bound)
 }
 
 # Bind only to the prod workspace
-resource "databricks_catalog_workspace_binding" "prod_to_prod_ws" {
+resource "databricks_workspace_binding" "prod_to_prod_ws" {
   provider       = databricks.workspace
   securable_name = databricks_catalog.prod.name
   workspace_id   = var.prod_workspace_id
 }
 
 # Bind dev catalog only to the dev workspace
-resource "databricks_catalog_workspace_binding" "dev_to_dev_ws" {
+resource "databricks_workspace_binding" "dev_to_dev_ws" {
   provider       = databricks.workspace
   securable_name = databricks_catalog.dev.name
   workspace_id   = var.dev_workspace_id
 }
 ```
 
-The same `isolation_mode = "ISOLATED"` flag and `databricks_catalog_workspace_binding` resource apply to storage credentials and external locations. Manage all bindings from a single designated management workspace — typically the same workspace that owns the metastore.
+The same `isolation_mode = "ISOLATED"` flag and `databricks_workspace_binding` resource apply to storage credentials and external locations. Manage all bindings from a single designated management workspace — typically the same workspace that owns the metastore.
 
 This pattern pairs naturally with the workspace-per-env topology: the prod workspace can only see `prod_main`; dev engineers in the dev workspace cannot accidentally `SELECT *` from a prod table because `prod_main` is not bound to their workspace.
 
@@ -1559,7 +1559,7 @@ For a new production deployment, the recommended workflow is:
 - **Unity Catalog changes the isolation equation:** before UC, workspace = isolation boundary. With UC, catalog = isolation boundary. Separate workspaces are only necessary for compute isolation, billing isolation, or regulatory scope boundaries.
 - **Three environment separation strategies:** workspace-per-env (strongest, most expensive), catalog-per-env (recommended default), schema-per-env (weakest — only for small teams).
 - **Hybrid catalog topology scales best:** `{env}_{domain}` catalog names (e.g., `prod_marketing`, `dev_marketing`) give both domain ownership and environment isolation in one consistent naming scheme.
-- **Match the isolation mechanism to the requirement:** catalog grants for coarse isolation; `isolation_mode = "ISOLATED"` + `databricks_catalog_workspace_binding` for preventing catalog discovery across workspaces; row filters for row-level RBAC; column masking for PII; dynamic views for complex multi-table logic.
+- **Match the isolation mechanism to the requirement:** catalog grants for coarse isolation; `isolation_mode = "ISOLATED"` + `databricks_workspace_binding` for preventing catalog discovery across workspaces; row filters for row-level RBAC; column masking for PII; dynamic views for complex multi-table logic.
 - **Multi-BU governance follows two patterns:** distributed publishing (each BU governs its own catalogs) or centralized publishing (central team quality-gates all published data). Cross-region data sharing uses Databricks-to-Databricks Delta Sharing between metastores.
 - **A deployment stage is a validation + approval boundary:** dev → staging (automated tests) → prod (human approval). Staging data should read raw prod inputs but write to an isolated catalog.
 - **Config-driven Terraform replaces copy-pasted HCL:** drive catalog and grant structure from `locals` maps with `for_each`; stop at two nesting levels before explicit resources become clearer. For platform-team self-service, externalise the config into YAML files read with `yamldecode()`.
