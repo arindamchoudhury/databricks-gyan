@@ -202,6 +202,8 @@ terraform output workspace_id    # e.g. 1234567890123456
 
 Open the workspace URL in your browser. It should show the Databricks UI. Verify it also appears in the **Accounts console → Workspaces** list.
 
+> **Finding workspace ID and URL in the UI:** in the account console (`accounts.cloud.databricks.com`) click the workspace row — the workspace ID is the number in the browser URL bar: `https://accounts.cloud.databricks.com/workspaces/<workspace_id>`. The workspace URL is shown on the configuration page as the **Per-workspace URL**.
+
 ---
 
 ## Step 4 — Unity Catalog layer
