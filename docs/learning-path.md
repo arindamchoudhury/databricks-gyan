@@ -466,9 +466,9 @@ You are ready to advance when you can:
 
 ### ⬜ A7 — Lakehouse Federation & OpenSharing
 
-**What it is:** Lakehouse Federation for querying external databases (PostgreSQL, MySQL, Redshift) from Unity Catalog without data movement; OpenSharing (formerly Delta Sharing, renamed June 2026) for sharing Delta tables across organizations and cloud platforms via an open protocol.
+**What it is:** Lakehouse Federation for querying external databases (PostgreSQL, MySQL, Redshift) from Unity Catalog without data movement; OpenSharing (formerly Delta Sharing, renamed June 2026 and now a Linux Foundation project) — the open, zero-copy sharing protocol that extends beyond Delta/Iceberg tables to also share AI models, agent skills, and unstructured data across organizations and cloud platforms, regardless of whether the recipient uses Databricks.
 
-**Why you need it:** Real data engineering involves data that lives outside Databricks; Federation and OpenSharing solve the access and sharing problem without copying data.
+**Why you need it:** Real data engineering involves data that lives outside Databricks; Federation and OpenSharing solve the access and sharing problem without copying data. OpenSharing also underpins Databricks Marketplace and Clean Rooms, so understanding it explains how cross-org data products and privacy-safe collaboration work.
 
 **How to learn it:**
 
@@ -478,7 +478,7 @@ You are ready to advance when you can:
 4. **Reference — DB-DOCS: [Lakehouse Federation](https://docs.databricks.com/aws/en/query-federation/)** and **[OpenSharing / Delta Sharing](https://docs.databricks.com/aws/en/delta-sharing/)**
 5. **Interactive** (~1.5 hrs) — Configure a Foreign Catalog connection to a PostgreSQL external database; run a federated query; then create an OpenShare and share a table with an external recipient.
 
-**Milestone:** You can explain the difference between a Foreign Catalog and an OpenShare, configure a federated connection, and describe in what scenario you'd use OpenSharing vs. just granting Unity Catalog access.
+**Milestone:** You can explain the difference between a Foreign Catalog and an OpenShare, configure a federated connection, describe in what scenario you'd use OpenSharing vs. just granting Unity Catalog access, and name what OpenSharing adds beyond table sharing (AI models, agent skills, unstructured data) over the older Delta Sharing scope.
 
 ---
 
