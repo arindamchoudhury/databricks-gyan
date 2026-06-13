@@ -1279,7 +1279,7 @@ cd live/environments/dev/catalog
 terragrunt apply
 
 # Control parallelism when hitting Databricks API rate limits
-terragrunt run --all apply --terragrunt-parallelism 2
+terragrunt run --all --parallelism 2 -- apply
 ```
 
 ### Terragrunt caveats for Databricks
@@ -1287,7 +1287,7 @@ terragrunt run --all apply --terragrunt-parallelism 2
 | Caveat | What happens | Fix |
 |---|---|---|
 | Workspace-level provider needs workspace URL | Data sources that read workspace resources fail during `plan` when the workspace unit hasn't been applied yet | Add `mock_outputs` in `dependency` blocks |
-| Rate limiting on `run --all` | Parallel unit execution hits Databricks API limits | `--terragrunt-parallelism 2` |
+| Rate limiting on `run --all` | Parallel unit execution hits Databricks API limits | `--parallelism 2` |
 | Auth for multiple workspaces | Each workspace unit needs its own provider with the workspace URL | Use `dependency` output as `host` in the workspace provider |
 | Provider generation for workspace provider | `root.hcl` can only generate MWS provider; workspace provider needs the URL | Generate it per-unit using a `generate` block that reads the workspace dependency output |
 
