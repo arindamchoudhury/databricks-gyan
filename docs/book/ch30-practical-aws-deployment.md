@@ -9,7 +9,9 @@ A misconfigured IAM trust policy can silently accept the workspace request, retu
 - An S3 bucket holding all Terraform state (no DynamoDB)
 - A VPC with two private subnets and one public subnet (NAT gateway optional — off by default for serverless)
 - A Databricks workspace registered in your account console
+- An account-level `admins` group containing your user, assigned workspace ADMIN
 - A Unity Catalog metastore with a `main` catalog containing bronze, silver, and gold schemas
+- A `dev` secret scope (empty by default; add secrets to `secrets.json` to populate it)
 
 ---
 
@@ -17,7 +19,11 @@ A misconfigured IAM trust policy can silently accept the workspace request, retu
 
 > **If you have a Databricks Free Edition account**, you already have one workspace provisioned by Databricks — you cannot create additional workspaces via `databricks_mws_*`. **Skip Steps 1–3** (bootstrap, networking, workspace). Go straight to [Step 4 — Unity Catalog](#step-4--unity-catalog-layer), which works against any existing workspace including Free Edition. You will still need a service principal (see below) and Terraform installed, but no AWS account is required for the UC layer alone.
 >
-> Steps 1–3 require a **paid Databricks account on AWS** (Trial or Enterprise) where you have permission to provision new workspaces. The standard way to get one is through the **AWS Marketplace**: search for "Databricks" at `https://us-east-1.console.aws.amazon.com/marketplace/search?text=databricks`, subscribe, and Databricks will email you a link to set up your account at `accounts.cloud.databricks.com`. Your Databricks DBU (compute) charges then flow through your AWS bill.
+> Steps 1–3 require a **paid Databricks account on AWS** (Trial or Enterprise) where you have permission to provision new workspaces. The standard way to get one is through the **AWS Marketplace**: search for "Databricks" at `https://us-east-1.console.aws.amazon.com/marketplace/search?text=databricks`, subscribe, and your DBU charges will flow through your AWS bill.
+>
+> **AWS Marketplace subscription — avoid the auto-created workspace.** After accepting the offer, AWS shows a "Set up your account" button. **Do not click it.** That wizard always creates a default workspace (named `workspace`, storage: *Default*, credentials: *Serverless only*) before you can intervene. Instead, after the subscription confirms, navigate directly to `accounts.cloud.databricks.com` — the Marketplace billing link is already attached. Provision your workspace via Terraform in Step 2.
+>
+> If you already clicked "Set up your account" and now have an unwanted `workspace` in your account console, delete it: **account console → Workspaces → click the workspace → Delete workspace**. Because it uses Databricks-managed (*Default*) storage, there is nothing in your AWS account to clean up. Your Terraform-managed workspace is unaffected.
 >
 > **Cost note for learners:** provisioning the workspace, VPC, S3 bucket, and Unity Catalog metastore via Terraform incurs only standard AWS infrastructure costs — no DBU charges. DBUs only accrue when a cluster or SQL warehouse is running. The main ongoing cost is the **NAT gateway (~$0.045/hour, ~$32/month)**, which sits in your VPC to give classic cluster nodes outbound access to the Databricks control plane. If you plan to use **serverless compute only** (serverless SQL Warehouses, serverless jobs), compute runs in Databricks-managed infrastructure and never touches your VPC — the NAT gateway is idle overhead. In that case, set `enable_nat_gateway = false` in `modules/networking/main.tf` to remove it, or simply destroy the full stack after each learning session (`terraform destroy` in reverse layer order takes ~5 minutes).
 
@@ -175,7 +181,22 @@ cp backend.tfvars.example backend.tfvars
 
 cp terraform.tfvars.example terraform.tfvars
 # Edit: databricks_account_id, databricks_client_id, state_bucket, workspace_name = "dev"
+```
 
+**Before applying, edit `iam.json`** to set your Databricks account email:
+
+```json
+{
+  "users": [
+    { "user_name": "your.email@example.com", "display_name": "Your Name" }
+  ],
+  "groups": [
+    { "name": "admins", "members": ["your.email@example.com"] }
+  ]
+}
+```
+
+```powershell
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform validate
 terraform plan
@@ -192,6 +213,10 @@ terraform apply
 6. `databricks_mws_storage_configurations` — registers the S3 bucket with Databricks account
 7. `databricks_mws_networks` — registers the VPC + subnets + security group with Databricks account
 8. `databricks_mws_workspaces` — combines the above three into a workspace (takes 2–5 minutes to provision)
+9. `databricks_user.this` — creates account-level users from `iam.json`
+10. `databricks_group.this` — creates account-level groups from `iam.json`
+11. `databricks_group_member.this` — adds users to their groups
+12. `databricks_mws_permission_assignment.admin` — assigns the `admins` group as workspace ADMIN
 
 Expected apply time: 4–8 minutes (the workspace provisioning waits for Databricks to complete the VPC peering and cluster setup).
 
@@ -200,7 +225,7 @@ terraform output workspace_url   # e.g. https://1234567890123456.7.azuredatabric
 terraform output workspace_id    # e.g. 1234567890123456
 ```
 
-Open the workspace URL in your browser. It should show the Databricks UI. Verify it also appears in the **Accounts console → Workspaces** list.
+Open the workspace URL in your browser. It should show the Databricks UI. If you see a "You do not have permission" error, the permission assignment hasn't propagated yet — wait 30 seconds and refresh. Verify the workspace also appears in the **Accounts console → Workspaces** list.
 
 > **Finding workspace ID and URL in the UI:** in the account console (`accounts.cloud.databricks.com`) click the workspace row — the workspace ID is the number in the browser URL bar: `https://accounts.cloud.databricks.com/workspaces/<workspace_id>`. The workspace URL is shown on the configuration page as the **Per-workspace URL**.
 
@@ -217,7 +242,26 @@ cp backend.tfvars.example backend.tfvars
 cp terraform.tfvars.example terraform.tfvars
 # Edit: paste workspace_url and workspace_id from step 3 outputs
 # Also set: admin_user = "your.email@example.com"
+```
 
+**Optionally populate `secrets.json`** before applying (the file is gitignored — never commit actual values):
+
+```json
+{
+  "scopes": [
+    {
+      "name": "dev",
+      "secrets": [
+        { "key": "my-api-key", "value": "actual-value-here" }
+      ]
+    }
+  ]
+}
+```
+
+If you leave `secrets.json` empty (`"secrets": []`) or absent, the scope is created with no secrets — you can add them later with another `terraform apply`.
+
+```powershell
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform validate
 terraform plan
@@ -226,17 +270,27 @@ terraform apply
 
 **Resource creation sequence:**
 
-1. `aws_s3_bucket.metastore` — storage root for the Unity Catalog metastore
-2. `aws_iam_role.uc_storage` (placeholder trust policy using `databricks_account_id` as `ExternalId`)
-3. `aws_iam_role_policy.uc_storage` — grants S3 access + STS assume-role
-4. `databricks_metastore` — creates the metastore at account level; one per region
-5. `databricks_metastore_data_access` — provides the IAM role to UC; this is where the real `external_id` is generated
-6. **`time_sleep` 20 seconds** — waits for UC to provision the IAM session
-7. `aws_iam_role.uc_storage_patched` — patches the trust policy with the real `external_id`
-8. `databricks_metastore_assignment` — assigns metastore to workspace
-9. `databricks_catalog`, `databricks_schema` ×3, `databricks_grants` ×4
+1. `aws_s3_bucket.catalog` — a dedicated S3 bucket for catalog-level storage (versioning disabled, AES256, public access blocked)
+2. `databricks_storage_credential.this` — created **first**, with a hardcoded role ARN string; Databricks generates the real `external_id` here
+3. `data.databricks_aws_unity_catalog_assume_role_policy.this` — reads `external_id` from the storage credential; generates the correct IAM trust policy JSON (includes both Databricks' IAM principal and the self-assume statement)
+4. `aws_iam_role.catalog_storage` — created with the trust policy from the data source; no two-pass patching needed
+5. `data.databricks_aws_unity_catalog_policy.this` — generates the S3 access IAM policy JSON using the provider's built-in data source (keeps permissions in sync as Databricks evolves its requirements)
+6. `aws_iam_policy.catalog_storage` + `aws_iam_role_policy_attachment.catalog_storage` — managed policy attached to the role (preferred over inline `aws_iam_role_policy`)
+7. **`time_sleep` 30 seconds** — waits for both the trust policy update and the S3 policy attachment to propagate through AWS IAM before Databricks validates
+8. `databricks_external_location.catalog` — registers `s3://<bucket>` with the storage credential; Databricks verifies the IAM role can actually assume itself at this point
+9. `data.databricks_metastores.all` + local — looks up the auto-provisioned metastore by the region-derived name pattern (`metastore_aws_<region_underscored>`)
+10. `databricks_metastore_assignment.this` — assigns the existing metastore to the workspace (no metastore creation — accounts after Nov 2023 already have one per region)
+11. `databricks_default_namespace_setting.this` — sets workspace default catalog to `main`
+12. `databricks_catalog.this` — with `storage_root` pointing to the external location (trailing `/` required; provider normalizes to this form)
+13. `databricks_schema.bronze/silver/gold`
+14. **`time_sleep` 15 seconds** — Databricks' permissions API takes a moment to register newly-created schemas; grants immediately after schema creation fail
+15. `databricks_grants.catalog/bronze/silver/gold`
+16. `databricks_secret_scope.this` — creates secret scopes defined in `secrets.json`
+17. `databricks_secret.this` — creates secrets within each scope
 
-**The circular-dependency pattern:** Unity Catalog needs the IAM role ARN to create the data-access credential, but the real `external_id` for the trust policy only exists after the credential is created. The solution is a two-pass IAM role update: create with placeholder `ExternalId`, create the Databricks credential, then patch the trust policy. Terraform resolves this as a linear dependency chain in a single `apply`.
+**Why catalog-level storage, not metastore-level?** Databricks auto-provisions one metastore per region using Databricks-managed S3 (in Databricks' own AWS account). You cannot reference that storage root from your own Terraform — `databricks_catalog.storage_root` would point to a bucket you don't own. The fix is to create your own S3 bucket and wire it to the catalog via a storage credential and external location.
+
+**The credential-before-role pattern:** `databricks_storage_credential` is created with a hard-coded ARN string (not a Terraform resource reference to `aws_iam_role`). This breaks the circular dependency: storage credential needs the role ARN; the IAM role's trust policy needs the `external_id` from the storage credential. By decoupling the ARN string from the resource reference, Terraform can create the credential first, then create the role with the correct trust policy in one `apply` pass.
 
 Verify in the workspace:
 
@@ -244,6 +298,7 @@ Verify in the workspace:
 SHOW CATALOGS;                    -- should include "main"
 SHOW SCHEMAS IN main;             -- should show bronze, silver, gold
 SHOW GRANTS ON CATALOG main;      -- should show your admin_user
+SHOW GRANTS ON SCHEMA main.bronze;
 ```
 
 ---
@@ -252,9 +307,18 @@ SHOW GRANTS ON CATALOG main;      -- should show your admin_user
 
 | Error | Cause | Fix |
 |---|---|---|
-| `unable to assume role` during `databricks_mws_credentials` | IAM propagation not complete | `time_sleep` 20s handles this; if it still fails, increase to 30s |
-| `BucketAlreadyOwnedByYou` | S3 bucket name not globally unique | Change the prefix in tfvars |
-| `account has reached the limit for metastores in region` | One metastore per region per account; a prior wizard or manual setup already created one | Find the metastore ID in the account console under **Catalog** (it's in the browser URL), then import: `terraform import "module.unity_catalog.databricks_metastore.this" "<id>"` and re-run `terraform apply` |
+| Duplicate workspace named `workspace` appears in account console | Clicked "Set up your account" in the AWS Marketplace subscription wizard, which auto-creates a default workspace | Delete it from the account console (no AWS cleanup needed — it uses Databricks-managed storage). Next time, navigate directly to `accounts.cloud.databricks.com` after the subscription confirms instead of using that button |
+| `unable to assume role` during `databricks_mws_credentials` | IAM propagation not complete | `time_sleep` 20s in the workspace module handles this; increase to 30s if still failing |
+| `BucketAlreadyOwnedByYou` | S3 bucket name not globally unique | Change the prefix in tfvars; bootstrap uses `random_id` to avoid this automatically |
+| `account has reached the limit for metastores in region` | Accounts created after Nov 2023 get one auto-provisioned metastore per region; `databricks_metastore` tries to create a second | This codebase does not create a metastore — it uses a data source to look up the existing one. If you see this, an old version of the module is still in state; run `terraform state rm module.unity_catalog.databricks_metastore.this` |
+| `EntityAlreadyExists: Role with name X already exists` | Two `aws_iam_role` resources with the same name — the old two-pass IAM patch pattern | Fixed in this codebase by the `databricks_aws_unity_catalog_assume_role_policy` data source; no second role resource |
+| `non self-assuming` on `databricks_external_location` | IAM trust policy was just updated; Databricks validated before AWS propagated the change | `time_sleep` 30s after `aws_iam_role_policy_attachment` handles this |
+| `Provider produced inconsistent final plan` for `storage_root` | Databricks provider appends a trailing `/` to `storage_root`; plan was computed without it | Fixed in code: `storage_root = "${databricks_external_location.catalog.url}/"` |
+| `securable_full_name "main.bronze" is not a valid name` or `invalid schema name: 'bronze'` | Schema grants run immediately after schema creation; Databricks' permissions API hasn't registered the schema yet | `time_sleep` 15s after schema creation in the module handles this |
+| `default_catalog_name` deprecation warning | `databricks_metastore_assignment.default_catalog_name` was removed | Fixed: use `databricks_default_namespace_setting` resource instead |
+| `Unable to view page` / "not assigned to workspace" on first login | User not in the `admins` group or permission assignment not yet propagated | Check `iam.json` has your email in the `admins` group; re-run `terraform apply` in `02-workspace`; wait 30s and refresh |
+| `User with username X already exists` on `databricks_user` | User was created manually in the account console before Terraform ran | Import: `terraform import 'module.workspace.databricks_user.this["x@example.com"]' <user_id>` then re-apply |
+| Secret value visible in `terraform plan` output | `sensitive = true` missing on the `secrets` variable | Declared correctly in this codebase; if you copied the variable elsewhere, add `sensitive = true` |
 | Backend init fails with `NoSuchBucket` | Bootstrap not applied yet | Run `terraform apply` in `bootstrap/` first |
 | `workspace_url` or `workspace_id` empty in UC tfvars | Forgot to fill in from step 3 outputs | `terraform -chdir=../02-workspace output workspace_url` |
 | Windows Defender blocks provider binary | Antivirus scanning new `.exe` | Add `.terraform/providers/` to Defender exclusions; `terraform validate` retries automatically |
@@ -299,6 +363,11 @@ This deployment gives you a working, standard workspace. To harden it toward pro
 - The state bucket is bootstrapped once; all other layers use S3 native locking (`use_lockfile = true`)
 - Three layers deploy in strict order: networking → workspace → unity-catalog
 - Each layer reads upstream outputs via `terraform_remote_state` (networking) or explicit variable (workspace URL for UC)
-- The `time_sleep` 20s resources absorb IAM propagation delay at two points: after cross-account policy attachment, and after UC metastore data-access creation
-- The UC IAM circular dependency is broken by a two-pass trust policy update in the same `apply` run
-- Dev and prod share the same modules; only tfvars and state keys differ
+- Users and groups are defined in `iam.json` (committed); the `admins` group is assigned workspace ADMIN via `databricks_mws_permission_assignment` — membership changes require only a JSON edit, not HCL
+- Accounts created after Nov 2023 get one auto-provisioned metastore per region; the UC module looks it up via `data "databricks_metastores"` rather than creating one
+- Catalog-level storage (your own S3 bucket + storage credential + external location) is required because you cannot set `storage_root` to the auto-provisioned metastore's Databricks-managed bucket
+- The `databricks_aws_unity_catalog_assume_role_policy` data source breaks the storage-credential ↔ IAM-role circular dependency: create the credential first (hardcoded ARN string, no Terraform resource dependency), then let the data source read the real `external_id` and generate the correct trust policy for the IAM role in the same `apply` pass
+- Three `time_sleep` resources absorb propagation delays: 20s after workspace cross-account IAM, 30s after catalog IAM role + policy attachment, 15s after schema creation before applying grants
+- `databricks_default_namespace_setting` sets the workspace default catalog (replaces the deprecated `default_catalog_name` on `databricks_metastore_assignment`)
+- Secret scopes and secrets are defined in `secrets.json` (gitignored); the file is optional — if absent or empty, the layer applies cleanly with no secrets created
+- Dev and prod share the same modules; only tfvars, `iam.json`, and `secrets.json` differ

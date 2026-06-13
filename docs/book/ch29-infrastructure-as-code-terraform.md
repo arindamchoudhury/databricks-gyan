@@ -527,6 +527,72 @@ module "workspace" {
 
 The advantage: a data engineer who wants a new workspace submits a PR editing `workspaces.yaml` rather than writing HCL. CI runs `terraform plan` on the change; a platform engineer reviews and merges. The underlying Terraform complexity is completely hidden. The disadvantage: you now have a custom DSL that teams must learn, and YAML validation errors become Terraform runtime errors. Use `yamldecode` + `can()` to validate required fields early.
 
+### IAM from JSON
+
+The same `jsondecode(file(...))` pattern applies to Databricks identity management. Keeping users, groups, and group membership in a checked-in JSON file makes access changes reviewable as code diffs — an auditor can see exactly who was added or removed and when.
+
+```json
+{
+  "users": [
+    { "user_name": "alice@example.com", "display_name": "Alice" },
+    { "user_name": "bob@example.com",   "display_name": "Bob" }
+  ],
+  "groups": [
+    { "name": "admins",         "members": ["alice@example.com"] },
+    { "name": "data-engineers", "members": ["alice@example.com", "bob@example.com"] }
+  ]
+}
+```
+
+The corresponding Terraform creates account-level resources via `databricks.mws`:
+
+```hcl
+resource "databricks_user" "this" {
+  for_each     = { for u in var.iam.users : u.user_name => u }
+  provider     = databricks.mws
+  user_name    = each.value.user_name
+  display_name = each.value.display_name
+}
+
+resource "databricks_group" "this" {
+  for_each     = { for g in var.iam.groups : g.name => g }
+  provider     = databricks.mws
+  display_name = each.key
+}
+
+resource "databricks_group_member" "this" {
+  for_each = {
+    for pair in flatten([
+      for g in var.iam.groups : [
+        for m in g.members : { group = g.name, user = m }
+      ]
+    ]) : "${pair.group}:${pair.user}" => pair
+  }
+  provider  = databricks.mws
+  group_id  = databricks_group.this[each.value.group].id
+  member_id = databricks_user.this[each.value.user].id
+}
+```
+
+A `workspace_admin_group` variable then drives `databricks_mws_permission_assignment` so the group — not an individual user — holds workspace ADMIN:
+
+```hcl
+resource "databricks_mws_permission_assignment" "admin" {
+  provider     = databricks.mws
+  workspace_id = databricks_mws_workspaces.this.workspace_id
+  principal_id = databricks_group.this[var.workspace_admin_group].id
+  permissions  = ["ADMIN"]
+}
+```
+
+**Prefer groups over users for workspace assignment.** Assigning a group means adding a new admin is a JSON edit and a `terraform apply` — no HCL change, no Terraform engineer required. Assigning an individual user means that person leaving the company triggers an emergency Terraform change instead of a routine access review. This distinction matters most when users are managed in an external IdP (Okta, Azure AD) synced via SCIM: group membership is already the IdP's language; Terraform just maps groups to workspace roles.
+
+The `iam.json` file is committed to git — it contains no secrets, only email addresses and group names. The environment module passes it as:
+
+```hcl
+iam = jsondecode(file("${path.module}/iam.json"))
+```
+
 ---
 
 ## The two-layer model
@@ -806,25 +872,32 @@ The `databricks_metastore` resource accepts an optional `storage_root` attribute
 When `storage_root` is absent, every catalog must explicitly declare its own managed storage location. This forces you to think about storage isolation at the catalog level — the right unit of isolation — instead of letting tables accumulate in a shared bucket that becomes impossible to govern later.
 
 ```hcl
-resource "databricks_metastore" "this" {
-  provider      = databricks.mws
-  name          = "${var.region}-metastore"
-  region        = var.region
-  # No storage_root — catalogs must declare their own storage
-  force_destroy = true
+# Accounts created after November 2023 receive one metastore per region
+# automatically — you cannot create a second one. Look it up instead.
+data "databricks_metastores" "all" {
+  provider = databricks.mws
+}
+
+locals {
+  # Auto-provisioned name pattern: metastore_aws_<region_underscored>
+  # e.g. eu-central-1 → metastore_aws_eu_central_1
+  metastore_name = "metastore_aws_${replace(var.region, "-", "_")}"
+  metastore_id   = data.databricks_metastores.all.ids[local.metastore_name]
 }
 
 resource "databricks_metastore_assignment" "this" {
   provider     = databricks.mws
-  metastore_id = databricks_metastore.this.id
+  metastore_id = local.metastore_id
   workspace_id = databricks_mws_workspaces.this.workspace_id
 }
 ```
 
-Once the metastore is assigned, set the workspace default catalog so SQL code without a catalog qualifier resolves to your UC catalog instead of `hive_metastore`. The `databricks_namespace_settings` resource (workspace-level) configures this:
+> **Auto-provisioned metastores.** Databricks accounts created after November 2023 receive one metastore per AWS region automatically. The `resource "databricks_metastore"` block will fail with `METASTORE_LIMIT_EXCEEDED` on these accounts — use `data "databricks_metastores"` to look up the existing one instead. Older accounts can still create metastores. The auto-provisioned naming convention is `metastore_aws_<region_underscored>`; if your metastore was renamed, pass the name explicitly.
+
+Once the metastore is assigned, set the workspace default catalog so SQL code without a catalog qualifier resolves to your UC catalog instead of `hive_metastore`. Use `databricks_default_namespace_setting` (workspace-level):
 
 ```hcl
-resource "databricks_namespace_settings" "default_catalog" {
+resource "databricks_default_namespace_setting" "this" {
   provider = databricks.workspace
   namespace {
     value = var.default_catalog_name   # e.g. "engineering" or "dev_main"
@@ -837,29 +910,60 @@ This is especially important during migrations: existing notebooks that write `S
 
 ### External location for catalog storage
 
-Before creating a catalog with managed storage, you need a storage credential (the IAM role Databricks uses to access S3) and an external location (the S3 path itself):
+Before creating a catalog with managed storage, you need a storage credential (the IAM role Databricks uses to access S3) and an external location (the S3 path itself).
+
+There is a genuine circular dependency to navigate: the IAM role's trust policy requires an `external_id` that Databricks generates when the storage credential is created — but the storage credential needs the IAM role ARN. Break the cycle with the **credential-before-role** pattern: create the storage credential first with a hardcoded ARN string (no Terraform resource reference), then read the `external_id` from the created credential to generate the correct trust policy for the IAM role.
 
 ```hcl
-resource "aws_iam_role" "uc_storage" {
-  name = "${var.prefix}-uc-storage"
-  # Trust policy references the Databricks Unity Catalog AWS account
-  assume_role_policy = data.databricks_aws_unity_catalog_assume_role_policy.this.json
-}
-
-resource "aws_iam_role_policy" "uc_storage" {
-  role   = aws_iam_role.uc_storage.id
-  policy = data.databricks_aws_unity_catalog_policy.this.json
-}
-
+# Step 1 — storage credential first, hardcoded ARN string breaks the cycle
+# (no Terraform dependency on aws_iam_role, so Terraform creates this first)
 resource "databricks_storage_credential" "this" {
   provider = databricks.workspace
   name     = "${var.prefix}-storage-cred"
 
   aws_iam_role {
-    role_arn = aws_iam_role.uc_storage.arn
+    role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.prefix}-uc-storage"
   }
 
   depends_on = [databricks_metastore_assignment.this]
+}
+
+# Step 2 — data source reads the real external_id from the created credential
+data "databricks_aws_unity_catalog_assume_role_policy" "this" {
+  provider       = databricks.workspace
+  aws_account_id = data.aws_caller_identity.current.account_id
+  role_name      = "${var.prefix}-uc-storage"
+  external_id    = databricks_storage_credential.this.aws_iam_role[0].external_id
+}
+
+# Step 3 — IAM role created with correct trust policy (including self-assume)
+resource "aws_iam_role" "uc_storage" {
+  name               = "${var.prefix}-uc-storage"
+  assume_role_policy = data.databricks_aws_unity_catalog_assume_role_policy.this.json
+}
+
+# Managed policy (not inline) — provider keeps S3 permissions current
+data "databricks_aws_unity_catalog_policy" "this" {
+  provider       = databricks.workspace
+  aws_account_id = data.aws_caller_identity.current.account_id
+  bucket_name    = aws_s3_bucket.catalog.id
+  role_name      = "${var.prefix}-uc-storage"
+}
+
+resource "aws_iam_policy" "uc_storage" {
+  name   = "${var.prefix}-uc-storage-policy"
+  policy = data.databricks_aws_unity_catalog_policy.this.json
+}
+
+resource "aws_iam_role_policy_attachment" "uc_storage" {
+  role       = aws_iam_role.uc_storage.name
+  policy_arn = aws_iam_policy.uc_storage.arn
+}
+
+# IAM eventual consistency — wait before Databricks validates the external location
+resource "time_sleep" "wait_for_iam" {
+  depends_on      = [aws_iam_role_policy_attachment.uc_storage]
+  create_duration = "30s"
 }
 
 resource "databricks_external_location" "catalog_storage" {
@@ -867,10 +971,11 @@ resource "databricks_external_location" "catalog_storage" {
   name            = "${var.prefix}-catalog-location"
   url             = "s3://${aws_s3_bucket.catalog.bucket}/"
   credential_name = databricks_storage_credential.this.name
+  depends_on      = [time_sleep.wait_for_iam]
 }
 ```
 
-> **The UC storage credential circular dependency.** The IAM trust policy for the UC storage role needs to reference the Unity Catalog AWS account ID, which is static (Databricks provides it via the `databricks_aws_unity_catalog_assume_role_policy` data source). This avoids the classic circular dependency where you'd need the role ARN before creating the role. Always use the data source — never hardcode the trust policy.
+> **Why `data "databricks_aws_unity_catalog_policy"`?** The `databricks_aws_unity_catalog_policy` data source generates the S3 IAM policy with the exact permissions Databricks currently requires. Databricks updates these permissions over time (new features need new S3 actions). Using the data source means your IAM policy stays in sync with provider upgrades at no extra cost. Never hardcode the S3 actions — the generated list is longer and more precise than anything you'd write manually.
 
 ### Catalogs, schemas, and grants
 
@@ -878,7 +983,7 @@ resource "databricks_external_location" "catalog_storage" {
 resource "databricks_catalog" "engineering" {
   provider     = databricks.workspace
   name         = "engineering"
-  storage_root = "s3://${aws_s3_bucket.catalog.bucket}/engineering"
+  storage_root = "s3://${aws_s3_bucket.catalog.bucket}/engineering/"
 
   depends_on = [databricks_external_location.catalog_storage]
 }
@@ -922,6 +1027,74 @@ resource "databricks_grants" "engineering" {
     privileges = ["USE_CATALOG"]
   }
 }
+```
+
+### Secrets management
+
+Databricks secrets store sensitive values (API keys, passwords, connection strings) at workspace level. Secret scopes namespace the secrets; a notebook reads them with `dbutils.secrets.get("scope", "key")` — the value is never logged or displayed.
+
+The same JSON-from-file pattern used for IAM drives secret creation. Because secret values are sensitive, the JSON file is gitignored — only a `secrets.json.example` with placeholder values is committed:
+
+```json
+{
+  "scopes": [
+    {
+      "name": "dev",
+      "secrets": [
+        { "key": "my-api-key",  "value": "replace-me" },
+        { "key": "db-password", "value": "replace-me" }
+      ]
+    }
+  ]
+}
+```
+
+```hcl
+resource "databricks_secret_scope" "this" {
+  for_each = { for s in var.secrets.scopes : s.name => s }
+  provider = databricks.workspace
+  name     = each.key
+}
+
+resource "databricks_secret" "this" {
+  for_each = {
+    for pair in flatten([
+      for s in var.secrets.scopes : [
+        for sec in s.secrets : { scope = s.name, key = sec.key, value = sec.value }
+      ]
+    ]) : "${pair.scope}:${pair.key}" => pair
+  }
+  provider     = databricks.workspace
+  scope        = databricks_secret_scope.this[each.value.scope].name
+  key          = each.value.key
+  string_value = each.value.value
+}
+```
+
+The environment module reads the file with a `fileexists()` guard so the layer applies cleanly even when no secrets are defined yet:
+
+```hcl
+secrets = fileexists("${path.module}/secrets.json") ? jsondecode(file("${path.module}/secrets.json")) : { scopes = [] }
+```
+
+The variable is declared `sensitive = true` so Terraform never prints secret values in plan or apply output.
+
+**Secret scope ACLs.** By default only the creator of a scope (the service principal running Terraform) has `MANAGE` permission. Grant read access to user groups with `databricks_secret_acl`:
+
+```hcl
+resource "databricks_secret_acl" "read" {
+  for_each   = { for s in var.secrets.scopes : s.name => s }
+  provider   = databricks.workspace
+  scope      = databricks_secret_scope.this[each.key].name
+  principal  = "data-engineers"
+  permission = "READ"
+}
+```
+
+Use in a notebook — the value is `[REDACTED]` if printed but usable in API calls:
+
+```python
+api_key = dbutils.secrets.get(scope="dev", key="my-api-key")
 ```
 
 ---
@@ -1370,6 +1543,13 @@ For a new production deployment, the recommended workflow is:
 | Missing `depends_on` to metastore assignment | `Error: catalog cannot be created without metastore assignment` | Terraform parallelises workspace-level UC object creation before metastore is assigned | Add `depends_on = [databricks_metastore_assignment.this]` to `databricks_catalog` and `databricks_storage_credential` |
 | Terragrunt plan failure before workspace exists | `Error reading workspace attributes` in catalog plan | Data sources run during plan; workspace doesn't exist yet | Set `mock_outputs` in all `dependency` blocks with realistic placeholder values |
 | Hardcoded account ID in trust policy | IAM role accepts any principal in the Databricks account | Custom trust policy instead of `data.databricks_aws_assume_role_policy` | Always use the provider's data sources for trust and permissions policies |
+| Auto-provisioned metastore | `METASTORE_LIMIT_EXCEEDED` on `databricks_metastore` creation | Accounts after Nov 2023 receive one metastore per region automatically | Use `data "databricks_metastores"` to look up the existing metastore by name |
+| UC storage credential circular dependency | `EntityAlreadyExists` on IAM role, or trust policy has wrong `external_id` | IAM trust policy needs `external_id` from credential, but credential needs role ARN | Credential-before-role: create `databricks_storage_credential` with hardcoded ARN string; read `external_id` via `databricks_aws_unity_catalog_assume_role_policy` data source; then create the IAM role |
+| Assigning users directly to workspace | Adding a new admin requires an HCL change; removing a leaver requires emergency Terraform | Individual user assigned via `databricks_mws_permission_assignment` instead of a group | Assign the group to the workspace; manage membership in `iam.json` |
+| Secret scope MANAGE permission locked to SP | Human engineers cannot update or delete secrets after Terraform creates the scope | Service principal that created the scope is the sole MANAGE holder by default | Add `databricks_secret_acl` with `MANAGE` for the `admins` group immediately after scope creation |
+| UC IAM eventual consistency | `non self-assuming` error on `databricks_external_location` | AWS confirms IAM policy attachment seconds before global propagation; Databricks validates immediately | Add `time_sleep` of 30s after `aws_iam_role_policy_attachment`, before `databricks_external_location` |
+| Schema grant propagation delay | `securable_full_name is not a valid name` or `invalid schema name` on `databricks_grants` | Databricks permissions API needs ~15s to register newly created schemas | Add `time_sleep` of 15s after schema creation; add `depends_on` to all schema-level grant resources |
+| `storage_root` trailing slash | `Provider produced inconsistent final plan` on `databricks_catalog` | Provider normalizes `storage_root` to append `/` at apply time, but plan computed without it | Always append `/` to `storage_root`: `"s3://bucket/path/"` |
 
 ---
 
@@ -1383,6 +1563,8 @@ For a new production deployment, the recommended workflow is:
 - **Multi-BU governance follows two patterns:** distributed publishing (each BU governs its own catalogs) or centralized publishing (central team quality-gates all published data). Cross-region data sharing uses Databricks-to-Databricks Delta Sharing between metastores.
 - **A deployment stage is a validation + approval boundary:** dev → staging (automated tests) → prod (human approval). Staging data should read raw prod inputs but write to an isolated catalog.
 - **Config-driven Terraform replaces copy-pasted HCL:** drive catalog and grant structure from `locals` maps with `for_each`; stop at two nesting levels before explicit resources become clearer. For platform-team self-service, externalise the config into YAML files read with `yamldecode()`.
+- **IAM from JSON:** keep users, groups, and group membership in a committed `iam.json`; assign the workspace admin group via `databricks_mws_permission_assignment` rather than an individual user — membership changes stay out of HCL.
+- **Secrets from JSON (gitignored):** drive `databricks_secret_scope` and `databricks_secret` from a `secrets.json` that is gitignored; mark the variable `sensitive = true`; use `fileexists()` so the layer applies cleanly with no file present. Add `databricks_secret_acl` to give the `admins` group `MANAGE` access so engineers can update secrets without re-running Terraform as the SP.
 - **Flat module design:** root modules call child modules directly; child modules do not call other modules. More than two levels of module nesting creates unreadable `terraform graph` output and cryptic error addresses.
 - **The platform/application split is the foundational decision:** Terraform owns workspaces, networking, Unity Catalog topology, and shared platform resources. DABs owns pipelines, jobs, and notebooks. Never merge these layers.
 - **AWS workspace provisioning is account-level:** all `databricks_mws_*` resources use `provider = databricks.mws`. The four required components are the IAM cross-account role, the S3 root bucket, the VPC/subnets, and the MWS resource chain.
