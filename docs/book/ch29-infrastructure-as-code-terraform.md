@@ -811,7 +811,7 @@ resource "aws_security_group" "databricks" {
 }
 ```
 
-> **Plan your CIDR carefully.** On AWS, you can change VPC peering and routing rules later, but subnet sizes are fixed at creation. Each compute node needs an IP address in the subnet. A `/24` supports ~250 nodes; for large clusters use `/22` or larger. This is the single most common miscalculation in Databricks AWS deployments.
+> **Plan your CIDR carefully.** On AWS, you can change VPC peering and routing rules later, but subnet sizes are fixed at creation. Databricks assigns **two IP addresses per node** — one for management traffic, one for the Spark container — so usable nodes ≈ (subnet IPs − 5 AWS-reserved) ÷ 2. A `/24` therefore supports only **~120 nodes** (not ~250); for large clusters use `/22` (~500) or larger. Workspace subnets must have a netmask between `/17` and `/26`. This is the single most common miscalculation in Databricks AWS deployments.
 
 ### Step 4 — MWS resources and workspace
 
@@ -1316,7 +1316,7 @@ terraform {
 }
 ```
 
-Hooks have access to `TG_CTX_TF_PATH` (path to the Terraform module), `TG_CTX_COMMAND` (plan/apply/destroy), and `TG_CTX_HOOK_NAME`. Execution order follows definition order; multiple hooks of the same type are supported. Hooks fire per-unit, not per-stack — if you need stack-level notifications, call `terragrunt run --all apply` from a CI step that wraps the result.
+Hooks have access to `TG_CTX_TF_PATH` (path to the `tofu`/`terraform` binary), `TG_CTX_COMMAND` (plan/apply/destroy), and `TG_CTX_HOOK_NAME`. (The config directory is available as `TG_CTX_TERRAGRUNT_DIR`, but that — along with `TG_CTX_HOOK_TYPE` and `TG_CTX_SOURCE` — is gated behind the `hook-context-env` experiment.) Execution order follows definition order; multiple hooks of the same type are supported. Hooks fire per-unit, not per-stack — if you need stack-level notifications, call `terragrunt run --all apply` from a CI step that wraps the result.
 
 ---
 
