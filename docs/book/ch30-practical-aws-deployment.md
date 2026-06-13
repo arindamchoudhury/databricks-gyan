@@ -221,7 +221,7 @@ terraform apply
 Expected apply time: 4–8 minutes (the workspace provisioning waits for Databricks to complete the VPC peering and cluster setup).
 
 ```powershell
-terraform output workspace_url   # e.g. https://1234567890123456.7.azuredatabricks.net
+terraform output workspace_url   # e.g. https://dbc-76ed85a0-8687.cloud.databricks.com
 terraform output workspace_id    # e.g. 1234567890123456
 ```
 
@@ -315,7 +315,7 @@ SHOW GRANTS ON SCHEMA main.bronze;
 | `non self-assuming` on `databricks_external_location` | IAM trust policy was just updated; Databricks validated before AWS propagated the change | `time_sleep` 30s after `aws_iam_role_policy_attachment` handles this |
 | `Provider produced inconsistent final plan` for `storage_root` | Databricks provider appends a trailing `/` to `storage_root`; plan was computed without it | Fixed in code: `storage_root = "${databricks_external_location.catalog.url}/"` |
 | `securable_full_name "main.bronze" is not a valid name` or `invalid schema name: 'bronze'` | Schema grants run immediately after schema creation; Databricks' permissions API hasn't registered the schema yet | `time_sleep` 15s after schema creation in the module handles this |
-| `default_catalog_name` deprecation warning | `databricks_metastore_assignment.default_catalog_name` was removed | Fixed: use `databricks_default_namespace_setting` resource instead |
+| `default_catalog_name` deprecation warning | `databricks_metastore_assignment.default_catalog_name` is deprecated (still works, but no longer recommended) | Fixed: use `databricks_default_namespace_setting` resource instead |
 | `Unable to view page` / "not assigned to workspace" on first login | User not in the `admins` group or permission assignment not yet propagated | Check `iam.json` has your email in the `admins` group; re-run `terraform apply` in `02-workspace`; wait 30s and refresh |
 | `User with username X already exists` on `databricks_user` | User was created manually in the account console before Terraform ran | Import: `terraform import 'module.workspace.databricks_user.this["x@example.com"]' <user_id>` then re-apply |
 | Secret value visible in `terraform plan` output | `sensitive = true` missing on the `secrets` variable | Declared correctly in this codebase; if you copied the variable elsewhere, add `sensitive = true` |
