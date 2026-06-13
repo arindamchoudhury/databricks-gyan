@@ -172,8 +172,6 @@ cp backend.tfvars.example backend.tfvars
 cp terraform.tfvars.example terraform.tfvars
 # Edit: databricks_account_id, databricks_client_id, state_bucket, workspace_name = "dev"
 
-$env:TF_VAR_databricks_client_secret = "your-service-principal-secret"
-
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform apply
 ```
@@ -211,8 +209,6 @@ cp backend.tfvars.example backend.tfvars
 cp terraform.tfvars.example terraform.tfvars
 # Edit: paste workspace_url and workspace_id from step 3 outputs
 # Also set: admin_user = "your.email@example.com"
-
-$env:TF_VAR_databricks_client_secret = "your-service-principal-secret"
 
 terraform init -backend-config="backend.tfvars"   # quotes required on PowerShell (dot in filename)
 terraform apply
