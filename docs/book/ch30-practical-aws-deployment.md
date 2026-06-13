@@ -7,9 +7,19 @@ A misconfigured IAM trust policy can silently accept the workspace request, retu
 ## What you'll have after this chapter
 
 - An S3 bucket holding all Terraform state (no DynamoDB)
-- A VPC with two private subnets, one public subnet, and a NAT gateway
+- A VPC with two private subnets and one public subnet (NAT gateway optional — off by default for serverless)
 - A Databricks workspace registered in your account console
 - A Unity Catalog metastore with a `main` catalog containing bronze, silver, and gold schemas
+
+---
+
+## Free Edition vs paid account
+
+> **If you have a Databricks Free Edition account**, you already have one workspace provisioned by Databricks — you cannot create additional workspaces via `databricks_mws_*`. **Skip Steps 1–3** (bootstrap, networking, workspace). Go straight to [Step 4 — Unity Catalog](#step-4--unity-catalog-layer), which works against any existing workspace including Free Edition. You will still need a service principal (see below) and Terraform installed, but no AWS account is required for the UC layer alone.
+>
+> Steps 1–3 require a **paid Databricks account on AWS** (Trial or Enterprise) where you have permission to provision new workspaces. The standard way to get one is through the **AWS Marketplace**: search for "Databricks" at `https://us-east-1.console.aws.amazon.com/marketplace/search?text=databricks`, subscribe, and Databricks will email you a link to set up your account at `accounts.cloud.databricks.com`. Your Databricks DBU (compute) charges then flow through your AWS bill.
+>
+> **Cost note for learners:** provisioning the workspace, VPC, S3 bucket, and Unity Catalog metastore via Terraform incurs only standard AWS infrastructure costs — no DBU charges. DBUs only accrue when a cluster or SQL warehouse is running. The main ongoing cost is the **NAT gateway (~$0.045/hour, ~$32/month)**, which sits in your VPC to give classic cluster nodes outbound access to the Databricks control plane. If you plan to use **serverless compute only** (serverless SQL Warehouses, serverless jobs), compute runs in Databricks-managed infrastructure and never touches your VPC — the NAT gateway is idle overhead. In that case, set `enable_nat_gateway = false` in `modules/networking/main.tf` to remove it, or simply destroy the full stack after each learning session (`terraform destroy` in reverse layer order takes ~5 minutes).
 
 ---
 
@@ -17,15 +27,14 @@ A misconfigured IAM trust policy can silently accept the workspace request, retu
 
 Before running a single `terraform init`:
 
-| Requirement | How to verify |
-|---|---|
-| Terraform 1.15+ | `terraform version` |
-| AWS CLI configured | `aws sts get-caller-identity` |
-| IAM permissions | Create VPCs, IAM roles, S3 buckets, EC2 security groups |
-| Databricks account on AWS | Log in at accounts.cloud.databricks.com |
-| Service principal with Account Admin | Accounts → Settings → Service Principals |
+| Requirement | Free Edition | Paid account |
+|---|---|---|
+| Terraform 1.15+ | ✅ needed | ✅ needed |
+| Databricks account | ✅ accounts.cloud.databricks.com | ✅ accounts.cloud.databricks.com |
+| Service principal with Account Admin | ✅ needed | ✅ needed |
+| AWS CLI + IAM permissions | ❌ skip Steps 1–3 | ✅ needed |
 
-**Creating the service principal** (if you haven't already):
+**Creating the service principal** (works on both Free and paid):
 
 1. In the Databricks account console go to **Settings → Service Principals → Add service principal**
 2. Give it a name, e.g. `terraform-deployer`
@@ -121,8 +130,8 @@ terraform apply
 |---|---|
 | VPC | 10.0.0.0/16 |
 | Private subnets | 10.0.1.0/24, 10.0.2.0/24 (us-east-1a, us-east-1b) |
-| Public subnet | 10.0.0.0/24 (NAT gateway egress) |
-| NAT gateway | 1 (single, cost-optimised) |
+| Public subnet | 10.0.0.0/24 (for NAT egress if enabled) |
+| NAT gateway | None by default (`enable_nat_gateway = false`); set `true` only for classic clusters |
 | Security group | self-referential ingress + all egress |
 
 The default security group is configured for Databricks: cluster nodes communicate with each other on all ports (self-referential rule), and all outbound traffic is allowed so nodes can reach the Databricks control plane.
@@ -177,6 +186,8 @@ Open the workspace URL in your browser. It should show the Databricks UI. Verify
 ---
 
 ## Step 4 — Unity Catalog layer
+
+> **Free Edition users start here.** Set `workspace_url` and `workspace_id` from your existing workspace: in the Databricks UI go to the top-right user menu → **User Settings** — or copy the URL from your browser (e.g. `https://1234567890.cloud.databricks.com`). The workspace ID is the number in the URL. You do not need to fill in `state_bucket` — use a local backend instead (remove the `backend.tf` file and run `terraform init` without `-backend-config`).
 
 ```powershell
 cd environments/dev/03-unity-catalog
