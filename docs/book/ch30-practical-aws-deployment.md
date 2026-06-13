@@ -38,18 +38,19 @@ Before running a single `terraform init`:
 
 1. In the Databricks account console go to **Settings → Identity and access → Service Principals → Add service principal**
 2. Give it a name, e.g. `terraform-deployer`
-3. On the workspace entitlements screen set:
+3. On the workspace entitlements screen, set the following and click **Add service principal**:
 
-   | Entitlement | Setting | Why |
-   |---|---|---|
-   | Consumer access | On | Default; allows read access to shared data |
-   | Databricks SQL access | On | Needed to manage SQL warehouses via Terraform |
-   | Workspace access | On | Required to authenticate into the workspace at all |
-   | **Admin access** | **On** | Required to manage catalogs, schemas, grants, and workspace-level config |
+| Entitlement | Setting | Why |
+|---|---|---|
+| Consumer access | On | Default; allows read access to shared data |
+| Databricks SQL access | On | Needed to manage SQL warehouses via Terraform |
+| Workspace access | On | Required to authenticate into the workspace at all |
+| **Admin access** | **On** | Required to manage catalogs, schemas, grants, and workspace-level config |
 
-   Click **Add service principal**
-4. Back in the **account console** (`accounts.cloud.databricks.com`) → **Settings → Identity and access → Service Principals** → click `terraform-deployer` → **Roles** → assign **Account Admin** — this is the account-level role required for `databricks_mws_*` and metastore operations (separate from the workspace Admin access above)
-5. In the workspace SP detail page (**Workspace settings → Identity and access → Service principals → terraform-deployer**), click the **Secrets** tab → **Generate secret** — save the **Application Id** as `client_id` and the generated value as `client_secret`
+<ol start="4">
+<li>Back in the <strong>account console</strong> (<code>accounts.cloud.databricks.com</code>) → <strong>Settings → Identity and access → Service Principals</strong> → click <code>terraform-deployer</code> → <strong>Roles</strong> → assign <strong>Account Admin</strong> — account-level role required for <code>databricks_mws_*</code> and metastore operations (separate from the workspace Admin access above)</li>
+<li>In the workspace SP detail page (<strong>Workspace settings → Identity and access → Service principals → terraform-deployer</strong>) → <strong>Secrets</strong> tab → <strong>Generate secret</strong> — save the <strong>Application Id</strong> as <code>client_id</code> and the generated value as <code>client_secret</code></li>
+</ol>
 
 ---
 
