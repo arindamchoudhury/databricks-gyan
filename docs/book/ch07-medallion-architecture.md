@@ -81,14 +81,14 @@ SELECT
 FROM employees_bronze;
 ```
 
-`CREATE OR REPLACE TABLE AS SELECT` (CRAS) atomically drops and re-creates the table. On each pipeline run, Silver is rebuilt from Bronze — a "full refresh" pattern. This is safe when Bronze is the source of truth and Silver is purely derived.
+`CREATE OR REPLACE TABLE AS SELECT` (CRAS) atomically **replaces the table's contents** — it does *not* drop the table. The replace is a single new commit appended to the same `_delta_log/`, so the table identity and its full version history are retained (you can still time-travel to versions before the replace). On each pipeline run, Silver is rebuilt from Bronze — a "full refresh" pattern. This is safe when Bronze is the source of truth and Silver is purely derived.
 
 Functions used here:
 
 | Function | Returns | Notes |
 |----------|---------|-------|
 | `upper(str)` | STRING | Normalises text casing |
-| `current_timestamp()` | TIMESTAMP | UTC timestamp at query execution time |
+| `current_timestamp()` | TIMESTAMP | Timestamp at query start, in the session timezone (`spark.sql.session.timeZone`) — UTC by default on Databricks |
 | `date(timestamp)` | DATE | Extracts the date part |
 
 ### Gold — aggregate with TEMP VIEW + INSERT OVERWRITE
@@ -115,7 +115,7 @@ SELECT * FROM roles_summary;
 
 `INSERT OVERWRITE` replaces all rows but keeps the table's schema, properties, and Delta version history. A new Delta version is written on each run — you can time-travel to any previous aggregation state.
 
-This differs from `CREATE OR REPLACE TABLE`, which would reset the version history. For Gold tables that are monitored by dashboards or downstream jobs, keeping the history is useful for debugging.
+Both `INSERT OVERWRITE` and `CREATE OR REPLACE TABLE` preserve Delta history, so either gives you time travel. The real difference is **schema control**: `INSERT OVERWRITE` writes into the table's pre-declared, fixed schema, whereas CRAS derives a fresh schema from its `SELECT` each run. For a Gold table whose shape is a stable contract consumed by dashboards and downstream jobs, `INSERT OVERWRITE` into a fixed schema is the safer choice — an accidental change to the aggregation query can't silently reshape the table.
 
 ### Verifying lineage in Catalog Explorer
 
@@ -154,13 +154,13 @@ This is idempotent: re-running produces the same result.
 
 - **Keep Bronze immutable** — never update or delete from Bronze. It's your source of truth for reprocessing. If a source system sends corrections, land them as new rows with a version or sequence column, and handle them in Silver.
 - **Use CRAS for Silver full refreshes** — when Silver is fully derived from Bronze, CRAS is the simplest and most atomic pattern. It handles schema changes automatically (the new schema comes from the SELECT).
-- **Use INSERT OVERWRITE for Gold** — unlike CRAS, INSERT OVERWRITE preserves the table's Delta history, making it debuggable. If a Gold aggregation produces unexpected results, you can compare the current version against yesterday's with time travel.
+- **Use INSERT OVERWRITE for Gold** — it writes into a fixed, pre-declared schema, so an accidental change to the aggregation query can't silently reshape a table that dashboards depend on. (Both INSERT OVERWRITE and CRAS preserve Delta history, so you get time travel either way — you can still compare today's aggregation against yesterday's to debug unexpected results.)
 - **Name temp views clearly** — prefix with `tmp_` or `view_` to make it obvious they're session-scoped and not persisted. `tmp_roles_summary` vs `roles_gold` is unambiguous.
 - **Check lineage before renaming tables** — Unity Catalog lineage is based on table names. If you rename `employees_silver` to `staff_silver`, the lineage graph shows a break. Update downstream dependencies before or alongside any rename.
 
 ## Common pitfalls
 
-- **CRAS drops Delta history** — if you're using `CREATE OR REPLACE TABLE` for Silver, the previous versions are gone. If Silver consumers rely on time travel (e.g. for SLA monitoring), use `INSERT OVERWRITE` instead.
+- **`DROP TABLE` + `CREATE TABLE` destroys history — CRAS does not.** A common misconception is that `CREATE OR REPLACE TABLE` (CRAS) loses history. It doesn't: REPLACE appends a new commit to the same transaction log, so prior versions remain queryable. What actually wipes history is dropping the table and recreating it — `DROP TABLE` deletes the `_delta_log/` (for managed tables, the whole directory), and the new table starts fresh at version 0. If you need a clean refresh of Silver, prefer CRAS over DROP+CREATE precisely so consumers keep time travel.
 - **Temp views don't survive session end** — if a job runs in a new session, a temp view from a previous session is gone. Don't rely on temp views being available across job runs. Create them fresh each time they're needed, or use permanent views for shared intermediate results.
 - **Gold tables read by dashboards can have stale data** — if Gold is populated by a scheduled job and a dashboard queries it during the INSERT OVERWRITE, the query may read an empty or partially populated table. Consider using Delta's `MERGE` or writing to a staging table and atomically swapping.
 - **Forgetting to create the Gold table** before `INSERT OVERWRITE` — the table must exist. `CREATE TABLE IF NOT EXISTS` is the right guard; `INSERT OVERWRITE` will fail if the table doesn't exist.
@@ -176,7 +176,7 @@ This is idempotent: re-running produces the same result.
 
 - Bronze = raw data, append-only via COPY INTO; Silver = cleaned via CRAS; Gold = aggregated via INSERT OVERWRITE.
 - `upper()`, `current_timestamp()`, and `date()` are the key transformation functions in the Silver layer.
-- `INSERT OVERWRITE` replaces rows while preserving Delta history; `CREATE OR REPLACE TABLE` resets history.
+- Both `INSERT OVERWRITE` and `CREATE OR REPLACE TABLE` preserve Delta history (REPLACE appends a commit to the same log); only `DROP` + `CREATE` loses it. Choose INSERT OVERWRITE for Gold to lock the schema, CRAS for Silver to let the schema follow the SELECT.
 - Unity Catalog tracks table-level (and column-level) lineage automatically — view it in the Catalog Explorer.
 - The full pipeline is idempotent: re-running produces the same result without duplicates.
 
