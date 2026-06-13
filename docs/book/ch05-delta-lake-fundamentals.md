@@ -138,13 +138,13 @@ SELECT * FROM employees TIMESTAMP AS OF '2026-01-01T00:00:00';
 
 Time travel requires that the old Parquet files haven't been vacuumed. By default, `VACUUM` retains files for 7 days (`deletedFileRetentionDuration = interval 7 days`).
 
-> ⚠️ **DBR 18 change:** `VERSION AS OF` beyond the retention window now raises an error (was a warning in earlier versions). Always `VACUUM` with the default threshold or higher in production.
+> ⚠️ **DBR 18 change:** Databricks now blocks time-travel queries beyond the `deletedFileRetentionDuration` threshold (default 7 days) for *all* tables. DBR 18 also keeps the two retention properties consistent — you can't set `deletedFileRetentionDuration` larger than `logRetentionDuration`, or vice versa. Keep `VACUUM` at the default threshold or higher in production.
 
 ## Best practices
 
 - **Use CTAS for initial table creation** — it's atomic (all-or-nothing) and infers schema automatically via `read_files()`. You can always tighten the schema with `ALTER TABLE` later.
 - **Use `DESCRIBE DETAIL`** to verify a table's physical location and file count after large writes. Unexpected file counts indicate something went wrong.
-- **Enable Predictive Optimization** (workspace-level setting) so Databricks automatically runs `OPTIMIZE` and `VACUUM` in the background. You get compacted files and controlled history retention without manual maintenance.
+- **Rely on Predictive Optimization** for maintenance. It is **on by default** for Unity Catalog managed tables (accounts created on or after 2024-11-11; existing accounts are being enabled in a gradual rollout). Databricks automatically runs `OPTIMIZE` and `VACUUM` in the background, so you get compacted files and controlled history retention without manual maintenance. On older accounts, confirm it's active rather than assuming you need to enable it.
 - **Prefer managed tables** for most data engineering work. External tables are appropriate when another system (e.g. an existing Hive metastore) already owns the data lifecycle.
 - **Don't run `VACUUM` with retention < 7 days** in production. Shorter retention breaks time travel and can interfere with concurrent readers.
 
@@ -154,7 +154,7 @@ Time travel requires that the old Parquet files haven't been vacuumed. By defaul
 - **Predictive Optimization creates extra versions**: `DESCRIBE HISTORY` may show `OPTIMIZE` operations you didn't trigger. This is expected — predictive optimization runs automatically. The versions are safe to ignore.
 - **Direct file queries (`csv.\`/path/\``) don't treat the first row as a header** by default. You get headers as data. Always use `read_files()` with `header => true` for structured files.
 - **Forgetting `USE CATALOG`/`USE SCHEMA`** means your `CREATE TABLE` lands in the wrong schema. Confirm with `SELECT current_catalog(), current_schema()` before any DDL.
-- **`CREATE OR REPLACE TABLE`** drops and recreates the table, which removes all properties and history. Use it only when you intentionally want a clean slate. For updates, use `INSERT OVERWRITE` or `MERGE`.
+- **`CREATE OR REPLACE TABLE` vs `DROP` + `CREATE`** — these are not equivalent. `CREATE OR REPLACE TABLE` (REPLACE) is atomic and **preserves history**: the versions before and after the replace both stay in the transaction log, so you can still time-travel or `RESTORE` to a pre-replace version (column masks on surviving columns are kept too). It replaces the data and resets table properties to those declared in the statement. What actually destroys history is `DROP TABLE` followed by `CREATE TABLE` — that removes the table from the metastore and starts a fresh log. For routine updates, prefer `INSERT OVERWRITE` or `MERGE`.
 
 ## Exercises
 
