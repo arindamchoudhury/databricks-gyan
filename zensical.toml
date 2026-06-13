@@ -2,6 +2,8 @@
 site_name = "Databricks Data Engineering — Learning Notes"
 site_description = "Personal notes and book from learning Databricks Data Engineering."
 site_author = "arindam@live.com"
+extra_css = ["stylesheets/extra.css"]
+extra_javascript = ["javascripts/sidebar-toggle.js"]
 
 nav = [
     { "Home" = "index.md" },
