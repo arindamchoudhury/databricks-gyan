@@ -95,8 +95,7 @@ The bootstrap layer is the only one without a remote backend — it uses local s
 cd C:\opt\learn\databricks\databricks-aws-terraform\bootstrap
 
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars: set state_bucket_name to a globally unique value
-# e.g. "myorg-databricks-tf-state-abc123"
+# Edit terraform.tfvars: set region and prefix (bucket name is auto-generated)
 
 terraform init
 terraform apply
@@ -105,12 +104,14 @@ terraform apply
 Expected output on success:
 
 ```
-Apply complete! Resources: 4 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 5 added, 0 changed, 0 destroyed.
 
 Outputs:
-state_bucket_name = "myorg-databricks-tf-state-abc123"
-state_bucket_region = "us-east-1"
+state_bucket_name = "myorg-databricks-tf-state-a1b2c3d4"
+state_bucket_region = "eu-central-1"
 ```
+
+The bucket name is `<prefix>-databricks-tf-state-<random8hex>` — globally unique without any manual naming.
 
 **What gets created:** one S3 bucket with versioning, AES256 encryption, and public access blocked. `force_destroy = false` protects the bucket from accidental deletion.
 
