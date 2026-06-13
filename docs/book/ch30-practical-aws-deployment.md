@@ -254,7 +254,7 @@ SHOW GRANTS ON CATALOG main;      -- should show your admin_user
 |---|---|---|
 | `unable to assume role` during `databricks_mws_credentials` | IAM propagation not complete | `time_sleep` 20s handles this; if it still fails, increase to 30s |
 | `BucketAlreadyOwnedByYou` | S3 bucket name not globally unique | Change the prefix in tfvars |
-| `metastore already exists in region us-east-1` | One metastore per region per account | Import existing: `terraform import databricks_metastore.this <id>` |
+| `account has reached the limit for metastores in region` | One metastore per region per account; a prior wizard or manual setup already created one | Find the metastore ID in the account console under **Catalog** (it's in the browser URL), then import: `terraform import "module.unity_catalog.databricks_metastore.this" "<id>"` and re-run `terraform apply` |
 | Backend init fails with `NoSuchBucket` | Bootstrap not applied yet | Run `terraform apply` in `bootstrap/` first |
 | `workspace_url` or `workspace_id` empty in UC tfvars | Forgot to fill in from step 3 outputs | `terraform -chdir=../02-workspace output workspace_url` |
 | Windows Defender blocks provider binary | Antivirus scanning new `.exe` | Add `.terraform/providers/` to Defender exclusions; `terraform validate` retries automatically |
