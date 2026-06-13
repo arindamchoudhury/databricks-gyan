@@ -31,6 +31,10 @@
 | **REPO-DLT** | delta-live-tables-notebooks — official Databricks DLT/Lakeflow example pipelines (CDC, streaming, Kimball, ML) | GitHub repo | https://github.com/databricks/delta-live-tables-notebooks |
 | **REPO-NBP** | notebook-best-practices — before/after modularization example (COVID EDA); shared module `covid_analysis/transforms.py`; 4 pytest unit tests in `tests/transforms_test.py`; `notebooks/run_unit_tests.py` runs pytest via `pytest.main()` inside a Databricks notebook; GitHub Actions CI using `databricks/run-notebook` action | GitHub repo | https://github.com/databricks/notebook-best-practices |
 | **REPO-TF** | terraform-databricks-lakehouse-blueprints — production lakehouse infra (Unity Catalog, Private Link, multi-cloud) | GitHub repo | https://github.com/databricks/terraform-databricks-lakehouse-blueprints |
+| **REPO-TF-EX** | terraform-databricks-examples — official Databricks Terraform code examples including CI/CD pipeline templates | GitHub repo | https://github.com/databricks/terraform-databricks-examples |
+| **SPEC-TF** | Specialist Session: "Managing Databricks at scale using Terraform" (Vuong Nguyen & Alex Ott, Databricks 2025) — AWS workspace provisioning, Unity Catalog setup, Terragrunt, Terraform vs DABs, CI/CD for Terraform | Local PDF | `C:\opt\learn\databricks\specialist sessions\Databricks Specialist Sessions_ Managing Databricks at scale using Terraform.pdf` |
+| **REPO-SRA** | terraform-databricks-sra — Security Reference Architecture: production-hardened Databricks workspace templates for AWS/Azure/GCP (Private Link, CMK, no-public-IP, audit log delivery, Compliance Security Profile, Security Analysis Tool) | Local repo / GitHub | `C:\opt\learn\databricks\repos\terraform-databricks-sra` · https://github.com/databricks/terraform-databricks-sra |
+| **REPO-TF-PROVIDER** | terraform-provider-databricks — Terraform provider source code (Go); useful for understanding undocumented resource behaviour, debugging unexpected plan/apply errors, or checking what fields a resource actually accepts | Local repo / GitHub | `C:\opt\learn\databricks\repos\terraform-provider-databricks` · https://github.com/databricks/terraform-provider-databricks |
 
 ---
 
@@ -601,6 +605,38 @@ You are ready to advance when you can:
 
 ---
 
+### ✅ E7 — Databricks Infrastructure as Code with Terraform
+
+**What it is:** Using the Databricks Terraform provider to provision AWS workspaces (VPC, IAM, S3, `databricks_mws_*` resources), set up Unity Catalog objects programmatically, manage cluster policies and permissions at scale — and Terragrunt for DRY, multi-environment IaC deployments.
+
+**Why you need it:** DABs (A5) handles the application layer — pipelines and jobs. Terraform handles the platform layer — workspaces, networking, Unity Catalog metastores, and shared resources. Understanding both, and where each starts and stops, is what separates a data engineer who can deploy a pipeline from one who can provision the entire platform.
+
+**How to learn it:**
+
+1. **Specialist session — SPEC-TF** (~3 hrs) — 100-page official Databricks session covering the complete picture: architecture, AWS workspace provisioning, Unity Catalog setup, Terragrunt, the Terraform vs DABs split, and Terraform CI/CD. Read cover to cover before anything else.
+2. **Reference — DB-DOCS: [Terraform on Databricks](https://docs.databricks.com/aws/en/dev-tools/terraform/)** (~1 hr) — Official provider docs; focus on the AWS workspace provisioning guide and Unity Catalog resource reference.
+3. **Local repo — REPO-TF** (~1.5 hrs) — Browse the `aws_fs_lakehouse` and `aws_uc` modules. Focus on: how account-level resources (`databricks_mws_*`, `databricks_metastore`) are separated from workspace-level resources (`databricks_catalog`, `databricks_grants`, `databricks_cluster_policy`). Note the separate Terraform state files for each layer.
+4. **Hands-on: AWS workspace + UC** (~4 hrs) — Provision a Databricks workspace on AWS from scratch: VPC + private subnets, IAM cross-account role, S3 root bucket, `databricks_mws_networks` → `databricks_mws_credentials` → `databricks_mws_storage_configurations` → `databricks_mws_workspaces`. Then switch to workspace provider and add UC: `databricks_metastore` (no `storage_root` — best practice from SPEC-TF), `databricks_metastore_assignment`, `databricks_catalog`, `databricks_schema`, `databricks_grants`.
+5. **Local repo — REPO-SRA** (~2 hrs) — Read the AWS SRA after the hands-on above. Compare your basic deployment to what a hardened deployment adds: two Private Link VPC endpoints (REST + SCC relay), S3/STS/Kinesis VPC endpoints with restrictive policies, two CMK keys (workspace storage + managed services), Network Connectivity Configuration, disabled legacy DBFS/access settings, and the Security Analysis Tool. This is the difference between "it works" and "it passes a security audit".
+6. **Hands-on: Terragrunt** (~2 hrs) — Refactor into a Terragrunt layout: `root.hcl` with S3 remote state (`remote_state` block), separate `account-config/`, `workspace/`, `unity-catalog/` units with `terragrunt.hcl` per unit, `environment.hcl` per stage (dev/prod). Run `terragrunt run --all apply` and confirm dependency ordering.
+7. **Hands-on: CI/CD** (~1 hr) — Wire deployment into GitHub Actions using REPO-TF-EX's `cicd-pipelines` as a reference: `terraform fmt` + `validate` + `plan` on PR, `apply` on merge to main. Store Terraform state in S3 with DynamoDB locking.
+8. **Reference: REPO-TF-PROVIDER** — When a Terraform resource behaves unexpectedly (plan shows diff you can't explain, an attribute isn't in the docs), look it up in the provider source. The `mws/` directory covers MWS workspace resources; `catalog/` covers Unity Catalog. Reading the Go struct tags is faster than filing a GitHub issue.
+
+> **Terraform vs DABs — the canonical split (from SPEC-TF p.89):**
+> - **Terraform:** workspace provisioning + cloud infra, Unity Catalog metastore/catalogs/grants, cluster policies, shared SQL warehouses, user/group/service principal management
+> - **DABs (A5):** pipelines, jobs, notebooks — project-level artifacts, environment promotion, developer-owned CI/CD
+
+> **Key Databricks-specific Terraform gotchas (from SPEC-TF):**
+> - AWS workspace provisioning is an account-level operation — use `provider = databricks.mws` (MWS endpoint), not the workspace endpoint.
+> - `databricks_mws_credentials` has a circular dependency on IAM: the IAM role trust policy needs the Databricks `external_id`, which isn't known until after the credential is created. The official workaround uses a two-phase `depends_on`.
+> - Create `databricks_metastore` without `storage_root` to ensure full storage isolation between catalogs.
+> - Keep account-level and workspace-level resources in **separate Terraform state files**.
+> - `databricks_grants` is authoritative (replaces all grants); `databricks_grant` is per-principal. Never mix both for the same object.
+
+**Milestone:** You can provision a Databricks workspace on AWS entirely from Terraform (`databricks_mws_*`), set up a Unity Catalog metastore and catalog with grants, organize code into Terragrunt stacks with separate state per layer, and explain the Terraform vs DABs split: what each tool owns and why.
+
+---
+
 ### ✅ Expert Checkpoint
 
 You are ready to call yourself a Databricks Data Engineering expert when you can:
@@ -609,6 +645,7 @@ You are ready to call yourself a Databricks Data Engineering expert when you can
 - Optimize cluster cost using system tables, cluster policies, and right-sized instance types
 - Build advanced streaming pipelines with fan-out and stateful aggregations
 - Automate workspace operations with the Databricks SDK
+- Provision a Databricks workspace and Unity Catalog on AWS using Terraform, and explain the Terraform vs DABs boundary
 
 ---
 
@@ -621,10 +658,10 @@ Intermediate (I1–I8)  → ~45 hrs  →  [DCDEA cert: $200 · 45 Q · 90 min]
     ↓
 Advanced (A1–A7)      → ~40 hrs  →  [DCDEP cert: $200 · 59 Q · 120 min]
     ↓
-Expert (E1–E6)        → ~35 hrs  →  Architect-level mastery
+Expert (E1–E7)        → ~40 hrs  →  Architect-level mastery
 ```
 
-**Total estimate:** ~150 hrs of deliberate practice.
+**Total estimate:** ~155 hrs of deliberate practice.
 
 **You are currently here:** Beginner — no topics completed yet. Start with B1.
 

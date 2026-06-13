@@ -3,10 +3,12 @@
 > **Level:** Expert · **Topic code:** E7
 >
 > **After this chapter you will be able to:**
+> 
 > - Choose the right workspace topology for your organisation (monolithic, environment-separated, domain-separated, hub-spoke)
 > - Design a Unity Catalog namespace that scales — catalog-per-env, catalog-per-domain, or hybrid
-> - Apply the correct isolation mechanism — workspace isolation, catalog isolation, row filters, column masking, or dynamic views
-> - Separate deployment stages and decide what constitutes a "stage" boundary in a Databricks platform
+> - Apply the correct isolation mechanism — workspace isolation, catalog isolation, workspace-catalog binding, row filters, column masking, or dynamic views
+> - Separate deployment stages with per-stage admin delegation; decide what constitutes a "stage" boundary
+> - Design multi-BU data governance using distributed or centralized publishing patterns
 > - Provision a Databricks workspace on AWS entirely from Terraform using the `databricks_mws_*` resource family
 > - Set up Unity Catalog — metastore, catalogs, schemas, and grants — programmatically
 > - Organise Terraform code into layered modules with separate state files
@@ -224,6 +226,18 @@ us-east-1 metastore
 
 All three workspaces see the same catalogs. Access control is enforced by grants — a prod-workspace user cannot see `dev_main` unless explicitly granted `USE_CATALOG`. This is the key advantage: shared governance plane, isolated access.
 
+### Data publishing patterns (multi-BU)
+
+In organisations with multiple business units sharing a metastore, two patterns govern how data flows between teams:
+
+**Option 1 — Distributed publishing.** Each BU owns its catalogs (`bu1_prd`, `bu2_prd`) and publishes data directly. Other BUs access data via UC grants on specific schemas and tables. The central platform team provides workspace blueprints and creates environments for BUs, but each BU controls its own catalog's ACLs. Best when BU autonomy matters more than uniform quality standards.
+
+**Option 2 — Centralized publishing.** BUs produce data to their own staging catalogs, then request the central team to publish to a central catalog (e.g., `bu1_published`). The central team enforces naming conventions, data quality checks, and sets the ACLs. All enterprise consumers go through the central catalog. Best for regulated industries or when a data stewardship team must sign off on all published data.
+
+Naming convention in both patterns: `{bu}_{env}` catalogs (`central_prd`, `bu1_dev`, `bu1_stg`, `bu1_prd`) make ownership and stage obvious in every `SELECT` statement.
+
+For **cross-region** multi-BU setups, **Databricks-to-Databricks Delta Sharing** links metastores across AWS regions. Region 2 BUs see shared tables from region 1's metastore as read-only views in their own metastore — no data copy required. An alternative is Lakehouse Federation for heterogeneous sources. Both are separate topics from workspace provisioning but must be planned in the UC topology design.
+
 ---
 
 ## Unity Catalog isolation options
@@ -296,6 +310,36 @@ WHERE is_member('emea-team') = TRUE OR region = 'GLOBAL';
 
 Grant on the view, not the underlying table. Use when you need JOIN-based filtering (e.g., a user can only see rows referenced in an access-control table they own).
 
+### 5. Workspace-catalog binding
+
+By default every catalog in a metastore is visible to all workspaces assigned to that metastore (subject to grants). Setting `isolation_mode = "ISOLATED"` makes a catalog invisible to every workspace — it does not appear in `SHOW CATALOGS` — until you explicitly bind it with `databricks_catalog_workspace_binding`. This is stricter than catalog grants alone: even a metastore admin cannot discover the catalog from an unbound workspace.
+
+```hcl
+resource "databricks_catalog" "prod" {
+  provider       = databricks.workspace
+  name           = "prod_main"
+  isolation_mode = "ISOLATED"   # invisible to all workspaces until bound
+}
+
+# Bind only to the prod workspace
+resource "databricks_catalog_workspace_binding" "prod_to_prod_ws" {
+  provider       = databricks.workspace
+  securable_name = databricks_catalog.prod.name
+  workspace_id   = var.prod_workspace_id
+}
+
+# Bind dev catalog only to the dev workspace
+resource "databricks_catalog_workspace_binding" "dev_to_dev_ws" {
+  provider       = databricks.workspace
+  securable_name = databricks_catalog.dev.name
+  workspace_id   = var.dev_workspace_id
+}
+```
+
+The same `isolation_mode = "ISOLATED"` flag and `databricks_catalog_workspace_binding` resource apply to storage credentials and external locations. Manage all bindings from a single designated management workspace — typically the same workspace that owns the metastore.
+
+This pattern pairs naturally with the workspace-per-env topology: the prod workspace can only see `prod_main`; dev engineers in the dev workspace cannot accidentally `SELECT *` from a prod table because `prod_main` is not bound to their workspace.
+
 ### Choosing the right mechanism
 
 ```
@@ -317,6 +361,7 @@ Row filters and column masks are preferable to dynamic views for new code: they 
 | Row filters | Row | Minor (filter pushed to scan) | Medium | UC native, preferred |
 | Column masking | Column | None | Medium | UC native, preferred |
 | Dynamic views | Rows + columns | JOIN overhead | High | Pre-UC pattern; still valid for complex logic |
+| Workspace-catalog binding | Catalog (workspace visibility) | None | Low | Prevents catalog discovery from unbound workspaces; strongest isolation |
 
 ---
 
@@ -350,6 +395,7 @@ What changes at each stage boundary:
 | Terraform (workspace, VPC) | Different state files; prod requires separate approval gate in CI/CD |
 | DABs (jobs, pipelines) | `--target dev/staging/prod` in the bundle; each target has its own catalog and cluster config |
 | Unity Catalog (data) | `dev_main` → `staging_main` → `prod_main` catalogs; grants restrict who can write to prod |
+| Unity Catalog (admin) | Each env can have a separate catalog admin — dev team has `CREATE_SCHEMA` on `dev_main`, no rights on `prod_main`; prod admin is a service principal used only by CI/CD |
 | Cluster policies | Dev: on-demand small clusters allowed; prod: job clusters only, no interactive |
 
 ### Data in staging
@@ -447,6 +493,39 @@ resource "databricks_schema" "this" {
 ### When config-driven becomes too clever
 
 Config-driven scale pays off when you genuinely repeat the same structure many times. It adds cognitive overhead — a new team member reading a `for_each` over a nested map needs to understand the data structure before they can understand what gets created. Draw the line at two levels of nesting. If your locals require three nested `for` expressions to flatten, split into explicit resources instead.
+
+### Beyond HCL: YAML-driven config
+
+For platform teams that provision many workspaces or catalogs on behalf of other teams, the next step is externalising the configuration into YAML files that non-Terraform engineers can edit:
+
+```yaml
+# config/workspaces.yaml
+workspaces:
+  - name: marketing-dev
+    env: dev
+    vpc_cidr: "10.10.0.0/16"
+    catalog: marketing_dev
+  - name: marketing-prod
+    env: prod
+    vpc_cidr: "10.11.0.0/16"
+    catalog: marketing_prd
+```
+
+```hcl
+# main.tf
+locals {
+  workspaces = yamldecode(file("${path.module}/config/workspaces.yaml")).workspaces
+}
+
+module "workspace" {
+  for_each = { for ws in local.workspaces : ws.name => ws }
+  source   = "../modules/aws-workspace"
+  prefix   = each.value.name
+  vpc_cidr = each.value.vpc_cidr
+}
+```
+
+The advantage: a data engineer who wants a new workspace submits a PR editing `workspaces.yaml` rather than writing HCL. CI runs `terraform plan` on the change; a platform engineer reviews and merges. The underlying Terraform complexity is completely hidden. The disadvantage: you now have a custom DSL that teams must learn, and YAML validation errors become Terraform runtime errors. Use `yamldecode` + `can()` to validate required fields early.
 
 ---
 
@@ -742,6 +821,20 @@ resource "databricks_metastore_assignment" "this" {
 }
 ```
 
+Once the metastore is assigned, set the workspace default catalog so SQL code without a catalog qualifier resolves to your UC catalog instead of `hive_metastore`. The `databricks_namespace_settings` resource (workspace-level) configures this:
+
+```hcl
+resource "databricks_namespace_settings" "default_catalog" {
+  provider = databricks.workspace
+  namespace {
+    value = var.default_catalog_name   # e.g. "engineering" or "dev_main"
+  }
+  depends_on = [databricks_metastore_assignment.this]
+}
+```
+
+This is especially important during migrations: existing notebooks that write `SELECT * FROM bronze.events` continue to work without modification.
+
 ### External location for catalog storage
 
 Before creating a catalog with managed storage, you need a storage credential (the IAM role Databricks uses to access S3) and an external location (the S3 path itself):
@@ -872,6 +965,8 @@ infra/
 │       ├── catalog/
 │       └── platform/
 ```
+
+**Flat module design is strongly recommended:** root modules call child modules directly; child modules should not call other modules. A two-level call stack (root → child) is easy to follow. Three or more levels (root → wrapper → child → sub-child) makes `terraform graph` unreadable and `module.X.module.Y.module.Z.resource_name` addresses appear in error messages. If you feel the urge to have a module call another module, the two modules probably belong in the same module.
 
 Root modules (`environments/dev/workspace/main.tf` etc.) are thin: they call child modules and pass environment-specific variables. All logic lives in the modules.
 
@@ -1022,6 +1117,33 @@ terragrunt run --all apply --terragrunt-parallelism 2
 | Rate limiting on `run --all` | Parallel unit execution hits Databricks API limits | `--terragrunt-parallelism 2` |
 | Auth for multiple workspaces | Each workspace unit needs its own provider with the workspace URL | Use `dependency` output as `host` in the workspace provider |
 | Provider generation for workspace provider | `root.hcl` can only generate MWS provider; workspace provider needs the URL | Generate it per-unit using a `generate` block that reads the workspace dependency output |
+
+### Terragrunt hooks
+
+Hooks let you run shell commands before or after Terraform commands — useful for pre-flight validation, notification, and CI/CD integration:
+
+```hcl
+# In a terragrunt.hcl unit
+terraform {
+  before_hook "validate_tfvars" {
+    commands = ["apply"]
+    execute  = ["./scripts/validate-workspace-vars.sh"]
+  }
+
+  after_hook "notify_slack" {
+    commands = ["apply"]
+    execute  = ["./scripts/notify.sh", "workspace deployed"]
+  }
+
+  error_hook "on_apply_fail" {
+    commands  = ["apply"]
+    execute   = ["./scripts/alert.sh", "apply failed"]
+    on_errors = [".*"]
+  }
+}
+```
+
+Hooks have access to `TG_CTX_TF_PATH` (path to the Terraform module), `TG_CTX_COMMAND` (plan/apply/destroy), and `TG_CTX_HOOK_NAME`. Execution order follows definition order; multiple hooks of the same type are supported. Hooks fire per-unit, not per-stack — if you need stack-level notifications, call `terragrunt run --all apply` from a CI step that wraps the result.
 
 ---
 
@@ -1257,16 +1379,18 @@ For a new production deployment, the recommended workflow is:
 - **Unity Catalog changes the isolation equation:** before UC, workspace = isolation boundary. With UC, catalog = isolation boundary. Separate workspaces are only necessary for compute isolation, billing isolation, or regulatory scope boundaries.
 - **Three environment separation strategies:** workspace-per-env (strongest, most expensive), catalog-per-env (recommended default), schema-per-env (weakest — only for small teams).
 - **Hybrid catalog topology scales best:** `{env}_{domain}` catalog names (e.g., `prod_marketing`, `dev_marketing`) give both domain ownership and environment isolation in one consistent naming scheme.
-- **Match the isolation mechanism to the requirement:** catalog grants for coarse isolation; row filters for row-level RBAC; column masking for PII; dynamic views for complex multi-table logic.
+- **Match the isolation mechanism to the requirement:** catalog grants for coarse isolation; `isolation_mode = "ISOLATED"` + `databricks_catalog_workspace_binding` for preventing catalog discovery across workspaces; row filters for row-level RBAC; column masking for PII; dynamic views for complex multi-table logic.
+- **Multi-BU governance follows two patterns:** distributed publishing (each BU governs its own catalogs) or centralized publishing (central team quality-gates all published data). Cross-region data sharing uses Databricks-to-Databricks Delta Sharing between metastores.
 - **A deployment stage is a validation + approval boundary:** dev → staging (automated tests) → prod (human approval). Staging data should read raw prod inputs but write to an isolated catalog.
-- **Config-driven Terraform replaces copy-pasted HCL:** drive catalog and grant structure from `locals` maps with `for_each`; stop at two nesting levels before explicit resources become clearer.
+- **Config-driven Terraform replaces copy-pasted HCL:** drive catalog and grant structure from `locals` maps with `for_each`; stop at two nesting levels before explicit resources become clearer. For platform-team self-service, externalise the config into YAML files read with `yamldecode()`.
+- **Flat module design:** root modules call child modules directly; child modules do not call other modules. More than two levels of module nesting creates unreadable `terraform graph` output and cryptic error addresses.
 - **The platform/application split is the foundational decision:** Terraform owns workspaces, networking, Unity Catalog topology, and shared platform resources. DABs owns pipelines, jobs, and notebooks. Never merge these layers.
 - **AWS workspace provisioning is account-level:** all `databricks_mws_*` resources use `provider = databricks.mws`. The four required components are the IAM cross-account role, the S3 root bucket, the VPC/subnets, and the MWS resource chain.
 - **Add `time_sleep` after IAM policy attachment** to absorb AWS propagation delay before `databricks_mws_credentials` validates the role.
 - **Omit `storage_root` from `databricks_metastore`:** force every catalog to declare its own storage location, keeping governance clean at the catalog boundary.
 - **`databricks_grants` is authoritative** — it replaces all grants on an object. `databricks_grant` is per-principal. Never mix them on the same securable.
 - **Separate state files by lifecycle:** account, workspace, catalog, and platform layer each get their own state. A catalog change should not re-evaluate VPC resources.
-- **Terragrunt eliminates DRY violations:** `root.hcl` defines remote state backend and provider generation once; each unit's `terragrunt.hcl` specifies only its module source, inputs, and dependencies.
+- **Terragrunt eliminates DRY violations:** `root.hcl` defines remote state backend and provider generation once; each unit's `terragrunt.hcl` specifies only its module source, inputs, and dependencies. Use hooks (`before_hook`, `after_hook`, `error_hook`) for CI/CD notifications and validation scripts.
 - **CI/CD pipeline stages:** `fmt → validate → plan` on PR; `apply` on merge to main, gated by environment approval.
 
 ---
