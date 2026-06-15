@@ -27,6 +27,14 @@ nav = [
             { "M2-03: Medallion Architecture" = "sources/da-free/medallion-architecture.md" },
             { "M2-04: Lakeflow Jobs" = "sources/da-free/lakeflow-jobs.md" },
         ]},
+        { "DCDE-SG (Study Guide)" = [
+            { "Book Overview" = "sources/dcde-sg/index.md" },
+            { "Ch 1: Getting Started with Databricks" = "sources/dcde-sg/ch01-getting-started-with-databricks.md" },
+        ]},
+        { "Databricks Docs" = [
+            { "Overview" = "sources/databricks-docs/index.md" },
+            { "Debug Notebooks (Interactive Debugger)" = "sources/databricks-docs/notebook-debugger.md" },
+        ]},
     ]},
     { "Release Notes" = [
         { "Overview & LP Flags" = "release-notes/index.md" },

@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .venv/
 .claude/
+
+# Working files for PDF note-taking (raw extracted book text — don't publish/commit)
+docs/sources/*/pdf-cache/
