@@ -2,14 +2,15 @@
 
 > **Source (AWS):** [docs.databricks.com/aws/en/compute/configure](https://docs.databricks.com/aws/en/compute/configure)
 > **Source (GCP):** [docs.databricks.com/gcp/en/compute/configure](https://docs.databricks.com/gcp/en/compute/configure)
+> **Source (Azure):** [learn.microsoft.com/en-us/azure/databricks/compute/configure](https://learn.microsoft.com/en-us/azure/databricks/compute/configure)
 > **Added:** 2026-06-16
 > **Source updated:** 2026-06-11
-> **Tags:** compute, classic-compute, configuration, autoscaling, EBS, spark-config, instance-types, gcp, B1
+> **Tags:** compute, classic-compute, configuration, autoscaling, EBS, spark-config, instance-types, gcp, azure, B1
 > **Type:** documentation
 
 ## Summary
 
-Full configuration reference for classic compute (all-purpose and job clusters) covering both AWS and GCP. Covers every setting in the compute creation UI: runtime version, instance types, autoscaling behaviour, advanced instance options (GPU, Graviton/Fleet on AWS; local SSDs on GCP), tags, access modes, storage, logging, and Spark configuration. Cloud-specific sections are labelled. The overview page ([[classic-compute-overview]]) covers what classic compute is and permission levels; this page covers how to configure it.
+Full configuration reference for classic compute (all-purpose and job clusters) covering AWS, GCP, and Azure. Covers every setting in the compute creation UI: runtime version, instance types, autoscaling behaviour, advanced instance options (GPU, Graviton/Fleet on AWS; local SSDs on GCP; confidential VMs on Azure), tags, access modes, storage, logging, and Spark configuration. Cloud-specific sections are labelled. The overview page ([[classic-compute-overview]]) covers what classic compute is and permission levels; this page covers how to configure it.
 
 ## Key points
 
@@ -23,6 +24,10 @@ Full configuration reference for classic compute (all-purpose and job clusters) 
 - **Autoscaling local storage**: auto-attaches EBS GP3 volumes (AWS) or resizes Zonal SSD PD (GCP) up to 5 TB/instance; never detached mid-run.
 - **Google service account** (GCP) replaces instance profiles (AWS) as the mechanism for accessing cloud storage without static keys.
 - **HA zone** (GCP): `HA` availability zone option spreads instances across zones in a region; may increase inter-zone egress costs.
+- **Azure spot failback**: evicted spot VMs → Databricks tries new spot first, then falls back to on-demand. Failback only for fully-running instances; failed-during-setup spot is not replaced.
+- **Azure confidential computing VMs** (DC/EC series): prevent unauthorized data access while in use; useful for regulated industries.
+- **Autoscaling local storage always-on on Azure** (no toggle; uses Managed Disks); AWS/GCP require opt-in.
+- **SSH access (Azure only)**: SSH port closed by default; can be enabled only if workspace is in customer's Azure VNet.
 - **Log delivery** to a Volume requires Standard mode or Dedicated-to-user (not Dedicated-to-group).
 - **Local disk encryption** available (Public Preview) via Clusters API only; has performance overhead.
 - **Spark secrets in config**: use `{{secrets/<scope>/<name>}}` syntax instead of plaintext passwords.
@@ -69,6 +74,10 @@ Each worker gets two private IPs: one for Databricks internal traffic, one for t
 #### GPU instance types
 
 For deep learning and computationally demanding tasks. *AWS:* Amazon EC2 P2 instances deprecated.
+
+#### Azure confidential computing VMs *(Azure only)*
+
+DC and EC series VM types prevent unauthorized access to data while it's in use, including from the cloud operator. Beneficial for highly regulated industries or businesses with sensitive cloud data. Select DC or EC series in the worker and driver node dropdowns.
 
 #### AWS Graviton instance types
 
@@ -138,7 +147,10 @@ Intended for small datasets and non-distributed workloads (single-node ML librar
 - No GPU scheduling on single-node
 - Large-scale data processing will exhaust resources
 - Cannot scale to 0 workers (that's a multi-node constraint; single-node is always 0 workers)
-- Parquet files with UDT columns fail with "The Spark driver has stopped unexpectedly and is restarting." Workaround: disable the native Parquet reader via Spark config property
+- Parquet files with UDT columns fail with "The Spark driver has stopped unexpectedly and is restarting." Workaround:
+  ```python
+  spark.conf.set("spark.databricks.io.parquet.nativeReader.enabled", False)
+  ```
 
 ### Autoscaling
 
@@ -183,6 +195,8 @@ Dynamically reallocates workers based on job characteristics.
 
 **Spot instances (AWS)**: first instance (driver) is always on-demand; subsequent workers use spot.
 
+**Spot instances (Azure)**: first instance (driver) always on-demand; subsequent workers are spot. Azure-specific failback: if spot VMs are evicted, Databricks first tries to acquire new spot instances; if that fails, deploys on-demand instances instead. Failback only applies to spot instances that were fully running — instances that fail *during setup* are not automatically replaced. When new nodes are added to existing compute, Databricks also attempts spot first.
+
 **Preemptible instances (GCP)**: much cheaper than on-demand instances but "Google Cloud might stop (preempt) these instances if it requires access to those resources for other tasks." Availability varies with GCE capacity. Enable via the UI checkbox or instance pool config; when unavailable, system defaults to on-demand unless configured otherwise.
 
 **Automatic termination**: terminates after a configurable inactivity period (minutes since last command).
@@ -210,6 +224,8 @@ The mechanism for accessing cloud storage without static keys differs by cloud:
 > ⚠️ "Once a compute resource launches with an instance profile, anyone who has attach permissions to this compute resource can access the underlying resources controlled by this role." Use Compute permissions to restrict access.
 
 **GCP — Google service account**: Associate a Google service account with compute via **Advanced > Google service account** (enter the service account email). The service account must be in the same project as the Databricks setup account. Used to authenticate with GCS and BigQuery data sources.
+
+**Azure — Managed Identities**: Not covered on the compute configuration page; handled via Unity Catalog or workspace-level Azure identity configuration.
 
 ### Availability zones
 
@@ -242,7 +258,9 @@ Databricks monitors free disk space on workers and automatically expands storage
 
 **GCP**: auto-**resizes** the existing **Zonal SSD PD** (persistent disk) attached to the worker before it runs out of space.
 
-Both: limit is **5 TB total disk per instance** (including local storage).
+**Azure**: auto-attaches **Managed Disks**. Always-on — Azure Databricks automatically enables autoscaling local storage on all Azure compute; there is no toggle to disable it. Managed disks detached only when the VM is returned to Azure (never mid-run).
+
+All clouds: limit is **5 TB total disk per instance** (including local storage).
 
 ### AWS EBS volumes (fixed)
 
@@ -288,9 +306,13 @@ Driver, worker, and event logs delivered every 5 minutes, archived hourly. Deliv
 - **S3** *(AWS only)* — requires instance profile with `PutObject` and `PutObjectAcl` permissions.
 - **DBFS** (legacy) — only available if DBFS root/mounts are not disabled.
 
-> 💡 GCP: S3 is not available. GCP log delivery supports Volumes and DBFS only.
+> 💡 GCP and Azure: S3 is not available. Both support Volumes and DBFS only.
 
 Logs land in a subfolder named after the cluster ID: e.g., `/Volumes/catalog/schema/volume/06308418893214/`.
+
+### SSH access to compute *(Azure only)*
+
+SSH port is **closed by default** on Azure Databricks. Can be enabled only if the workspace is deployed in the customer's own Azure Virtual Network (VNet injection). See Databricks KB for setup steps.
 
 ### Environment variables
 
@@ -298,7 +320,6 @@ Set custom environment variables accessible from init scripts via **Advanced > S
 
 ## Open questions
 
-- ❓ What specific Spark config property disables the native Parquet reader for the UDT single-node workaround?
 - ❓ What are the support-level differences for init scripts across Standard vs Dedicated access modes on DBR 13.3 LTS+?
 
 ## Related sources
