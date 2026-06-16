@@ -38,6 +38,7 @@ nav = [
             { "Serverless Compute for Lakeflow Jobs" = "sources/databricks-docs/serverless-jobs.md" },
             { "Serverless Compute for Lakeflow Pipelines" = "sources/databricks-docs/serverless-pipelines.md" },
             { "Serverless Compute Limitations" = "sources/databricks-docs/serverless-limitations.md" },
+            { "Classic Compute Overview" = "sources/databricks-docs/classic-compute-overview.md" },
         ]},
     ]},
     { "Release Notes" = [
