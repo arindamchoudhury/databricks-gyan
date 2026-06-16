@@ -1,0 +1,261 @@
+# Databricks Compute Configuration Reference
+Source: https://docs.databricks.com/aws/en/compute/configure
+Fetched: 2026-06-16
+Last updated on page: Jun 11, 2026
+
+## Create a New All-Purpose Compute Resource
+Steps: Click Compute > Click Create compute > Configure resource > Click Create
+
+## Compute Policy
+"Policies are a set of rules used to limit the configuration options available to users when they create compute resources."
+Default Access: All users have access to Personal Compute policy for single-machine resources.
+Requirement: Users without "Unrestricted cluster creation" entitlement can only create resources using granted policies.
+
+## Performance Settings
+
+### Databricks Runtime Versions
+"The set of core components that run on your compute."
+Recommendations:
+- All-purpose: Use most current version
+- Job compute (operational): Use Long Term Support (LTS) version
+- Data science/ML: Use Databricks Runtime ML version
+Includes: Apache Spark in all versions
+
+### Use Photon Acceleration
+Default: Enabled on Databricks Runtime 9.1 LTS and above
+
+### Worker Node Type
+"A compute resource consists of one driver node and zero or more worker nodes."
+Options: Select cloud provider instance types; pick separate types for driver and worker nodes; default driver = same as worker; can select pools for worker or driver nodes.
+Critical: "Do not use a pool with spot instances as your driver type. Select an on-demand driver type to prevent your driver from being reclaimed."
+Multi-node: "Worker nodes run the Spark executors and other services required for a properly functioning compute resource."
+Spark requirement: "To run a Spark job, you need at least one worker node."
+
+#### Flexible Node Types
+"Flexible node types allow your compute resource to fall back to alternative, compatible instance types when your specified instance type is unavailable."
+"Improves compute launch reliability by reducing capacity failures."
+
+#### Worker Node IP Addresses
+"Databricks launches worker nodes with two private IP addresses each."
+- Primary private IP: Hosts Databricks internal traffic
+- Secondary private IP: Used by Spark container for intra-cluster communication
+Provides isolation between multiple compute resources
+
+#### GPU Instance Types
+"Graphics processing units (GPUs)" for computationally demanding tasks like deep learning
+Deprecated: Amazon EC2 P2 instances no longer supported
+
+#### AWS Graviton Instance Types
+"AWS-designed Graviton processors that are built on top of the Arm64 instruction set architecture."
+"Instance types with these processors have the best price-to-performance ratio of any instance type on Amazon EC2."
+Requirements:
+- DBR 9.1 LTS+ (non-Photon), DBR 10.2+ (Photon), DBR 15.4 LTS ML+
+- All AWS Regions (availability varies)
+- AWS Graviton2 and Graviton3 processors
+Constraint: "Not all instance types are available in all Regions. If you select an instance type that is not available in the Region for a workspace, you get compute creation failure."
+
+ARM64 ISA Limitations:
+- "Typical operations like adding, subtracting, multiplying, and dividing have no change in precision."
+- Single triangle functions: upper bound on precision difference to Intel is "1.11e-16"
+- "The change in ISA may have some impact on support for third-party tools and libraries."
+- "Databricks does not support mixing AWS Graviton and non-AWS Graviton instance types, as each type requires a different Databricks Runtime."
+
+Graviton Unsupported features:
+- Python UDFs (available on DBR 15.2+)
+- Databricks Container Services
+- Databricks SQL
+- Databricks on AWS GovCloud
+- Access to workspace files including Git folders from web terminals
+
+#### AWS Fleet Instance Types
+"A fleet instance type is a variable instance type that automatically resolves to the best available instance type of the same size."
+Example: "If you select the fleet instance type `m-fleet.xlarge`, your node will resolve to whichever `.xlarge`, general purpose instance type has the best spot capacity and price at that moment."
+"The instance type your compute resource resolves to will always have the same memory and number of cores as the fleet instance type you chose."
+Uses AWS's Spot Placement Score API to choose best AZ.
+
+Fleet Limitations:
+- Spot instance bid percentage updates via API/JSON have no effect with fleet worker nodes
+- "Fleet instances do not support GPU instances."
+- Some older workspaces don't yet support fleet instance types
+
+### Single-Node Compute
+"Jobs that use small amounts of data or non-distributed workloads such as single-node machine learning libraries."
+"Multi-node compute should be used for larger jobs with distributed workloads."
+
+Single Node Properties:
+- "Runs Spark locally."
+- "Driver acts as both master and worker, with no worker nodes."
+- "Spawns one executor thread per logical core in the compute resource, minus 1 core for the driver."
+- "Saves all `stderr`, `stdout`, and `log4j` log outputs in the driver log."
+- "Can't be converted to a multi-node compute resource."
+
+Use Cases:
+- Large-scale data processing will exhaust resources on single node
+- Multi-node compute can't be scaled to 0 workers
+- GPU scheduling is not enabled on single node compute
+- On single-node compute, Spark cannot read Parquet files with a UDT column
+  Error: "The Spark driver has stopped unexpectedly and is restarting. Your notebook will be automatically reattached."
+  Workaround: Disable native Parquet reader with configuration property
+
+### Enable Autoscaling
+When checked: Provide min and max number of workers. If unchecked: Enter fixed number.
+"Databricks dynamically reallocates workers to account for the characteristics of your job."
+"The compute size can go below the minimum number of workers selected when the cloud provider terminates instances."
+"In this case, Databricks continuously retries to re-provision instances in order to maintain the minimum number of workers."
+"Autoscaling is not available for `spark-submit` jobs."
+"Compute auto-scaling has limitations scaling down cluster size for Structured Streaming workloads."
+Alternative: Lakeflow Spark Declarative Pipelines with enhanced autoscaling for streaming.
+
+Autoscaling example - resizing to 5-10 autoscale:
+- Initial 6 → After 6
+- Initial 12 → After 10 (capped at max)
+- Initial 3 → After 5 (bumped to min)
+
+#### Optimized Autoscaling (Premium plan and above)
+- "Scales up from min to max in at most 2 scaling events."
+- "Can scale down, even if the compute resource is not idle, by looking at the shuffle file state."
+- "Scales down based on a percentage of current nodes."
+- Job compute: "Scales down if the compute resource is underutilized over the last 40 seconds."
+- All-purpose compute: "Scales down if the compute resource is underutilized over the last 150 seconds."
+- Tunable: `spark.databricks.aggressiveWindowDownS` (max 600)
+
+#### Standard Autoscaling (Standard pricing plan)
+- "Starts by adding 8 nodes. Then scales up exponentially."
+- "Scales down when 90% of the nodes are not busy for 10 minutes and the compute has been idle for at least 30 seconds."
+- "Scales down exponentially, starting with 1 node."
+
+WARNING: "Do not enable Apache Spark Dynamic Allocation (`spark.dynamicAllocation.enabled`) on compute resources that use Databricks autoscaling."
+"Enabling Spark Dynamic Allocation in parallel can cause conflicting scaling decisions, leading to executor churn, `NODES_LOST` errors, and tasks that are never picked up."
+
+#### Autoscaling with Pools
+- Pool idle instances must be >= min compute size requested, or startup time loses pool benefit.
+- Max compute size must be <= pool max capacity, or compute creation fails.
+
+### Advanced Performance Settings
+
+#### Spot Instances
+"The first instance will always be on-demand (the driver node is always on-demand)."
+Subsequent instances: spot instances.
+
+#### Automatic Termination
+Field: Inactivity period (minutes)
+"If the difference between the current time and the last command run on the compute resource is more than the inactivity period specified, Databricks automatically terminates that compute resource."
+
+#### Driver Type
+Default: Same as worker node type
+"The driver node maintains state information of all notebooks attached to the compute resource."
+"Also maintains the SparkContext, interprets all the commands you run from a notebook or a library on the compute resource, and runs the Apache Spark master that coordinates with the Spark executors."
+Optimization: "You can choose a larger driver node type with more memory if you are planning to `collect()` a lot of data from Spark workers and analyze them in the notebook."
+Tip: "Since the driver node maintains all of the state information of the notebooks attached, make sure to detach unused notebooks from the driver node."
+
+## Tags
+"Tags allow you to easily monitor the cost of compute resources used by various groups in your organization."
+Key-value pairs; applied to cloud resources like VMs and disk volumes, and Databricks usage logs.
+Pool limitation: "For compute launched from pools, the custom tags are only applied to DBU usage reports and do not propagate to cloud resources."
+
+## Advanced Settings
+
+### Access Modes
+Default: Auto (based on selected DBR)
+Auto behavior: Defaults to Standard unless ML runtime or DBR < 14.3 selected, then uses Dedicated.
+"Databricks recommends that you use standard access mode unless your required functionality is not supported."
+
+| Mode | Description | Languages |
+|------|-------------|-----------|
+| Standard | Multiple users with data isolation | Python, SQL, Scala |
+| Dedicated | Single user or group | Python, SQL, Scala, R |
+
+"In Databricks Runtime 13.3 LTS and above, init scripts and libraries are supported by all access modes. Requirements and levels of support vary."
+
+### Instance Profiles
+"Databricks recommends using Unity Catalog external locations to connect to S3 instead of instance profiles."
+Purpose: "To securely access AWS resources without using AWS keys, you can launch Databricks compute with instance profiles."
+Warning: "Once a compute resource launches with an instance profile, anyone who has attach permissions to this compute resource can access the underlying resources controlled by this role."
+"To guard against unwanted access, use Compute permissions to restrict permissions to the compute resource."
+
+### Availability Zones
+Default: Auto (selected based on available IPs in workspace subnets)
+"Retries in other availability zones if AWS returns insufficient capacity errors."
+"Auto-AZ works only at compute startup. After the compute resource launches, all the nodes stay in the original availability zone until the compute resource is terminated or restarted."
+Use case: "Choosing a specific AZ for the compute resource is useful primarily if your organization has purchased reserved instances in specific availability zones."
+
+### AWS Capacity Blocks
+"Allow you to reserve compute capacity for a specific time in a specific AZ."
+Configuration:
+1. Purchase Capacity Block in AWS portal
+2. Tag with Key: `X-Databricks-AwsCapacityBlockId`, Value: Capacity Block ID
+3. Uncheck Use spot instances
+4. Select the specific AZ assigned by AWS
+"Capacity Blocks must be active before you can launch compute resources using them."
+
+### Enable Autoscaling Local Storage
+"If you don't want to allocate a fixed number of EBS volumes at compute creation time, use autoscaling local storage."
+"Databricks monitors the amount of free disk space available on your compute's Spark workers."
+"If a worker begins to run too low on disk, Databricks automatically attaches a new EBS volume to the worker before it runs out of disk space."
+Limit: "EBS volumes are attached up to a limit of 5 TB of total disk space per instance (including the instance's local storage)."
+"EBS volumes are never detached from an instance as long as it is part of a running compute." (Detached when instance returned to AWS.)
+"Databricks uses Amazon EBS GP3 volumes to extend the local storage of an instance."
+AWS limit: "The default AWS capacity limit for these volumes is 50 TiB." Admins should request increase.
+
+### EBS Volumes
+Prerequisite: Autoscaling local storage must be disabled.
+Default EBS volumes per worker:
+- 30 GB encrypted root volume (host OS + Databricks services)
+- 150 GB encrypted container root volume (Spark worker, services, logs)
+- (HIPAA only) 75 GB encrypted worker log volume
+
+Add EBS Shuffle Volumes (General Purpose SSD):
+"By default, Spark shuffle outputs go to the instance local disk."
+"For instance types that do not have a local disk, or if you want to increase your Spark shuffle storage space, you can specify additional EBS volumes."
+"Particularly useful to prevent out-of-disk space errors when you run Spark jobs that produce large shuffle outputs."
+"Databricks encrypts these EBS volumes for both on-demand and spot instances."
+
+SSD type: gp2 or gp3. Databricks recommends gp3 for cost savings.
+"By default, the Databricks configuration sets the gp3 volume's IOPS and throughput IOPS to match the maximum performance of a gp2 volume with the same volume size."
+
+### Local Disk Encryption (Public Preview)
+"To ensure that all data at rest is encrypted for all storage types, including shuffle data that is stored temporarily on your compute resource's local disks, you can enable local disk encryption."
+"Your workloads may run more slowly because of the performance impact of reading and writing encrypted data to and from local volumes."
+"Databricks generates an encryption key locally that is unique to each compute node."
+"The scope of the key is local to each compute node and is destroyed along with the compute node itself."
+"During its lifetime, the key resides in memory for encryption and decryption and is stored encrypted on the disk."
+Configuration: Must use Clusters API. Set `enable_local_disk_encryption` to `true`.
+
+### Spark Configuration
+"To fine-tune Spark jobs, you can provide custom Spark configuration properties."
+Location: Advanced > Spark tab. One key-value pair per line.
+API: Set in `spark_conf` field in create/update cluster API.
+Admin enforcement: "To enforce Spark configurations on compute, workspace admins can use compute policies."
+
+Retrieve a Spark Configuration Property from a Secret:
+"Databricks recommends storing sensitive information, such as passwords, in a secret instead of plaintext."
+Syntax: `spark.<property-name> {{secrets/<scope-name>/<secret-name>}}`
+Example: `spark.password {{secrets/acme-app/password}}`
+
+### Compute Log Delivery
+"Logs are delivered every five minutes and archived hourly in your selected destination."
+"Databricks continues delivering logs until the compute resource is terminated."
+Destinations:
+1. Volumes (recommended) - "Stores logs in a Unity Catalog volume path. This is the recommended and most secure option when using Unity Catalog-enabled compute resources."
+2. S3 - stores in Amazon S3 bucket
+3. DBFS (legacy) - only if DBFS root/mounts not disabled
+
+Volume delivery constraint: "Supported only on Unity Catalog-enabled compute with Standard access mode or Dedicated access mode assigned to a user."
+"It's not supported with Dedicated access mode assigned to a group."
+Permission requirement: compute owner or assigned user must have READ VOLUME and WRITE VOLUME permissions.
+
+S3 bucket requirements: Must configure instance profile with PutObject and PutObjectAcl permissions.
+IAM policy example:
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect": "Allow", "Action": ["s3:ListBucket"], "Resource": ["arn:aws:s3:::<my-s3-bucket>"]},
+    {"Effect": "Allow", "Action": ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject", "s3:DeleteObject"], "Resource": ["arn:aws:s3:::<my-s3-bucket>/*"]}
+  ]
+}
+
+### Environment Variables
+Configure custom environment variables accessible from init scripts.
+Predefined variables provided by Databricks. "You cannot override these predefined environment variables."
+Location: Advanced > Spark tab > Environment variables field.
+API: Use `spark_env_vars` field in create/update cluster API.

@@ -53,11 +53,11 @@ Four levels, cumulative (each includes all below it):
 
 ## Open questions
 
-- ❓ What is the full compute configuration reference linked from this page?
 - ❓ How are compute policies configured and assigned?
 
 ## Related sources
 
+- [[classic-compute-configure]] — full configuration reference for this compute type: instance types, autoscaling, EBS, Spark config, log delivery.
 - [[serverless-notebooks]], [[serverless-jobs]], [[serverless-pipelines]] — the serverless alternative to classic compute; no cloud account deployment, no cluster config.
 - [[serverless-limitations]] — limitations that apply when not using classic compute.
 - [[ch01-getting-started-with-databricks]] — DCDE-SG Ch 1 §8 covers all-purpose vs job clusters and the access mode rename.

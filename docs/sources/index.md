@@ -29,3 +29,4 @@ Course notebooks and external sources captured as structured notes.
 | [Serverless Compute for Lakeflow Pipelines](sources/databricks-docs/serverless-pipelines.md) | documentation | 2026-06-16 | serverless, pipelines, lakeflow, ldp, I5 |
 | [Serverless compute limitations](sources/databricks-docs/serverless-limitations.md) | documentation | 2026-06-16 | serverless, limitations, streaming, caching, B1, I5, I6 |
 | [Classic compute overview](sources/databricks-docs/classic-compute-overview.md) | documentation | 2026-06-16 | compute, classic-compute, access-modes, permissions, B1 |
+| [Classic compute configuration reference](sources/databricks-docs/classic-compute-configure.md) | documentation | 2026-06-16 | compute, classic-compute, configuration, autoscaling, EBS, spark-config, B1 |
