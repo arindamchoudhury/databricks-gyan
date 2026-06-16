@@ -166,7 +166,7 @@ Dynamically reallocates workers based on job characteristics.
 - Scales up from min to max in at most 2 scaling events
 - Can scale down even on non-idle compute by inspecting shuffle file state
 - Scale-down window: **40 s** for job compute, **150 s** for all-purpose compute
-- Tunable via `spark.databricks.aggressiveWindowDownS` (max 600)
+- Tunable via `spark.databricks.aggressiveWindowDownS` (max 600 s = 10 min; the `S` suffix = seconds)
 
 #### Standard autoscaling (Standard plan)
 
