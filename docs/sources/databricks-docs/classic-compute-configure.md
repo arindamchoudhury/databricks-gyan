@@ -1,14 +1,15 @@
 # Classic compute configuration reference
 
-> **Source:** [docs.databricks.com/aws/en/compute/configure](https://docs.databricks.com/aws/en/compute/configure)
+> **Source (AWS):** [docs.databricks.com/aws/en/compute/configure](https://docs.databricks.com/aws/en/compute/configure)
+> **Source (GCP):** [docs.databricks.com/gcp/en/compute/configure](https://docs.databricks.com/gcp/en/compute/configure)
 > **Added:** 2026-06-16
 > **Source updated:** 2026-06-11
-> **Tags:** compute, classic-compute, configuration, autoscaling, EBS, spark-config, instance-types, B1
+> **Tags:** compute, classic-compute, configuration, autoscaling, EBS, spark-config, instance-types, gcp, B1
 > **Type:** documentation
 
 ## Summary
 
-Full configuration reference for classic compute (all-purpose and job clusters). Covers every setting in the compute creation UI: runtime version, instance types, autoscaling behaviour, advanced instance options (GPU, Graviton, fleet), tags, access modes, storage, logging, and Spark configuration. The overview page ([[classic-compute-overview]]) covers what classic compute is and permission levels; this page covers how to configure it.
+Full configuration reference for classic compute (all-purpose and job clusters) covering both AWS and GCP. Covers every setting in the compute creation UI: runtime version, instance types, autoscaling behaviour, advanced instance options (GPU, Graviton/Fleet on AWS; local SSDs on GCP), tags, access modes, storage, logging, and Spark configuration. Cloud-specific sections are labelled. The overview page ([[classic-compute-overview]]) covers what classic compute is and permission levels; this page covers how to configure it.
 
 ## Key points
 
@@ -16,9 +17,12 @@ Full configuration reference for classic compute (all-purpose and job clusters).
 - **Autoscaling** behaves differently on Premium (optimised) vs Standard (exponential) plans; don't mix with `spark.dynamicAllocation.enabled`.
 - **Autoscaling is not available for `spark-submit` jobs** and has limitations with Structured Streaming scale-down.
 - **Driver node**: always on-demand even when workers use spot; defaults to same type as worker; consider upsizing if you `collect()` large datasets.
-- **Graviton** instance types offer best price/performance but have notable limitations (no DCS, no Databricks SQL, no GovCloud, no Python UDFs below DBR 15.2, no mixed Graviton/non-Graviton).
-- **Fleet** instance types auto-pick the best spot instance at launch; no GPU support.
-- **Autoscaling local storage** auto-attaches EBS volumes up to 5 TB/instance; volumes are never detached mid-run.
+- **Graviton** instance types offer best price/performance but have notable limitations (no DCS, no Databricks SQL, no GovCloud, no Python UDFs below DBR 15.2, no mixed Graviton/non-Graviton). *AWS only.*
+- **Fleet** instance types auto-pick the best spot instance at launch; no GPU support. *AWS only.*
+- **AWS Capacity Blocks** reserve compute capacity for a specific time+AZ; no equivalent on GCP.
+- **Autoscaling local storage**: auto-attaches EBS GP3 volumes (AWS) or resizes Zonal SSD PD (GCP) up to 5 TB/instance; never detached mid-run.
+- **Google service account** (GCP) replaces instance profiles (AWS) as the mechanism for accessing cloud storage without static keys.
+- **HA zone** (GCP): `HA` availability zone option spreads instances across zones in a region; may increase inter-zone egress costs.
 - **Log delivery** to a Volume requires Standard mode or Dedicated-to-user (not Dedicated-to-group).
 - **Local disk encryption** available (Public Preview) via Clusters API only; has performance overhead.
 - **Spark secrets in config**: use `{{secrets/<scope>/<name>}}` syntax instead of plaintext passwords.
@@ -47,7 +51,8 @@ Enabled by default on DBR 9.1 LTS and above. Toggle on the creation form.
 
 A compute resource has one **driver node** and zero or more **worker nodes**. Driver defaults to the same type as workers; can be set independently.
 
-> ⚠️ "Do not use a pool with spot instances as your driver type. Select an on-demand driver type to prevent your driver from being reclaimed."
+> ⚠️ AWS: "Do not use a pool with spot instances as your driver type. Select an on-demand driver type to prevent your driver from being reclaimed."
+> ⚠️ GCP: "Do not use a pool with preemptible VM instances as your driver type."
 
 The driver maintains notebook state, the SparkContext, and the Spark master. Upsize the driver if you plan to `collect()` large results into the notebook. Detach unused notebooks from the driver to avoid state bloat.
 
@@ -63,7 +68,7 @@ Each worker gets two private IPs: one for Databricks internal traffic, one for t
 
 #### GPU instance types
 
-For deep learning and computationally demanding tasks. Amazon EC2 P2 instances deprecated.
+For deep learning and computationally demanding tasks. *AWS:* Amazon EC2 P2 instances deprecated.
 
 #### AWS Graviton instance types
 
@@ -97,6 +102,25 @@ Variable instance types that resolve to the best available instance of the same 
 - Spot bid percentage settings via API/JSON have no effect on fleet workers
 - No GPU support
 - Not available on some older workspaces
+
+#### GCP instance types with local SSDs
+
+Some GCP instance types include locally attached SSDs for shuffle files and cache data. Local SSDs are encrypted with default Google Cloud server-side encryption and use automatic disk caching.
+
+- Supported on first- and second-generation types: n1, n2, n2d (and others — check GCP pricing estimator for current list)
+- Instance types with `-lssd` suffix have a fixed, built-in SSD count; others allow you to choose the count under **Advanced > Instances > Local SSD**
+- The **Default** option uses the standard SSD configuration for the instance type
+
+> 💡 Unlike AWS where shuffle storage is added via EBS, GCP shuffle/cache storage comes from local SSDs provisioned with the instance type.
+
+**GCP default worker node storage** (provisioned automatically):
+
+| Storage | Size/Count | Purpose |
+|---|---|---|
+| Boot disk | 30 GB | Host OS + Databricks services |
+| Container root volume | 150 GB | Spark worker, services, logs |
+| Local SSDs | 375 GB each | Shuffle files and cache data |
+| Remote SSD | 80 GB (or 0 GB if local SSD present), autoscales | Overflow / autoscaling storage |
 
 ### Single-node compute
 
@@ -157,13 +181,15 @@ Dynamically reallocates workers based on job characteristics.
 
 ### Advanced performance settings
 
-**Spot instances**: first instance (driver) is always on-demand; subsequent workers use spot.
+**Spot instances (AWS)**: first instance (driver) is always on-demand; subsequent workers use spot.
+
+**Preemptible instances (GCP)**: much cheaper than on-demand instances but "Google Cloud might stop (preempt) these instances if it requires access to those resources for other tasks." Availability varies with GCE capacity. Enable via the UI checkbox or instance pool config; when unavailable, system defaults to on-demand unless configured otherwise.
 
 **Automatic termination**: terminates after a configurable inactivity period (minutes since last command).
 
 ### Tags
 
-Key-value pairs applied to cloud resources (VMs, EBS volumes) and usage logs. Useful for cost monitoring by group.
+Key-value pairs applied to cloud resources (VMs, disk volumes) and usage logs. Useful for cost monitoring by group.
 
 > ⚠️ For pool-launched compute, custom tags appear only in DBU usage reports — they do **not** propagate to cloud resources.
 
@@ -175,21 +201,27 @@ See [[classic-compute-overview]] for the Standard vs Dedicated summary. Addition
 - "Databricks recommends that you use standard access mode unless your required functionality is not supported."
 - Init scripts and libraries supported by all access modes on DBR 13.3 LTS+; requirements and support levels vary.
 
-### Instance profiles
+### Cloud identity for storage access
 
-Databricks recommends **Unity Catalog external locations** over instance profiles for S3 access. If you do use an instance profile:
+The mechanism for accessing cloud storage without static keys differs by cloud:
+
+**AWS — Instance profiles**: Databricks recommends **Unity Catalog external locations** over instance profiles for S3 access. If you do use an instance profile:
 
 > ⚠️ "Once a compute resource launches with an instance profile, anyone who has attach permissions to this compute resource can access the underlying resources controlled by this role." Use Compute permissions to restrict access.
+
+**GCP — Google service account**: Associate a Google service account with compute via **Advanced > Google service account** (enter the service account email). The service account must be in the same project as the Databricks setup account. Used to authenticate with GCS and BigQuery data sources.
 
 ### Availability zones
 
 Default is **Auto**: Databricks picks the AZ based on available IPs in workspace subnets; retries other AZs on insufficient capacity errors. Auto-AZ only applies at startup — nodes stay in the chosen AZ until restart.
 
-Set a specific AZ when using reserved instances in a particular AZ.
+Set a specific AZ when using reserved instances in a particular AZ (AWS) or to target a zone where you have resources.
 
-### AWS Capacity Blocks
+**GCP — High availability (HA) zone**: Select `HA` as the availability zone to spread instances across multiple zones in the region, reducing single-zone failure risk. Trade-off: may increase cost due to inter-zone egress charges.
 
-Reserve compute capacity for a specific time and AZ. Setup:
+### AWS Capacity Blocks *(AWS only)*
+
+Reserve compute capacity for a specific time and AZ. No GCP equivalent. Setup:
 
 1. Purchase the Capacity Block in the AWS portal
 2. Tag the compute resource: `X-Databricks-AwsCapacityBlockId` = your Capacity Block ID
@@ -200,16 +232,21 @@ Reserve compute capacity for a specific time and AZ. Setup:
 
 ### Autoscaling local storage
 
-Databricks monitors free disk space on workers and auto-attaches EBS GP3 volumes when a worker runs low.
+Databricks monitors free disk space on workers and automatically expands storage when a worker runs low. Same 5 TB limit on both clouds; behaviour differs by platform:
 
-- Limit: **5 TB total disk per instance** (including local storage)
+**AWS**: auto-attaches new **EBS GP3** volumes.
+
 - Volumes are **never detached mid-run** — only when the instance is returned to AWS
 - Default AWS account cap: 50 TiB; request an increase if needed
 - Use with autoscaling compute or auto-termination to keep EBS costs in check
 
-### EBS volumes (fixed)
+**GCP**: auto-**resizes** the existing **Zonal SSD PD** (persistent disk) attached to the worker before it runs out of space.
 
-When autoscaling local storage is *disabled*, you can configure fixed EBS volumes. Default volumes provisioned per worker:
+Both: limit is **5 TB total disk per instance** (including local storage).
+
+### AWS EBS volumes (fixed)
+
+When autoscaling local storage is *disabled* on AWS, you can configure fixed EBS volumes. Default volumes provisioned per worker:
 
 | Volume | Size | Purpose |
 |---|---|---|
@@ -248,8 +285,10 @@ Driver, worker, and event logs delivered every 5 minutes, archived hourly. Deliv
 **Destination options**
 
 - **Volumes** (recommended) — Unity Catalog volume path; most secure. Requires Standard mode *or* Dedicated mode assigned to a user (not a group). Compute owner or assigned user needs `READ VOLUME` + `WRITE VOLUME`.
-- **S3** — requires instance profile with `PutObject` and `PutObjectAcl` permissions.
+- **S3** *(AWS only)* — requires instance profile with `PutObject` and `PutObjectAcl` permissions.
 - **DBFS** (legacy) — only available if DBFS root/mounts are not disabled.
+
+> 💡 GCP: S3 is not available. GCP log delivery supports Volumes and DBFS only.
 
 Logs land in a subfolder named after the cluster ID: e.g., `/Volumes/catalog/schema/volume/06308418893214/`.
 
