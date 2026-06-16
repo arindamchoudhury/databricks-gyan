@@ -68,6 +68,9 @@ Both modes use the **same SKU** — the difference is in startup behaviour and D
 | **Standard** | 4–6 min | Lower | Cost-sensitive, latency-tolerant jobs |
 | **Performance Optimized** | Fast | Higher | Time-sensitive, SLA-bound workloads |
 
+- Setting only affects **serverless tasks** within the job — non-serverless tasks are unaffected.
+- ⚠️ **Standard performance mode is not supported for one-time runs created using the `runs/submit` endpoint.** Use Performance Optimized or the Jobs UI / DABs for `runs/submit` one-time runs.
+
 ### Additional configuration
 
 **High memory (Public Preview):** Notebook tasks can be configured for higher memory via the **Environment** side panel.

@@ -8,12 +8,12 @@
 
 ## Summary
 
-Serverless pipelines run Lakeflow Spark Declarative Pipelines (formerly Delta Live Tables) on Databricks-managed infrastructure — no cluster configuration needed. Unity Catalog is required; any existing cluster config is removed when serverless is enabled. Two performance modes (Standard vs Performance Optimized) mirror the same pattern in [[serverless-jobs]].
+Serverless pipelines run Lakeflow Spark Declarative Pipelines (formerly Delta Live Tables) on Databricks-managed infrastructure — no cluster configuration needed. Unity Catalog is required; any existing cluster config is removed when serverless is enabled. Two performance modes (Standard vs Performance Optimized) mirror the same pattern in [[serverless-jobs]]. Some workloads require classic compute or the legacy Hive metastore and cannot use serverless.
 
 ## Key points
 
 - **Prerequisite:** Unity Catalog enabled workspace; no cluster creation permission required.
-- Databricks recommends serverless for all **new** pipeline development.
+- Databricks recommends serverless for all **new** pipeline development. Exception: some workloads require classic compute or the legacy Hive metastore.
 - **Existing cluster config is wiped** when serverless is enabled — cannot add compute via `clusters` in JSON.
 - Two performance modes for triggered pipelines: **Standard** (lower DBU, 4–6 min startup) and **Performance Optimized** (faster, higher DBU).
 - Three exclusive serverless features: **incremental refresh** (with full-refresh fallback), **stream pipelining** (concurrent microbatches, on by default), **vertical autoscaling** (adds to horizontal autoscaling).
