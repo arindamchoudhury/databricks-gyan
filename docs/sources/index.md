@@ -26,3 +26,4 @@ Course notebooks and external sources captured as structured notes.
 | [Debug Notebooks (Interactive Debugger)](sources/databricks-docs/notebook-debugger.md) | documentation | 2026-06-14 | notebooks, debugging, variable-explorer, B1 |
 | [Serverless Compute for Notebooks](sources/databricks-docs/serverless-notebooks.md) | documentation | 2026-06-15 | serverless, notebooks, query-insights, B1 |
 | [Serverless Compute for Lakeflow Jobs](sources/databricks-docs/serverless-jobs.md) | documentation | 2026-06-15 | serverless, jobs, lakeflow, workflows, I6 |
+| [Serverless Compute for Lakeflow Pipelines](sources/databricks-docs/serverless-pipelines.md) | documentation | 2026-06-16 | serverless, pipelines, lakeflow, ldp, I5 |
