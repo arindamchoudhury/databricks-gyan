@@ -16,7 +16,7 @@ Serverless pipelines run Lakeflow Spark Declarative Pipelines (formerly Delta Li
 - Databricks recommends serverless for all **new** pipeline development.
 - **Existing cluster config is wiped** when serverless is enabled — cannot add compute via `clusters` in JSON.
 - Two performance modes for triggered pipelines: **Standard** (lower DBU, 4–6 min startup) and **Performance Optimized** (faster, higher DBU).
-- Three exclusive serverless features: **incremental refresh**, **stream pipelining**, **vertical autoscaling**.
+- Three exclusive serverless features: **incremental refresh** (with full-refresh fallback), **stream pipelining** (concurrent microbatches, on by default), **vertical autoscaling** (adds to horizontal autoscaling).
 - AWS PrivateLink requires contacting Databricks.
 
 ## Notes
@@ -65,9 +65,9 @@ Identical SKU for both modes; difference is startup latency and DBU consumption:
 
 Three capabilities only available on serverless pipelines (not classic clusters):
 
-- **Incremental refresh** — materialized views update incrementally rather than full recompute.
-- **Stream pipelining** — concurrent microbatch processing across pipeline stages.
-- **Vertical autoscaling** — automatically selects optimal instance types, not just instance counts.
+- **Incremental refresh** — materialized views are refreshed incrementally whenever possible. Falls back to a full refresh if results cannot be computed incrementally.
+- **Stream pipelining** — microbatches run concurrently instead of sequentially (standard Spark Structured Streaming runs them sequentially), improving compute resource utilisation. Enabled by default on serverless pipelines.
+- **Vertical autoscaling** — *adds to* the horizontal autoscaling provided by Databricks enhanced autoscaling by automatically allocating the most cost-efficient instance types that can run the pipeline without out-of-memory errors.
 
 ### Monitoring costs
 
