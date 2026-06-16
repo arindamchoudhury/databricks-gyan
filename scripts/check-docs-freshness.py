@@ -37,7 +37,7 @@ SOURCES_DIR = ROOT / "docs" / "sources"
 
 # Applied to both raw HTML (static fetch) and rendered text (Playwright).
 DATE_PATTERNS = [
-    re.compile(r'last[_\-\s]?updated[\s"=>:]+(\w+ \d{1,2},?\s+\d{4})', re.IGNORECASE),
+    re.compile(r'last[_\-\s]?updated\s+(?:on\s+)?(\w+ \d{1,2},?\s+\d{4})', re.IGNORECASE),
     re.compile(r'"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})',             re.IGNORECASE),
     re.compile(r'article:modified_time[^>]+content="(\d{4}-\d{2}-\d{2})"', re.IGNORECASE),
     re.compile(r'data-last-updated="(\d{4}-\d{2}-\d{2})"',               re.IGNORECASE),
@@ -81,6 +81,41 @@ def _search_date(text: str) -> str | None:
         if m:
             return _parse_date(m.group(1).strip())
     return None
+
+
+def probe_url(url: str) -> None:
+    """Fetch url with Playwright and print body text context for debugging."""
+    if not PLAYWRIGHT_AVAILABLE:
+        print("Playwright not installed. Run: pip install playwright && playwright install chromium")
+        return
+    print(f"Probing: {url}\n")
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(url, wait_until="networkidle", timeout=30_000)
+        try:
+            page.wait_for_selector("text=Last updated", timeout=8_000)
+            print("✓ 'Last updated' selector found\n")
+        except Exception:
+            print("✗ 'Last updated' selector timed out\n")
+        text = page.inner_text("body")
+        browser.close()
+
+    # Show context around "updated"
+    idx = text.lower().find("updated")
+    if idx >= 0:
+        snippet = text[max(0, idx - 30): idx + 100]
+        print(f"Context around 'updated':\n  {repr(snippet)}\n")
+    else:
+        print("'updated' not found in body text\n")
+
+    # Show any date-like strings: "Mon DD, YYYY" or "Month DD, YYYY"
+    dates = re.findall(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\w*\s+\d{1,2},?\s+20\d{2}\b', text)
+    print(f"Date-like strings found: {dates or '(none)'}\n")
+
+    # First 500 chars of body
+    print("Body text (first 500 chars):")
+    print(text[:500])
 
 
 def get_live_date(url: str) -> str | None:
@@ -182,7 +217,12 @@ def main() -> None:
     )
     parser.add_argument("--course",      default="", help="Course folder to scan (default: all)")
     parser.add_argument("--skip-fetch",  action="store_true", help="Skip HTTP; report metadata only")
+    parser.add_argument("--probe",       metavar="URL", help="Debug: fetch one URL and print body context")
     args = parser.parse_args()
+
+    if args.probe:
+        probe_url(args.probe)
+        sys.exit(0)
 
     results = scan(SOURCES_DIR, args.course, args.skip_fetch)
     if not results:
