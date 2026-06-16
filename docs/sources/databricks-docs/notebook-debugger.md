@@ -2,6 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/debugger](https://docs.databricks.com/aws/en/notebooks/debugger)
 > **Added:** 2026-06-14
+> **Source updated:** 2026-04-13
 > **Tags:** notebooks, debugging, variable-explorer, python, B1
 > **Type:** documentation
 
