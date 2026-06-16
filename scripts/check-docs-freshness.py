@@ -242,9 +242,8 @@ def main() -> None:
     if stale:
         print(f"{RED}=== STALE ({len(stale)}) ==={RESET}")
         for r in stale:
-            print(f"  {r['note']}")
-            print(f"    Captured: {r['captured']}  |  Live: {r['live']}")
-            print(f"    {r['url']}")
+            print(f"  {r['note']}  (captured {r['captured']} → live {r['live']})")
+            print(f"  {r['url']}")
         print()
 
     if missing:

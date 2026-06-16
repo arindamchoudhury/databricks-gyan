@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/jobs/run-serverless-jobs](https://docs.databricks.com/aws/en/jobs/run-serverless-jobs)
 > **Added:** 2026-06-15
-> **Source updated:** 2026-05-20
+> **Source updated:** 2026-06-15
 > **Tags:** serverless, jobs, lakeflow, workflows, compute, performance-modes, I6
 > **Type:** documentation
 
@@ -50,6 +50,14 @@ Open the **Job details** panel → under **Compute** click **Swap** → select s
 
 [![Swapping an existing task's compute to serverless](assets/serverless-jobs/02-swap-to-serverless.png)](assets/serverless-jobs/02-swap-to-serverless.png)
 *The Swap control in Job details replaces the existing cluster config with serverless in one click.*
+
+### Schedule a notebook directly
+
+Serverless jobs can also be created and scheduled directly from within a notebook (without going through the Jobs UI). See the [Create and manage scheduled notebook jobs](https://docs.databricks.com/aws/en/notebooks/schedule-notebook-jobs) docs page for steps.
+
+### Configure environments and dependencies
+
+Install libraries and configure dependencies for serverless jobs via the [serverless environment configuration](https://docs.databricks.com/aws/en/compute/serverless/dependencies) page. Not covered inline on this page.
 
 ### Performance modes
 
@@ -104,6 +112,10 @@ Jobs using serverless compute can be created and managed via:
 - **Databricks SDK for Python**
 
 > 💡 For production pipelines, DABs is the recommended path; see [[ch01-databricks-platform-workspace]] and future A5 chapter on DABs & CI/CD.
+
+### Limitations
+
+Serverless compute for workflows has a dedicated limitations page. See [Serverless compute limitations](https://docs.databricks.com/aws/en/compute/serverless/limitations) in the serverless compute release notes.
 
 ## Quotes worth keeping
 
