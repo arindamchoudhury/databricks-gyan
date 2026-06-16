@@ -17,5 +17,6 @@ Notes captured from individual Databricks official documentation pages. One file
 | [Classic compute overview](classic-compute-overview.md) | 2026-06-16 | compute, classic-compute, access-modes, permissions, B1 |
 | [Classic compute configuration reference](classic-compute-configure.md) | 2026-06-16 | compute, classic-compute, configuration, autoscaling, EBS, spark-config, B1 |
 | [Standard compute overview](standard-compute-overview.md) | 2026-06-16 | compute, classic-compute, access-modes, standard, lakeguard, B1 |
+| [Dedicated compute overview](dedicated-compute-overview.md) | 2026-06-16 | compute, classic-compute, access-modes, dedicated, RDD, GPU, R, B1 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*

@@ -31,3 +31,4 @@ Course notebooks and external sources captured as structured notes.
 | [Classic compute overview](sources/databricks-docs/classic-compute-overview.md) | documentation | 2026-06-16 | compute, classic-compute, access-modes, permissions, B1 |
 | [Classic compute configuration reference](sources/databricks-docs/classic-compute-configure.md) | documentation | 2026-06-16 | compute, classic-compute, configuration, autoscaling, EBS, spark-config, B1 |
 | [Standard compute overview](sources/databricks-docs/standard-compute-overview.md) | documentation | 2026-06-16 | compute, classic-compute, access-modes, standard, lakeguard, B1 |
+| [Dedicated compute overview](sources/databricks-docs/dedicated-compute-overview.md) | documentation | 2026-06-16 | compute, classic-compute, access-modes, dedicated, RDD, GPU, R, B1 |

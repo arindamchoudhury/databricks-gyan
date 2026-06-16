@@ -1,0 +1,30 @@
+# Dedicated Compute Overview
+Source: https://docs.databricks.com/aws/en/compute/dedicated-overview
+Fetched: 2026-06-16
+Last updated on page: Jun 11, 2026
+
+## What is dedicated compute?
+"Dedicated compute is compute configured with dedicated access mode. This means the compute resource can only be used by the single user or group assigned to it."
+
+## Access mode selection
+Access mode configured in Advanced section during compute creation.
+Default: Auto — "defaults to Standard unless a machine learning runtime or a Databricks Runtimes lower than 14.3 is selected, in which case Dedicated is used."
+
+## When to use dedicated compute
+Choose dedicated compute for workloads requiring:
+- RDD APIs — direct access to Spark's Resilient Distributed Dataset APIs
+- GPU instances — access to GPU resources
+- R language support — R programming capabilities for data science
+- Privileged machine access — lower-level system resource access
+"Use standard compute for better cost efficiency and simplified management" for other use cases.
+
+## User and group assignment
+- Single user assignment: "Assign compute to one specific user for exclusive access."
+- Group assignment (Public Preview): "Assign compute to a single group for shared access within the group."
+
+## Limitations and considerations
+"Fine-grain access control functionality requires Databricks Runtime 15.4 LTS or above and serverless compute enablement."
+
+## Linked pages (not yet captured)
+- Dedicated compute requirements and limitations (separate page)
+- Dedicated compute group access documentation
