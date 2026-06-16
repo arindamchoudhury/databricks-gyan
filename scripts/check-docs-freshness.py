@@ -3,32 +3,39 @@
 check-docs-freshness.py
 
 Scan docs/sources/ for Markdown notes with **Source:** and **Source updated:**
-metadata. Fetch each live page (static HTTP) and try to extract the current
-"Last updated" date. Report STALE / OK / NEEDS-CLAUDE.
+metadata. Fetch each live page and compare the "Last updated" date.
 
-JavaScript-rendered pages (e.g. Databricks docs) will show NEEDS-CLAUDE —
-static HTTP cannot execute JS. Those entries print a ready-to-paste Claude prompt.
+Strategy:
+  1. Static HTTP fetch (fast, works for plain HTML sites).
+  2. Playwright headless browser fallback for JS-rendered pages (e.g. Databricks
+     docs). Requires: pip install playwright && playwright install chromium
 
 Usage:
     python scripts/check-docs-freshness.py
     python scripts/check-docs-freshness.py --course databricks-docs
     python scripts/check-docs-freshness.py --skip-fetch
+
+Install Playwright for JS-rendered pages (e.g. Databricks docs):
+    pip install playwright && playwright install chromium
 """
 
 import argparse
 import re
 import sys
 import urllib.request
-import urllib.error
 from datetime import datetime
 from pathlib import Path
+
+try:
+    from playwright.sync_api import sync_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 ROOT        = Path(__file__).parent.parent
 SOURCES_DIR = ROOT / "docs" / "sources"
 
-# Patterns tried against raw (static) HTML.
-# Databricks docs are Next.js-rendered; "Last updated" is injected by JS and
-# will not be found here — those notes surface as NEEDS-CLAUDE.
+# Applied to both raw HTML (static fetch) and rendered text (Playwright).
 DATE_PATTERNS = [
     re.compile(r'last[_\-\s]?updated[\s"=>:]+(\w+ \d{1,2},?\s+\d{4})', re.IGNORECASE),
     re.compile(r'"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})',             re.IGNORECASE),
@@ -49,12 +56,13 @@ DARK   = "\033[90m"
 RESET  = "\033[0m"
 
 STATUS_COLOR = {
-    "STALE":        RED,
-    "MISSING-DATE": YELLOW,
-    "FETCH-ERROR":  YELLOW,
-    "NEEDS-CLAUDE": CYAN,
-    "OK":           GREEN,
-    "SKIPPED":      DARK,
+    "STALE":          RED,
+    "MISSING-DATE":   YELLOW,
+    "FETCH-ERROR":    YELLOW,
+    "NO-PLAYWRIGHT":  CYAN,
+    "UNKNOWN":        DARK,
+    "OK":             GREEN,
+    "SKIPPED":        DARK,
 }
 
 
@@ -67,21 +75,44 @@ def _parse_date(raw: str) -> str:
     return raw  # already ISO or unparseable
 
 
+def _search_date(text: str) -> str | None:
+    for pat in DATE_PATTERNS:
+        m = pat.search(text)
+        if m:
+            return _parse_date(m.group(1).strip())
+    return None
+
+
 def get_live_date(url: str) -> str | None:
-    """Fetch page; return normalised date string, None (not found), or 'ERROR: ...'."""
+    """Return ISO date from live page, None if not found, or 'ERROR: ...'."""
+    # 1. Static HTTP — fast, works for plain-HTML sites
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as resp:
             html = resp.read().decode("utf-8", errors="replace")
+        date = _search_date(html)
+        if date:
+            return date
     except Exception as exc:
         return f"ERROR: {str(exc)[:70]}"
 
-    for pat in DATE_PATTERNS:
-        m = pat.search(html)
-        if m:
-            return _parse_date(m.group(1).strip())
-
-    return None  # date not in static HTML (JS-rendered)
+    # 2. Playwright — for JS-rendered pages (e.g. Databricks docs / Next.js)
+    if not PLAYWRIGHT_AVAILABLE:
+        return None  # caller will set status NO-PLAYWRIGHT
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="networkidle", timeout=30_000)
+            try:
+                page.wait_for_selector("text=Last updated", timeout=8_000)
+            except Exception:
+                pass  # proceed anyway; date might still be in body text
+            text = page.inner_text("body")
+            browser.close()
+        return _search_date(text)
+    except Exception as exc:
+        return f"ERROR(pw): {str(exc)[:60]}"
 
 
 def scan(sources_dir: Path, course: str, skip_fetch: bool) -> list[dict]:
@@ -110,10 +141,12 @@ def scan(sources_dir: Path, course: str, skip_fetch: bool) -> list[dict]:
             status = "MISSING-DATE"
         elif skip_fetch:
             status = "SKIPPED"
-        elif live and live.startswith("ERROR:"):
+        elif live and live.startswith("ERROR"):
             status = "FETCH-ERROR"
+        elif live is None and not PLAYWRIGHT_AVAILABLE:
+            status = "NO-PLAYWRIGHT"
         elif live is None:
-            status = "NEEDS-CLAUDE"
+            status = "UNKNOWN"
         elif captured == live:
             status = "OK"
         else:
@@ -162,7 +195,8 @@ def main() -> None:
     stale   = [r for r in results if r["status"] == "STALE"]
     missing = [r for r in results if r["status"] == "MISSING-DATE"]
     errors  = [r for r in results if r["status"] == "FETCH-ERROR"]
-    needs   = [r for r in results if r["status"] == "NEEDS-CLAUDE"]
+    no_pw   = [r for r in results if r["status"] == "NO-PLAYWRIGHT"]
+    unknown = [r for r in results if r["status"] == "UNKNOWN"]
     ok      = [r for r in results if r["status"] == "OK"]
 
     if stale:
@@ -188,24 +222,24 @@ def main() -> None:
             print(f"  {r['note']}: {r['live']}")
         print()
 
-    if needs:
-        print(f"{CYAN}=== Needs Claude verification ({len(needs)}) ==={RESET}")
-        print("  Page date is JavaScript-rendered — not in static HTML.")
-        print()
-        print("  Paste into Claude Code:")
-        print("  " + "-" * 55)
-        print("  For each URL below, fetch the live page and extract the")
-        print("  'Last updated' date. Compare it to the captured date and")
-        print("  report which notes are stale.")
-        print()
-        for r in needs:
-            print(f"  Note: {r['note']} | captured {r['captured']}")
-            print(f"  URL:  {r['url']}")
-            print()
-        print("  " + "-" * 55)
+    if unknown:
+        print(f"{DARK}=== Unknown — date not found in rendered page ({len(unknown)}) ==={RESET}")
+        for r in unknown:
+            print(f"  {r['note']}: {r['url']}")
         print()
 
-    if ok and not stale and not needs and not missing:
+    if no_pw:
+        print(f"{CYAN}=== Playwright not installed ({len(no_pw)}) ==={RESET}")
+        print("  These pages are JS-rendered; static HTTP cannot read their dates.")
+        print("  Install Playwright to enable automatic checking:")
+        print("    pip install playwright && playwright install chromium")
+        print()
+        for r in no_pw:
+            print(f"  {r['note']} | captured {r['captured']}")
+            print(f"  {r['url']}")
+        print()
+
+    if ok and not stale and not no_pw and not missing and not unknown:
         print(f"{GREEN}All {len(ok)} pages confirmed up to date.{RESET}")
 
 
