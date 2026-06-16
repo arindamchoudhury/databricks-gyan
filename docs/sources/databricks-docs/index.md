@@ -13,5 +13,6 @@ Notes captured from individual Databricks official documentation pages. One file
 | [Serverless compute for notebooks](serverless-notebooks.md) | 2026-06-15 | serverless, notebooks, query-insights, B1 |
 | [Serverless compute for Lakeflow Jobs](serverless-jobs.md) | 2026-06-15 | serverless, jobs, lakeflow, workflows, I6 |
 | [Serverless compute for Lakeflow Pipelines](serverless-pipelines.md) | 2026-06-16 | serverless, pipelines, lakeflow, ldp, dlt, I5 |
+| [Serverless compute limitations](serverless-limitations.md) | 2026-06-16 | serverless, limitations, streaming, caching, B1, I5, I6 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*
