@@ -43,6 +43,7 @@ nav = [
             { "Standard Compute Overview" = "sources/databricks-docs/standard-compute-overview.md" },
             { "Dedicated Compute Overview" = "sources/databricks-docs/dedicated-compute-overview.md" },
             { "Compute Pools (Instance Pools)" = "sources/databricks-docs/compute-pools.md" },
+            { "SQL Warehouse Overview" = "sources/databricks-docs/sql-warehouse-overview.md" },
         ]},
     ]},
     { "Release Notes" = [
