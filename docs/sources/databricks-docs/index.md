@@ -20,5 +20,6 @@ Notes captured from individual Databricks official documentation pages. One file
 | [Dedicated compute overview](dedicated-compute-overview.md) | 2026-06-16 | compute, classic-compute, access-modes, dedicated, RDD, GPU, R, B1 |
 | [Compute pools (instance pools)](compute-pools.md) | 2026-06-16 | compute, pools, autoscaling, cost, B1 |
 | [SQL warehouse overview](sql-warehouse-overview.md) | 2026-06-16 | compute, sql-warehouse, serverless, databricks-sql, BI, B1 |
+| [SQL warehouse types](sql-warehouse-types.md) | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*

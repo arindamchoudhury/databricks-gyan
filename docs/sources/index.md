@@ -34,3 +34,4 @@ Course notebooks and external sources captured as structured notes.
 | [Dedicated compute overview](sources/databricks-docs/dedicated-compute-overview.md) | documentation | 2026-06-16 | compute, classic-compute, access-modes, dedicated, RDD, GPU, R, B1 |
 | [Compute pools (instance pools)](sources/databricks-docs/compute-pools.md) | documentation | 2026-06-16 | compute, pools, autoscaling, cost, B1 |
 | [SQL warehouse overview](sources/databricks-docs/sql-warehouse-overview.md) | documentation | 2026-06-16 | compute, sql-warehouse, serverless, databricks-sql, BI, B1 |
+| [SQL warehouse types](sources/databricks-docs/sql-warehouse-types.md) | documentation | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
