@@ -42,6 +42,7 @@ nav = [
             { "Classic Compute Configuration Reference" = "sources/databricks-docs/classic-compute-configure.md" },
             { "Standard Compute Overview" = "sources/databricks-docs/standard-compute-overview.md" },
             { "Dedicated Compute Overview" = "sources/databricks-docs/dedicated-compute-overview.md" },
+            { "Compute Pools (Instance Pools)" = "sources/databricks-docs/compute-pools.md" },
         ]},
     ]},
     { "Release Notes" = [

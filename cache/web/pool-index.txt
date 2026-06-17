@@ -1,0 +1,29 @@
+# Connect to Pools (Instance Pools)
+Source: https://docs.databricks.com/aws/en/compute/pool-index
+Fetched: 2026-06-16
+Last updated on page: Oct 29, 2024
+
+## Connect to pools
+"Databricks pools are a set of idle, ready-to-use instances. When cluster nodes are created using the idle instances, cluster start and auto-scaling times are reduced."
+"Databricks does not charge DBUs while instances are idle in the pool. Instance provider billing does apply."
+
+## Create a pool
+Requires "Allow pool creation" entitlement.
+"By default, only workspace admins have the pool creation entitlement."
+"Non-admin users with the Allow pool creation entitlement can only create pools using the CLI or API. The Create Pool button in the UI is available only to workspace admins."
+Steps: Compute > Pools tab > Create Pool > configure > Create.
+
+## Attach a cluster to a pool
+UI: "select the pool from the Driver Type or Worker Type dropdown when you configure the cluster."
+API: specify `driver_instance_pool_id` for the driver node and `instance_pool_id` for the worker nodes.
+
+## Pool permissions
+"There are three permission levels for a pool: NO PERMISSIONS, CAN ATTACH TO, and CAN MANAGE."
+Manage permissions: must have CAN MANAGE on the pool.
+Configurable via workspace UI, Permissions API, or Terraform provider.
+
+## Delete a pool
+"Terminates the pool's idle instances and removes its configuration."
+"You cannot undo this action."
+Running clusters attached to the pool continue to run but cannot allocate instances during resize or up-scaling.
+Terminated clusters attached to the pool will fail to start.
