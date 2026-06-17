@@ -47,6 +47,25 @@ nav = [
             { "SQL Warehouse Types" = "sources/databricks-docs/sql-warehouse-types.md" },
             { "Photon" = "sources/databricks-docs/photon.md" },
             { "Lakeguard" = "sources/databricks-docs/lakeguard.md" },
+            { "Notebooks Overview" = "sources/databricks-docs/notebooks-overview.md" },
+            { "Dashboards in Notebooks" = "sources/databricks-docs/notebook-dashboards.md" },
+            { "Unit Testing in Notebooks" = "sources/databricks-docs/notebook-testing.md" },
+            { "Databricks Widgets" = "sources/databricks-docs/notebook-widgets.md" },
+            { "Orchestrate Notebooks and Modularize Code" = "sources/databricks-docs/notebook-workflows.md" },
+            { "ipywidgets in Notebooks" = "sources/databricks-docs/notebook-ipywidgets.md" },
+            { "Share Code: Workspace Files" = "sources/databricks-docs/notebook-share-code.md" },
+            { "Notebook Best Practices" = "sources/databricks-docs/notebook-best-practices.md" },
+            { "Spark UI Guide" = "sources/databricks-docs/spark-ui-guide.md" },
+            { "Optimize Databricks/Spark/Delta Workloads" = "sources/databricks-docs/optimize-data-workloads-guide.md" },
+            { "Failing Jobs or Executors Removed" = "sources/databricks-docs/failing-spark-jobs.md" },
+            { "Look at Longest Stage" = "sources/databricks-docs/long-spark-stage.md" },
+            { "Look for Skew or Spill" = "sources/databricks-docs/long-spark-stage-page.md" },
+            { "Spark Memory Issues" = "sources/databricks-docs/spark-memory-issues.md" },
+            { "Determine if Longest Stage is I/O Bound" = "sources/databricks-docs/long-spark-stage-io.md" },
+            { "Look for Other Causes of Slow Stage Runtime" = "sources/databricks-docs/slow-spark-stage-low-io.md" },
+            { "How to Determine if Spark is Rewriting Data" = "sources/databricks-docs/spark-rewriting-data.md" },
+            { "One Spark Task" = "sources/databricks-docs/one-spark-task.md" },
+            { "Losing Spot Instances" = "sources/databricks-docs/losing-spot-instances.md" },
         ]},
     ]},
     { "Release Notes" = [
@@ -75,6 +94,10 @@ nav = [
         { "Resources" = "reference/resources.md" },
     ]},
 ]
+
+[project.markdown_extensions.wikilinks]
+base_url = ""
+end_url = ""
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [

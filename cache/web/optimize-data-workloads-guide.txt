@@ -1,0 +1,158 @@
+SOURCE: https://www.databricks.com/discover/pages/optimize-data-workloads-guide
+FETCHED: 2026-06-17
+TYPE: Single-page eBook/guide (anchor-based sections, no sub-pages, no downloadable images)
+
+=== INTRO / OVERVIEW ===
+Title: Comprehensive Guide to Optimize Databricks, Spark and Delta Lake Workloads
+Treat cost as a "nonfunctional requirement" from project inception rather than an afterthought.
+
+=== DELTA LAKE — THE LAKEHOUSE FORMAT ===
+Delta Lake: "an open format storage layer that delivers reliability, security and performance on your data lake."
+"supports ACID transactions and unifies batch and streaming paradigms."
+"performance enhancements around efficient data layout, indexation, data skipping and caching."
+Default format recommendation: always use Delta.
+
+=== DATA LAYOUT — FILE SIZING ===
+Recommended file size: "between 16MB and 1GB, which is configurable on a case-by-case basis."
+OPTIMIZE compacts files "to get a file size of up to 1GB, which is configurable."
+
+Optimize Write: "attempts to write out 128MB files for each table partition"
+Auto Compact: "further compress files to attain a 128MB file size"
+
+"Always run OPTIMIZE command on a separate job cluster and not as part of the job itself"
+
+=== DATA LAYOUT — Z-ORDER ===
+"Always choose high cardinality columns (for example: customer_id)"
+"Never use more than 4 columns"
+
+=== DATA LAYOUT — PARTITIONING ===
+"Databricks recommends not to partition tables under 1TB in size"
+"You can partition by a column if you expect data in each partition to be at least 1GB"
+"Use a low cardinality column — for example, year, date — as a partition column"
+
+=== DATA SHUFFLING — BROADCAST HASH JOIN ===
+Spark auto-broadcasts tables < 10MB.
+"If you're running a driver with a lot of memory (32GB+), you can safely raise the broadcast thresholds to something like 200MB"
+Hard limit: "Spark has a hard limit of 8GB on the table size it can broadcast"
+"The driver can only collect up to 1GB of data in memory"
+
+=== DATA SHUFFLING — SHUFFLE HASH JOIN ===
+Config to prefer shuffle hash join over sort-merge join:
+  spark.sql.join.preferSortMergeJoin=false
+
+=== DATA SHUFFLING — COST-BASED OPTIMIZER (CBO) ===
+Enable statistics:
+  ANALYZE TABLE table_name COMPUTE STATISTICS
+
+Enable CBO + join reordering:
+  spark.sql.cbo.enabled=true
+  spark.sql.cbo.joinReorder.enabled=true
+
+Maintenance: "ANALYZE TABLE command needs to be executed regularly (preferably once per day or when data has mutated by more than 10%)"
+
+=== DATA SPILLING — AQE AUTO-TUNING ===
+Enable auto-shuffle optimization:
+  spark.sql.adaptive.coalescePartitions.enabled=true
+  spark.sql.adaptive.skewJoin.enabled=true
+
+For highly compressed tables, reduce partition size threshold:
+  spark.sql.adaptive.preshufflePartitionSizeInBytes=16777216  (16MB; reduce to 8MB if issues persist)
+
+=== DATA SPILLING — MANUAL SHUFFLE PARTITION TUNING ===
+Formula: Number of partitions = Total shuffled data / (128MB to 200MB per task)
+"As a rule of thumb, we need to make sure that after tuning the number of shuffle partitions, each task should approximately be processing 128MB to 200MB of data."
+Conservative baseline: "set this to twice, or better thrice, the number of total worker CPU cores"
+
+=== DATA SKEWNESS — IDENTIFICATION ===
+"If all the Spark tasks for the shuffle stage are finished and just one or two of them are hanging for a long time, that's an indication of skew."
+"In the tasks summary metrics, if you see a huge difference between the min and max shuffle read size, that's also an indication of data skewness"
+
+=== DATA SKEWNESS — REMEDIATION (SALTING) ===
+Partial salting: apply only to skewed value(s), not all data.
+Example: e-commerce customer_id "xyz" causing skew in aggregations → append random suffixes only to "xyz" records to break large partition into smaller ones. Requires code modifications.
+
+=== DATA EXPLOSION — EXPLODE FUNCTION ===
+"While working with structured files...we often get data in collections like arrays, lists and maps. In such cases, the explode() function is useful to convert collection columns to rows."
+"can significantly increase the data volume"
+Visible in Spark UI as the Generate node.
+
+=== DATA EXPLOSION — JOIN OPERATION ===
+Join operations can produce "significantly more rows than anticipated" — "row explosion."
+"While reading input data from sources like Parquet, Delta, etc., Spark approximately reads 128MB per task per core...But due to data explosion, the 128MB data might get converted into a significantly high volume (for example, a couple of GBs)."
+
+Monitor "rows output" metric in SortMergeJoin or ShuffleHashJoin nodes in Spark UI.
+
+Solutions:
+- Decrease spark.sql.files.maxPartitionBytes from 128MB to 16MB or 32MB
+- Use repartition()
+- Increase shuffle partitions for join-related explosions
+
+=== DATA SKIPPING AND PRUNING ===
+Delta automatically collects stats on "the first 32 columns" for each Parquet file.
+"Always inquire about what columns are truly part of the workload computation"
+Apply "filter(s) right after the table read statement" for predicate pushdown.
+"Provide a filter on the column(s) being used as table partition(s)" for partition pruning.
+Dynamic Partition Pruning (DPP) and Dynamic File Pruning (DFP): "enabled by default on Spark 3.0+"
+
+=== CACHING — DELTA CACHE VS SPARK CACHE ===
+Delta cache: "accelerates data reads by creating copies of remote files in nodes' local storage (SSD drives)"
+"Spark caching is only useful when more than one Spark action...is being executed on the same DataFrame"
+"Databricks recommends using Delta caching instead of Spark caching, as Delta caching provides better performance outcomes"
+
+=== DELTA MERGE — INTERNALS ===
+Merge operates in two steps:
+1. Inner-join between source and target using ON clause condition → returns list of files in target with matching rows → sent to driver.
+2. Two possibilities depending on conditions:
+   - If no matching rows in target in step 1 → append-only write.
+   - Else → full outer join to consolidate changes between source and matching files from step 1.
+
+=== DELTA MERGE — CHALLENGES ===
+- Insufficient ON clause specificity → causes excessive data rewrites
+- Z-order degradation requiring post-merge optimization
+
+=== DELTA MERGE — OPTIMIZATIONS ===
+- Smaller target file sizes: 16MB–64MB for merge-heavy tables
+- Partition pruning filters in ON clause
+- Z-order column filters
+- Broadcast small source DataFrames (≤200MB)
+- Enable "low shuffle" merge: maintains data organization for unmodified rows; reorganizes only updated rows
+
+=== DATA PURGING — VACUUM ===
+VACUUM: "removes all files from the table directory that are not managed by Delta, as well as data files that are no longer in the latest state of the transaction log for the table and are older than a retention threshold."
+Default retention: 7 days.
+delta.logRetentionDuration: default 30 days.
+"set a retention interval to be at least 7 days because old snapshots and uncommitted files can still be in use by concurrent readers or writers."
+"Run VACUUM as a separate job, not as part of regular jobs."
+
+=== DELTA LIVE TABLES ===
+"build and manage reliable batch and streaming data pipelines that deliver high-quality data"
+4 benefits:
+1. Pipeline building: "Simply specify the data source, the transformation logic and the destination state of the data"
+2. Data quality: "Prevent bad data from flowing into tables through validation and integrity checks"
+3. Streaming efficiency: "Enhanced Autoscaling is designed to handle streaming workloads that are spiky and unpredictable"
+4. Observability: "Gain deep visibility into pipeline operations with tools to visually track operational stats and data lineage"
+"DLT is a managed ETL framework that frees users to concentrate on writing business-related code while DLT handles operational tasks including clusters, autoscaling, retries on failures"
+
+=== CLUSTER CONFIGURATION ===
+Instance selection by workload:
+- Memory Optimized: "For ML workloads" and "Where a lot of shuffle and spills are involved"
+- Compute Optimized: "To run OPTIMIZE and Z-order Delta commands"
+- Storage Optimized: "To leverage Delta caching"
+
+Cluster sizing:
+- "Start with 2-4 workers for small workloads"
+- "Start with 8-10 workers for medium to big workloads"
+- "Never choose a single worker for a production job"
+
+Autoscaling:
+- Enable for interactive clusters "with minimum workers set to 1"
+- For production jobs: "set it to a bigger value based on the minimum compute requirements"
+- "Autoscaling should not be used for Spark Structured Streaming workloads" (except Delta Live Tables)
+
+Photon: enable "for workloads with the following characteristics: ETL pipelines consisting of Delta MERGE operations" and "Scans of large data sets, joins, aggregations"
+
+Auto-termination: "Enable auto-termination for all-purpose clusters" (default 120 minutes inactivity)
+
+All-purpose vs automated:
+- All-purpose: interactive dev/EDA
+- Automated (job clusters): production; ~70% cheaper

@@ -1,0 +1,19 @@
+SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/losing-spot-instances
+FETCHED: 2026-06-17
+LAST UPDATED: 2024-07-16
+PART OF: Spark UI Guide series (linked from failing-spark-jobs)
+NOTE: Very sparse page — three options only, no images.
+
+=== MAIN CONTENT ===
+"If you're losing spot instances, you may be using an instance type that has a high reclaim rate."
+
+Three options:
+1. Change instance types — use AWS Spot Instance Advisor to evaluate reclaim frequency rates
+2. Stop using spot instances
+3. Review Databricks spot instance optimization guidance
+
+=== EXTERNAL LINKS ===
+- https://aws.amazon.com/ec2/spot/instance-advisor/ (AWS Spot Instance Advisor)
+
+=== IMAGES ===
+No content images — logos and privacy icon only.

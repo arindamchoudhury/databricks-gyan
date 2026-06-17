@@ -45,7 +45,39 @@ Data Engineering → Runs, Data Ingestion
 
 The key insight: **Serverless compute is the default** for notebooks on modern workspaces. You attach to it immediately — no cluster startup time. Under the hood, Databricks manages the infrastructure; you just pay for the seconds you actively use it.
 
-**Photon** is a C++ vectorised query engine that replaces the JVM-based Spark execution engine for SQL and DataFrame operations. It's enabled at the cluster level and delivers significant speedups for aggregations, sorts, and joins. It does *not* accelerate Python UDFs, which still run on the JVM/Python interpreter.
+**Photon** is a C++ vectorised query engine that replaces the JVM-based Spark execution engine for SQL and DataFrame operations. It's enabled at the cluster level and delivers significant speedups for aggregations, sorts, and joins. It does *not* accelerate Python UDFs, which still run on the JVM/Python interpreter. Photon is available on both classic clusters and SQL Warehouses (always on for Serverless SQL Warehouses). Chapter 23 covers its internals and cost trade-offs.
+
+### Classic cluster access modes
+
+All classic (non-serverless) clusters have an **access mode** that controls isolation and feature availability. This is one of the most exam-tested distinctions:
+
+| Access mode | Users | RDD access | GPU | Spark config override | Lakeguard | Best for |
+|---|---|---|---|---|---|---|
+| **Standard** | Multi-user | ❌ | ❌ | ❌ (blocked) | ✅ (enforced) | Data engineering, SQL, most ETL |
+| **Dedicated** | Single-user | ✅ | ✅ | ✅ | ❌ | ML workloads, GPU compute, RDD-dependent code |
+| **No Isolation Shared** | Multi-user | ✅ | ❌ | Limited | ❌ | Dev/test only; not recommended for production |
+
+**Standard access mode** (formerly "Shared") uses **Spark Connect** — a client-server model where each user's code runs in an isolated server process. This is what **Lakeguard** enforces: users cannot read each other's in-memory DataFrames or `SparkContext` state, cannot override Spark configuration at the cluster level, and cannot use RDD APIs. The tradeoff is automatic per-user isolation with no teardown — critical for multi-tenant environments.
+
+**Dedicated access mode** (formerly "Single User") gives one user full Spark access — including `SparkContext`, `RDD`, GPU kernels, and arbitrary Spark config. Required for any code that still uses the RDD API or relies on GPU-accelerated ML libraries.
+
+> ⚠️ **The Standard/Dedicated terminology is current as of 2025.** Older Databricks docs, courses, and the DCDE-SG book use "Shared" and "Single User". They are the same access modes under new names. The API name in Terraform (`data_security_mode`) still uses `"SINGLE_USER"` and `"USER_ISOLATION"` as string values.
+
+### SQL Warehouse types
+
+SQL Warehouses run SQL queries and power the SQL Editor, dashboards, and BI tool connections. Three types:
+
+| Type | Cold start | Management | Best for |
+|---|---|---|---|
+| **Serverless** | ~1–3 sec | Fully managed | Interactive SQL, dashboards, most use cases |
+| **Pro** | ~2–4 min | Self-managed | Databricks SQL + Lakeflow Pipelines as source |
+| **Classic** | ~2–4 min | Self-managed | Legacy BI tool compatibility, predictable config |
+
+Serverless SQL Warehouses always run on Photon. Pro is required when a SQL Warehouse is used as a data source for Lakeflow Spark Declarative Pipelines materialized views.
+
+### Compute pools (instance pools)
+
+Compute pools are a fleet of pre-allocated cloud instances that clusters draw from. They eliminate cold-start time: instead of launching new VMs, a cluster borrows pre-warmed instances from the pool and starts in seconds. Useful when you need many short-lived clusters (e.g., CI job runs) or when the 5–10 minute cluster start time is unacceptable for your SLA. Pools are optional infrastructure — most teams add them after hitting cold-start friction in production.
 
 ## Code examples
 
@@ -291,6 +323,66 @@ Databricks UI → Compute → Create compute
 
 Attach this cluster in the VS Code Databricks sidebar before running cells interactively.
 
+## Notebook features you'll use daily
+
+A Databricks notebook has four cell types: **Code** (Python, SQL, Scala, or R set by the `%lang` magic), **Markdown** (documentation), **Result** (output below each code cell), and **Visualization** (inline chart from a result). Switch language in a cell with `%python`, `%sql`, `%scala`, or `%r`.
+
+### Databricks widgets — parameterising notebooks
+
+Widgets add interactive input controls to a notebook and let you pass parameters from jobs or `%run` calls. Four types:
+
+| Type | What it does |
+|---|---|
+| `text` | Free text input |
+| `dropdown` | Pick one from a list |
+| `combobox` | Pick from list or type a custom value |
+| `multiselect` | Pick one or more from a list |
+
+```python
+# Create a dropdown (default CA; choices: CA, IL, MI, NY)
+dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY"])
+
+# Read the value anywhere in the notebook
+state = dbutils.widgets.get("state")
+
+# SQL — use parameter markers (DBR 15.2+; protects against injection)
+# SELECT * FROM orders WHERE state = :state
+```
+
+Widgets accept **string values only** — no integers or booleans. In SQL cells, use parameter markers (`:param_name`) instead of string interpolation to prevent SQL injection.
+
+> ⚠️ **On-change behaviour:** the default widget action is **"Run Accessed Commands"** — it reruns only cells that call `dbutils.widgets.get()` for that widget. SQL cells are **not** rerun in this mode. Switch to "Run Notebook" if you need SQL cells to refresh on widget change.
+
+For rich interactive Python controls (sliders, buttons, accordions), use **ipywidgets** instead. Key distinction: ipywidgets cannot pass parameters between notebooks or to jobs — use Databricks widgets for that.
+
+### Sharing code: %run and workspace files
+
+Two patterns for reusing code across notebooks:
+
+**Workspace files** (recommended): store functions in a `.py` file in the workspace and `import` it like any Python module. Requires DBR 11.3 LTS+. Supports Git, version control, and IDE debugging.
+
+**`%run`**: includes another notebook inline — all its functions and variables become available in the calling notebook's scope. Must be alone in its cell.
+
+```python
+# %run — must be the only thing in its cell
+%run ./utils/transforms
+
+# After %run, everything defined in transforms is in scope
+result = my_transform_function(df)
+```
+
+For orchestrating separate execution (with parameter passing and return values), use `dbutils.notebook.run()` — but prefer Lakeflow Jobs for any production scheduling need. The key rule: **`%run` merges scopes; `dbutils.notebook.run()` starts a separate job.**
+
+### Interactive debugger
+
+The built-in Python debugger (DBR 14.3 LTS+ on Standard; 13.3 LTS+ on Dedicated; Serverless) lets you set breakpoints, step through code, and inspect variables live without `print()` statements.
+
+Enable: Username → **Settings** → **Developer** → toggle **Python Notebook Interactive Debugger** on.
+
+Start a debug session: **Run > Debug cell** or `Alt+Shift+D`. Execution pauses before each breakpointed line. The **Variable Explorer** (right sidebar) shows all in-scope values; the **Debug Console** (bottom) lets you execute Python in the current frame.
+
+> ⚠️ Debug sessions auto-terminate after **30 minutes** idle. The debug console has a **15-second timeout** per execution and does not support `display()`.
+
 ## Best practices
 
 - Use **Serverless compute** by default for interactive work. Switch to a classic cluster only if you need a specific library that isn't pre-installed, need GPU support, or need to configure Spark parameters that Serverless doesn't expose.
@@ -298,6 +390,9 @@ Attach this cluster in the VS Code Databricks sidebar before running cells inter
 - Pin frequently used notebooks to **Favorites** to avoid losing them in deep workspace hierarchies.
 - Use **Git folders** instead of manually copying notebooks. Git folders give you version history, branching, and the ability to review changes before committing.
 - Grant permissions at the **schema or catalog level** when possible, rather than table-by-table. It scales better as your data model grows.
+- **Never use the notebook schedule button** to create a production job. The schedule button creates a job against the latest *working* copy of the notebook — unsaved edits included. Use Lakeflow Jobs pointing at the latest *committed* version in a Git folder instead.
+- Store reusable functions in **workspace files** (`.py`), not in notebook cells. Files are importable, testable, and versionable; code buried in cells is none of those things.
+- Use **Standard access mode** (not Dedicated) for all multi-user ETL workloads. Dedicated is for single-user ML and GPU work only — it doesn't enforce isolation between users.
 
 ## Common pitfalls
 
@@ -306,6 +401,9 @@ Attach this cluster in the VS Code Databricks sidebar before running cells inter
 - **Photon doesn't help Python UDFs**: if your bottleneck is a Python function applied row-by-row with `udf()`, Photon won't accelerate it. Rewrite as a native Spark/SQL expression to get the speedup.
 - **Using `file:/tmp/` paths in `spark.read`**: Databricks restricts local filesystem access to `/Workspace` paths only. `spark.read.text("file:/tmp/...")` raises `LocalFilesystemAccessDeniedException`. Use a UC Volume path (`/Volumes/catalog/schema/volume/file`) instead — it works on all compute types without any URI prefix.
 - **Running notebooks as jobs without parameterisation**: hardcoded catalog/schema names in notebooks break when the same notebook is used in different environments. Use `dbutils.widgets` or job parameters.
+- **Using the wrong access mode for the workload**: attaching a Standard-mode cluster to code that calls `sc` (SparkContext) or `.rdd` methods fails with an access-denied error. Standard uses Spark Connect, which does not expose the `SparkContext`. Switch to Dedicated mode for RDD or GPU workloads.
+- **Mixing Databricks widgets and ipywidgets expectations**: ipywidgets cannot pass values to jobs or between notebooks via `%run`. If a widget value needs to flow into a job parameter, use `dbutils.widgets`, not `widgets.IntSlider`.
+- **Forgetting that widget "Run Accessed Commands" skips SQL cells**: if your notebook mixes Python widget reads and SQL cells, SQL cells will not re-execute when a widget value changes under the default on-change behaviour. Manually re-run SQL cells or switch to "Run Notebook" mode.
 - **Not setting `USE CATALOG`/`USE SCHEMA`** leads to tables being created in the wrong place. Always confirm `SELECT current_catalog(), current_schema()` at the start of a notebook.
 
 ## Exercises
@@ -316,10 +414,14 @@ Attach this cluster in the VS Code Databricks sidebar before running cells inter
 
 ## Summary
 
-- Databricks workspace = Control Plane (managed by Databricks) + Data Plane (your cloud).
-- Unity Catalog governs all data objects in a `catalog.schema.object` three-level namespace.
-- Compute is split into All-Purpose, Job, SQL Warehouse, and Serverless modes — each billed differently.
-- Serverless is the default and the recommended starting point; switch to classic clusters only for specific needs.
-- Git folders replace the legacy Repos feature for version-controlled notebook development.
+- Databricks workspace = **Control Plane** (managed by Databricks) + **Data Plane** (your cloud). Your data never leaves your cloud account.
+- **Unity Catalog** governs all data objects in a `catalog.schema.object` three-level namespace. Every table, volume, function, and model lives here.
+- Compute breaks into: **All-Purpose** (interactive, expensive), **Job Compute** (~70% cheaper, production jobs), **SQL Warehouse** (SQL/BI, three sub-types), and **Serverless** (per-second, no startup, recommended default).
+- Classic clusters have an **access mode**: **Standard** (multi-user, Lakeguard-enforced isolation, no RDD, no GPU) vs **Dedicated** (single-user, full Spark including RDD and GPU).
+- **Standard = "Shared" (old name), Dedicated = "Single User" (old name)** — same modes, renamed in 2025.
+- Notebooks support four cell types and integrate deeply with **Databricks widgets** for parameterisation and **workspace files** for code reuse.
+- `%run` merges another notebook's scope inline; `dbutils.notebook.run()` starts a separate job. Both are fallbacks to Lakeflow Jobs for anything production.
+- Never schedule production jobs with the notebook schedule button — it targets the working copy, not the committed version.
+- **Git folders** replace legacy Repos for version-controlled development.
 
-The next chapter introduces Apache Spark's architecture and how it runs on Databricks clusters.
+The next chapter introduces Apache Spark's execution model — drivers, executors, DAGs, stages, and tasks — and how Databricks extends it with AQE and Photon.

@@ -56,7 +56,7 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 
 ---
 
-### ⬜ B1 — Databricks Platform & Workspace
+### ✅ B1 — Databricks Platform & Workspace
 
 **What it is:** The Databricks control/data plane architecture, workspace UI, cluster types, and notebook environment.
 
@@ -637,6 +637,51 @@ You are ready to advance when you can:
 
 ---
 
+### ⬜ E8 — LTAP & Lakebase: Unified Transactional-Analytical Architecture
+
+**What it is:** LTAP (Lake Transactional/Analytical Processing) — an architecture that unifies OLTP and OLAP on a single copy of data in open lake storage (Delta/Iceberg), eliminating the ETL layer between operational and analytical systems. Built on **Lakebase** (serverless Postgres on object storage) + the Lakehouse, both sharing Unity Catalog governance.
+
+**Why you need it:** CDC pipelines between operational databases and the lakehouse are brittle and lag-prone; LTAP eliminates this layer entirely. As AI agents increasingly require real-time access to data, the traditional OLTP↔OLAP gap becomes a critical bottleneck — LTAP is how Databricks solves it architecturally.
+
+**How to learn it:**
+
+1. **Press release — LTAP launch** (~30 min) — Read the official announcement: what LTAP is, why HTAP failed (collapsed workload isolation), why zero-ETL was insufficient (hid pipelines rather than eliminated them), and the three defining LTAP properties. [databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical](https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical)
+2. **Reference — DB-DOCS: [Lakebase](https://docs.databricks.com/aws/en/lakebase/)** (~1.5 hrs) — Serverless Postgres on object storage: architecture, git-style branching and snapshots, cross-cloud/cross-region disaster recovery, autonomous database operations, and Unity Catalog integration.
+3. **Video — Databricks YouTube: search "LTAP Lakebase Databricks 2026"** (~30 min) — Official architecture walkthrough of how Lakebase and the Lakehouse share a unified storage layer.
+4. **Hands-on** (~2 hrs) — Provision a Lakebase instance; write rows to a Postgres table; query the same data from a Databricks notebook via Unity Catalog without copying it. Compare this to a CDC-based approach (I4) and note what the pipeline layer you eliminated looked like.
+5. **Reference — DB-DOCS: [Lakebase DR & branching](https://docs.databricks.com/aws/en/lakebase/)** — Cross-region failover, snapshot-based experimentation, autonomous health management.
+
+> **Three defining LTAP properties:**
+> 1. **Unified governance** — all operational, analytical, and streaming data in open formats (Delta/Iceberg) under a single Unity Catalog
+> 2. **Independent scaling** — Postgres ACID for transactional workloads; Lakehouse scale for analytical workloads; no performance tradeoffs
+> 3. **No ETL** — data stored in one place; no copy, no CDC pipeline, no shadow infrastructure
+
+**Milestone:** You can explain the three LTAP properties, contrast LTAP with HTAP and zero-ETL, provision a Lakebase instance, and query operational Postgres data from the Lakehouse through Unity Catalog without a CDC pipeline or data copy.
+
+---
+
+### ⬜ E9 — LakehouseRT: Real-Time Analytics on Open Data
+
+**What it is:** Lakehouse//RT — a new Databricks compute engine (Reyden) that delivers sub-100 millisecond analytical queries directly on Delta Lake and Iceberg tables, eliminating the need for separate real-time serving infrastructure (Druid, Pinot, ClickHouse, etc.). All queries run within Unity Catalog governance; no data copies, no ingestion pipelines to a serving layer, no proprietary formats.
+
+**Why you need it:** Most production stacks maintain two parallel systems — the lakehouse for pipelines and a specialized serving layer for low-latency dashboards and AI agent queries. LakehouseRT collapses this into one: same data, same governance, same open formats — just served at operational latency. With LTAP (E8) eliminating ETL for writes and LakehouseRT eliminating separate serving for reads, the full real-time lakehouse architecture becomes coherent.
+
+**How to learn it:**
+
+1. **Press release — LakehouseRT launch** (~20 min) — What Reyden is, the "serving layer trap" (vendor lock-in, data copies, fragmented governance), the sub-100ms at 12,000 QPS performance claim, and the Unity Catalog governance guarantee. [databricks.com/company/newsroom/press-releases/databricks-launches-lakehousert-bring-real-time-analytics-directly](https://www.databricks.com/company/newsroom/press-releases/databricks-launches-lakehousert-bring-real-time-analytics-directly)
+2. **Reference — DB-DOCS: [Lakehouse//RT](https://docs.databricks.com/aws/en/lakehousert/)** (~1 hr) — How to enable LakehouseRT compute, supported query patterns, latency guarantees, and configuration options.
+3. **Video — Databricks YouTube: search "LakehouseRT Reyden Databricks 2026"** (~30 min) — Official architecture deep-dive into Reyden's asynchronous execution model.
+4. **Hands-on** (~2 hrs) — Run the same analytical query against a Serverless SQL Warehouse and against LakehouseRT compute; compare latency. Query a live streaming Delta table (from E2) with LakehouseRT; confirm Unity Catalog audit logs apply uniformly across both compute types.
+5. **Reference — DB-DOCS: [Reyden execution model](https://docs.databricks.com/aws/en/lakehousert/)** — How fully asynchronous execution differs from Photon's vectorized synchronous model.
+
+> **Contrast with Photon (E1):** Photon is a vectorized C++ engine optimized for throughput on batch/interactive SQL workloads (DBU-billed per cluster hour). Reyden is an asynchronous engine optimized for latency at high concurrency on live tables — different cost model and target query profile.
+
+> **Pair with LTAP (E8):** LTAP removes the write-side ETL gap (Postgres → Lakehouse). LakehouseRT removes the read-side serving gap (Lakehouse → real-time serving layer). Together they close both ends of the operational-to-analytical loop.
+
+**Milestone:** You can explain why LakehouseRT requires no data copy or CDC pipeline, describe how Reyden's asynchronous model enables sub-100ms latency at high QPS, contrast it with Photon's use case, and query a live Delta table using LakehouseRT compute.
+
+---
+
 ### ✅ Expert Checkpoint
 
 You are ready to call yourself a Databricks Data Engineering expert when you can:
@@ -646,6 +691,8 @@ You are ready to call yourself a Databricks Data Engineering expert when you can
 - Build advanced streaming pipelines with fan-out and stateful aggregations
 - Automate workspace operations with the Databricks SDK
 - Provision a Databricks workspace and Unity Catalog on AWS using Terraform, and explain the Terraform vs DABs boundary
+- Explain LTAP architecture and contrast it with HTAP and zero-ETL approaches
+- Explain LakehouseRT / Reyden and contrast it with Photon and specialized real-time serving stacks
 
 ---
 
@@ -658,12 +705,12 @@ Intermediate (I1–I8)  → ~45 hrs  →  [DCDEA cert: $200 · 45 Q · 90 min]
     ↓
 Advanced (A1–A7)      → ~40 hrs  →  [DCDEP cert: $200 · 59 Q · 120 min]
     ↓
-Expert (E1–E7)        → ~40 hrs  →  Architect-level mastery
+Expert (E1–E9)        → ~50 hrs  →  Architect-level mastery
 ```
 
-**Total estimate:** ~155 hrs of deliberate practice.
+**Total estimate:** ~165 hrs of deliberate practice.
 
-**You are currently here:** Beginner — no topics completed yet. Start with B1.
+**You are currently here:** Beginner — B1 complete. Next: B2 — Apache Spark Architecture on Databricks.
 
 ---
 
@@ -682,3 +729,5 @@ Expert (E1–E7)        → ~40 hrs  →  Architect-level mastery
 - https://docs.databricks.com/aws/en/release-notes/runtime
 - https://www.amazon.com/dp/8196994788
 - https://www.databricks.com/resources/ebook/big-book-of-data-engineering
+- https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical
+- https://www.databricks.com/company/newsroom/press-releases/databricks-launches-lakehousert-bring-real-time-analytics-directly

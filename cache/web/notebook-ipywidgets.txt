@@ -1,0 +1,72 @@
+Source: https://docs.databricks.com/aws/en/notebooks/ipywidgets
+Fetched: 2026-06-17
+
+Overview:
+"ipywidgets are visual elements that allow users to specify parameter values in notebook cells."
+"over 30 different controls, including form controls such as sliders, text boxes, and checkboxes, as well as layout controls such as tabs, accordions, and grids."
+
+== Version support ==
+
+Preview: "ipywidgets are available in preview in Databricks Runtime 11.0 through Databricks Runtime 12.2 LTS"
+GA: "generally available in Databricks Runtime 13.0 and above"
+Unity Catalog: "Support for Unity Catalog tables is available in Databricks Runtime 12.1 and above on Unity Catalog-enabled clusters"
+
+Known issue: "Some ipywidgets do not work in Databricks Runtime 15.0"
+
+== Browser requirement ==
+
+"your browser must be able to access the databricks-dev-cloudfront.dev.databricks.com domain"
+
+== Port configuration ==
+
+Default port: 6062
+"With Databricks Runtime 11.3 LTS and above, if you run into conflicts with third-party integrations such as Datadog, you can change the port"
+Spark config: spark.databricks.driver.ipykernel.commChannelPort <port-number>
+"The Spark config must be set when the cluster is created."
+
+== ipywidgets vs Databricks widgets ==
+
+"You can use Databricks widgets to pass parameters between notebooks and to pass parameters to jobs; ipywidgets do not support these scenarios"
+Databricks recommends ipywidgets for Python; use Databricks widgets for other languages.
+
+== Third-party widgets ==
+
+"Databricks provides best-effort support for third-party widgets" — ipyleaflet, bqplot, VegaFusion
+"some third-party widgets aren't supported"
+
+== Code examples ==
+
+1. Histogram with interact slider:
+```python
+import ipywidgets as widgets
+from ipywidgets import interact
+sparkDF = spark.read.csv("/databricks-datasets/bikeSharing/data-001/day.csv", header="true", inferSchema="true")
+# (bins=(3, 10) defines an integer slider widget that allows values between 3 and 10.
+@interact(bins=(3, 10))
+def plot_histogram(bins):
+  pdf = sparkDF.toPandas()
+  pdf.hist(column='temp', bins=bins)
+```
+
+2. IntSlider:
+```python
+import ipywidgets as widgets
+int_slider = widgets.IntSlider(max=10, value=5)
+int_slider
+```
+
+3. Button with Unity Catalog (DBR 12.1+):
+```python
+import ipywidgets as widgets
+button = widgets.Button(description="Load dataframe sample")
+output = widgets.Output()
+def load_sample_df(table_name):
+  return spark.sql(f"SELECT * FROM {table_name} LIMIT 1000")
+def on_button_clicked(_):
+    with output:
+      output.clear_output()
+      df = load_sample_df('<catalog>.<schema>.<table>')
+      print(df.toPandas())
+button.on_click(on_button_clicked)
+display(button, output)
+```

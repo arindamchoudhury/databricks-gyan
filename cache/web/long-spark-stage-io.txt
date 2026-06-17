@@ -1,0 +1,48 @@
+SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-io
+FETCHED: 2026-06-17
+PART OF: Spark UI Guide series (Step 4 of 5)
+
+=== WHAT IS HIGH I/O? ===
+"How much data needs to be in an I/O column to be considered high? To figure this out, first start with the highest number in any of the given columns. Then consider the total number of CPU cores you have across all our workers. Generally each core can read and write about 3 MBs per second. Divide your biggest I/O column by the number of cluster worker cores, then divide that by duration seconds. If the result is around 3 MB, then you're probably I/O bound. That would be high I/O."
+
+Formula: max_IO_column_bytes / worker_cores / duration_seconds ≈ 3 MB/s → I/O bound
+
+=== HIGH INPUT ===
+"If you see a lot of input into your stage, that means you're spending a lot of time reading data."
+
+Recommendations:
+- Use Delta
+- Use liquid clustering for data skipping → /aws/en/tables/clustering
+- Try Photon
+- Make queries more selective
+- Reconsider data layout
+- Use Delta cache for repeated reads
+- Consider DFP (Dynamic File Pruning) for joins
+- Increase cluster size or use serverless compute
+
+=== HIGH OUTPUT ===
+"If you see a lot of output from your stage, that means you're spending a lot of time writing data."
+
+Recommendations:
+- Check if rewriting data → /aws/en/optimizations/spark-ui-guide/spark-rewriting-data
+- Optimize merges
+- Use deletion vectors → /aws/en/tables/features/deletion-vectors
+- Enable Photon
+- Increase cluster size or use serverless compute
+
+=== HIGH SHUFFLE ===
+"Databricks recommends you set spark.sql.shuffle.partitions=auto to let Spark pick the number of optimal shuffle partitions automatically."
+
+=== NO HIGH I/O ===
+"If you don't see high I/O in any of the columns, then you need to dig deeper. See Slow Spark stage with little I/O"
+→ /aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io
+
+=== INTERNAL LINKS ===
+- /aws/en/tables/clustering (liquid clustering)
+- /aws/en/optimizations/spark-ui-guide/spark-rewriting-data (check data rewriting — NOT YET CAPTURED)
+- /aws/en/tables/features/deletion-vectors (deletion vectors)
+- /aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io (Step 5)
+
+=== IMAGES ===
+(already downloaded to assets/spark-ui-guide/)
+08-long-stage-io.jpeg — stage I/O columns showing Input/Output/Shuffle Read/Shuffle Write

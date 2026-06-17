@@ -1,0 +1,164 @@
+Source: https://docs.databricks.com/aws/en/notebooks/best-practices
+Fetched: 2026-06-17
+
+Overview:
+"Apply software engineering best practices to your Databricks notebooks: version control, code sharing, testing, and optionally continuous integration and continuous delivery or deployment (CI/CD)."
+
+== Requirements ==
+
+- Remote Git repository (GitHub recommended), initialized with at least one file
+- Databricks workspace
+- All-purpose cluster for running notebooks during development
+
+== Seven steps ==
+
+Step 1: Set up Databricks Git folders
+  1.1: Provide GitHub credentials
+  1.2: Connect to GitHub repo
+
+Step 2: Import and run the notebook (COVID-19 analysis)
+  2.1: Create working branch in repo ("enables you to work on files and code independently from your repo's main branch, which is a software engineering best practice")
+  2.2: Import notebook into repo
+  2.3: Run the notebook
+  2.4: Check in and merge the notebook
+
+Step 3: Move code into a shared module
+  3.1: Create another working branch
+  3.2: Import the notebook into the repo
+  3.3: Add the notebook's supporting shared code functions -> covid_analysis/transforms.py
+  3.4: Add the shared code's dependencies ("Declaring dependencies improves reproducibility by using precisely defined versions of libraries.")
+  3.5: Run the refactored notebook
+  3.6: Check in the notebook and its related code
+
+"This enables you to use these functions with other similar notebooks, which can speed up future coding and help ensure more predictable and consistent notebook results."
+"Sharing this code also enables you to more easily test these functions, which as a software engineering best practice can raise the overall quality of your code as you go."
+
+Step 4: Test the shared code
+  4.1: Create another working branch
+  4.2: Add the tests -> tests/transforms_test.py
+  4.3: Run the tests
+  4.4: Check in the notebook and related tests
+
+Step 5: Create a job to run the notebooks
+  5.1: Create a job task to run the testing notebook
+  5.2: Create a job task to run the main notebook (depends on testing task)
+  5.3: Run the job
+
+IMPORTANT: "Databricks does not recommend that you use the schedule button in the notebook...to schedule a job to run this notebook periodically. This is because the schedule button creates a job by using the latest working copy of the notebook in the workspace repo. Instead, Databricks recommends that you follow the preceding instructions to create a job that uses the latest committed version of the notebook in the repo."
+
+Step 6 (Optional): Set up CI/CD with GitHub Actions
+  6.1: Set up GitHub access to workspace (use service principal, not personal token)
+  6.2: Add the GitHub Actions workflow
+
+"For security reasons, Databricks discourages you from giving your Databricks workspace user's personal access token to GitHub."
+"Databricks recommends using a service principal...Notebooks are run with all of the workspace permissions of the identity that is associated with the token, so Databricks recommends using a service principal."
+
+Step 7 (Optional): Update shared code in GitHub to trigger tests
+  7.1: Create another working branch
+  7.2: Change the shared code
+  7.3: Check in the change to trigger the tests
+
+== covid_analysis/transforms.py ==
+
+```python
+import pandas as pd
+
+def filter_country(pdf, country="USA"):
+  pdf = pdf[pdf.iso_code == country]
+  return pdf
+
+def pivot_and_clean(pdf, fillna):
+  pdf["value"] = pd.to_numeric(pdf["value"])
+  pdf = pdf.fillna(fillna).pivot_table(
+    values="value", columns="indicator", index="date"
+  )
+  return pdf
+
+def clean_spark_cols(pdf):
+  pdf.columns = pdf.columns.str.replace(" ", "_")
+  return pdf
+
+def index_to_col(df, colname):
+  df[colname] = df.index
+  return df
+```
+
+== tests/transforms_test.py ==
+
+```python
+import pytest
+from textwrap import fill
+import os
+import pandas as pd
+import numpy as np
+from covid_analysis.transforms import *
+from pyspark.sql import SparkSession
+
+@pytest.fixture
+def raw_input_df() -> pd.DataFrame:
+  return pd.read_csv('tests/testdata.csv')
+
+@pytest.fixture
+def colnames_df() -> pd.DataFrame:
+  df = pd.DataFrame(
+    data=[[0,1,2,3,4,5]],
+    columns=[
+      "Daily ICU occupancy",
+      "Daily ICU occupancy per million",
+      "Daily hospital occupancy",
+      "Daily hospital occupancy per million",
+      "Weekly new hospital admissions",
+      "Weekly new hospital admissions per million"
+    ]
+  )
+  return df
+
+def test_filter(raw_input_df):
+  filtered = filter_country(raw_input_df)
+  assert filtered.iso_code.drop_duplicates()[0] == "USA"
+
+def test_pivot(raw_input_df):
+  pivoted = pivot_and_clean(raw_input_df, 0)
+  assert pivoted["Daily ICU occupancy"][0] == 0
+
+def test_clean_cols(colnames_df):
+  cleaned = clean_spark_cols(colnames_df)
+  cols_w_spaces = cleaned.filter(regex=(" "))
+  assert cols_w_spaces.empty == True
+
+def test_index_to_col(raw_input_df):
+  raw_input_df["col_from_index"] = raw_input_df.index
+  assert (raw_input_df.index == raw_input_df.col_from_index).all()
+```
+
+== GitHub Actions workflow ==
+
+```yaml
+name: Run pre-merge Databricks tests
+on:
+  pull_request:
+env:
+  DATABRICKS_HOST: https://<your-workspace-instance-name>
+jobs:
+  unit-test-notebook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Run test notebook
+        uses: databricks/run-notebook@main
+        with:
+          databricks-token: <your-access-token>
+          local-notebook-path: notebooks/run_unit_tests.py
+          existing-cluster-id: <your-cluster-id>
+          git-commit: '${{ github.event.pull_request.head.sha }}'
+          access-control-list-json: >
+            [
+              {
+                "group_name": "users",
+                "permission_level": "CAN_VIEW"
+              }
+            ]
+          run-name: 'EDA transforms helper module unit tests'
+```

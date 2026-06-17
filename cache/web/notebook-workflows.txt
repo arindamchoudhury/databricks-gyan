@@ -1,0 +1,102 @@
+Source: https://docs.databricks.com/aws/en/notebooks/notebook-workflows
+Fetched: 2026-06-17
+
+== Four orchestration/modularization methods ==
+
+1. Lakeflow Jobs (Recommended): "Recommended method for orchestrating notebooks. Supports complex workflows with task dependencies, scheduling, and triggers."
+2. dbutils.notebook.run(): "Use dbutils.notebook.run() if Jobs cannot support your use case, such as dynamically running a notebook based on a metadata file (metadata-driven ETL)."
+3. Workspace Files (Recommended): "Modularize code into reusable code files stored in the workspace. Supports version control with repos and integration with IDEs for better debugging and unit testing."
+4. %run: Use "when you can't access workspace files" to "Import functions or variables from other notebooks."
+
+== %run ==
+
+"%run must be in a cell by itself, because it runs the entire notebook inline."
+"functions and variables defined in it become available in the calling notebook."
+"You cannot use %run to run a Python file and import the entities defined in that file into a notebook."
+Widget behavior: "When you use %run to run a notebook that contains widgets, by default the specified notebook runs with the widget's default values. You can also pass values to widgets."
+
+Path syntax:
+  %run ./shared-code-notebook
+  %run ./dir/notebook
+  %run /Users/username@organization.com/directory/notebook
+
+== dbutils.notebook.run() ==
+
+"starts a new job to run the notebook" (not inline — separate job context)
+"Like all of the dbutils APIs, these methods are available only in Python and Scala."
+
+Python:
+  dbutils.notebook.run("notebook-name", 60, {"argument": "data", "argument2": "data2", ...})
+
+Scala:
+  dbutils.notebook.run("notebook-name", 60, Map("argument" -> "data", "argument2" -> "data2", ...))
+
+Constraints:
+- "The arguments parameter accepts only Latin characters (ASCII character set). Using non-ASCII characters returns an error."
+- "Both parameters and return values must be strings."
+- "The timeout_seconds parameter controls the timeout of the run (0 means no timeout)... If Databricks is down for more than 10 minutes, the notebook run fails regardless of timeout_seconds."
+- "Jobs created using the dbutils.notebook API must complete in 30 days or less."
+
+== Return values: dbutils.notebook.exit() ==
+
+dbutils.notebook.exit(value)  -- sends string back to caller
+
+Strategies for structured data:
+
+Temp views:
+```python
+# Callee
+spark.range(5).toDF("value").createOrReplaceGlobalTempView("my_data")
+dbutils.notebook.exit("my_data")
+
+# Caller
+returned_table = dbutils.notebook.run("LOCATION_OF_CALLEE_NOTEBOOK", 60)
+global_temp_db = spark.conf.get("spark.sql.globalTempDatabase")
+display(table(global_temp_db + "." + returned_table))
+```
+
+DBFS:
+```python
+# Callee
+dbutils.fs.rm("/tmp/results/my_data", recurse=True)
+spark.range(5).toDF("value").write.format("parquet").save("dbfs:/tmp/results/my_data")
+dbutils.notebook.exit("dbfs:/tmp/results/my_data")
+
+# Caller
+returned_table = dbutils.notebook.run("LOCATION_OF_CALLEE_NOTEBOOK", 60)
+display(spark.read.format("parquet").load(returned_table))
+```
+
+JSON (multiple values):
+```python
+# Callee
+import json
+dbutils.notebook.exit(json.dumps({"status": "OK", "table": "my_data"}))
+
+# Caller
+import json
+result = dbutils.notebook.run("LOCATION_OF_CALLEE_NOTEBOOK", 60)
+print(json.loads(result))
+```
+
+== Error handling ==
+
+```python
+def run_with_retry(notebook, timeout, args = {}, max_retries = 3):
+  num_retries = 0
+  while True:
+    try:
+      return dbutils.notebook.run(notebook, timeout, args)
+    except Exception as e:
+      if num_retries > max_retries:
+        raise e
+      else:
+        print("Retrying error", e)
+        num_retries += 1
+run_with_retry("LOCATION_OF_CALLEE_NOTEBOOK", 60, max_retries = 5)
+```
+
+== Parallelism ==
+
+"You can run multiple notebooks at the same time by using standard Scala and Python constructs such as Threads and Futures."
+(Full code in example notebooks; not shown inline on the page.)

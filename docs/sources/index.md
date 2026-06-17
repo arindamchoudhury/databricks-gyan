@@ -37,3 +37,22 @@ Course notebooks and external sources captured as structured notes.
 | [SQL warehouse types](sources/databricks-docs/sql-warehouse-types.md) | documentation | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
 | [Photon](sources/databricks-docs/photon.md) | documentation | 2026-06-16 | compute, photon, performance, vectorized, sql-warehouse, B1 |
 | [Lakeguard](sources/databricks-docs/lakeguard.md) | documentation | 2026-06-16 | compute, lakeguard, security, isolation, standard-compute, spark-connect, B1 |
+| [Notebooks Overview](sources/databricks-docs/notebooks-overview.md) | documentation | 2026-06-17 | notebooks, python, sql, scala, R, EDA, ML, collaboration, B1 |
+| [Dashboards in Notebooks](sources/databricks-docs/notebook-dashboards.md) | documentation | 2026-06-17 | notebooks, dashboards, visualization, AI-BI, scheduling, sharing, B1 |
+| [Unit Testing in Notebooks](sources/databricks-docs/notebook-testing.md) | documentation | 2026-06-17 | notebooks, testing, pytest, testthat, scalatest, sql, CI-CD, B1 |
+| [Databricks Widgets](sources/databricks-docs/notebook-widgets.md) | documentation | 2026-06-17 | notebooks, widgets, parameters, sql, python, scala, R, dashboards, B1 |
+| [Orchestrate Notebooks and Modularize Code](sources/databricks-docs/notebook-workflows.md) | documentation | 2026-06-17 | notebooks, orchestration, workflows, dbutils, run, modularization, B1, I6 |
+| [ipywidgets in Notebooks](sources/databricks-docs/notebook-ipywidgets.md) | documentation | 2026-06-17 | notebooks, ipywidgets, python, interactive, visualization, B1 |
+| [Share Code Between Notebooks (Workspace Files)](sources/databricks-docs/notebook-share-code.md) | documentation | 2026-06-17 | notebooks, workspace-files, modularization, python, git, B1 |
+| [Notebook Best Practices (Software Engineering)](sources/databricks-docs/notebook-best-practices.md) | documentation | 2026-06-17 | notebooks, best-practices, git, testing, CI-CD, modularization, jobs, B1 |
+| [Spark UI Guide (diagnose cost and performance)](sources/databricks-docs/spark-ui-guide.md) | documentation | 2026-06-17 | spark, spark-ui, performance, optimization, debugging, skew, spill, stages, tasks, B2, B16 |
+| [Optimize Databricks, Spark and Delta Lake Workloads](sources/databricks-docs/optimize-data-workloads-guide.md) | documentation | 2026-06-17 | spark, performance, optimization, delta-lake, shuffle, skew, spill, merge, vacuum, caching, photon, B2, B5, B12, B16, B17 |
+| [Failing Jobs or Executors Removed](sources/databricks-docs/failing-spark-jobs.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, executors, memory, spot-instances, autoscaling, B2, B16 |
+| [Look at Longest Stage](sources/databricks-docs/long-spark-stage.md) | documentation | 2026-06-17 | spark, spark-ui, performance, debugging, stages, tasks, shuffle, B2, B16 |
+| [Look for Skew or Spill](sources/databricks-docs/long-spark-stage-page.md) | documentation | 2026-06-17 | spark, spark-ui, performance, debugging, skew, spill, memory, shuffle, B2, B16 |
+| [Spark Memory Issues](sources/databricks-docs/spark-memory-issues.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, memory, OOM, executors, shuffle, broadcast, UDF, skew, streaming, B2, B16 |
+| [Determine if Longest Stage is I/O Bound](sources/databricks-docs/long-spark-stage-io.md) | documentation | 2026-06-17 | spark, spark-ui, performance, debugging, I/O, shuffle, delta-cache, photon, liquid-clustering, B2, B16 |
+| [Look for Other Causes of Slow Stage Runtime](sources/databricks-docs/slow-spark-stage-low-io.md) | documentation | 2026-06-17 | spark, spark-ui, performance, debugging, small-files, UDF, cartesian-join, explode, DAG, B2, B16 |
+| [How to Determine if Spark is Rewriting Data](sources/databricks-docs/spark-rewriting-data.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, delta, merge, delete, update, rewriting, B2, B12, B16 |
+| [One Spark Task](sources/databricks-docs/one-spark-task.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, tasks, parallelism, UDF, gzip, coalesce, repartition, B2, B16 |
+| [Losing Spot Instances](sources/databricks-docs/losing-spot-instances.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, spot-instances, AWS, executors, B2, B16 |

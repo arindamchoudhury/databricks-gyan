@@ -1,0 +1,24 @@
+SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/one-spark-task
+FETCHED: 2026-06-17
+LAST UPDATED: 2024-08-26
+PART OF: Spark UI Guide series (linked from long-spark-stage when task count = 1)
+NOTE: List-only page — six causes named with no per-cause explanation or remediation.
+
+=== CORE PROBLEM ===
+"If you see a long-running stage with just one task, that's likely a sign of a problem. While this one task is running only one CPU is utilized and the rest of the cluster may be idle."
+
+=== SIX CAUSES ===
+1. Expensive UDF on small data
+2. Window function without PARTITION BY statement
+3. Reading from an unsplittable file type (e.g. Gzip)
+4. Setting the multiLine option when reading a JSON or CSV file
+5. Schema inference of a large file
+6. Use of repartition(1) or coalesce(1)
+
+=== INTERNAL LINKS ===
+- /aws/en/udf/ (UDF docs)
+- /aws/en/sql/language-manual/sql-ref-window-functions (window function docs)
+- /aws/en/optimizations/spark-ui-guide/ (parent)
+
+=== IMAGES ===
+No content images — logos and privacy icon only.

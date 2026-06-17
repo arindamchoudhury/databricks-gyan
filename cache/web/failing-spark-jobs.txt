@@ -1,0 +1,38 @@
+SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/failing-spark-jobs
+FETCHED: 2026-06-17
+PART OF: Spark UI Guide series
+
+=== THREE CAUSES OF EXECUTOR REMOVAL ===
+1. Autoscaling — "In this case it's expected and not an error."
+2. Spot instance losses — "The cloud provider is reclaiming your VMs."
+3. Executors running out of memory
+
+=== FAILING JOBS — DIAGNOSTIC STEPS ===
+1. Click the failing job to open its detail page.
+2. Scroll down to see the failed stage and failure reason.
+3. Click the link in the description for more info (if reason is generic).
+4. Scroll further to see why each task failed.
+
+=== FAILING EXECUTORS — DIAGNOSTIC STEPS ===
+1. Check the compute's Event log for an explanation (resizing, spot instance loss).
+2. If spot instances: see "Losing spot instances" page.
+3. If autoscaling resizing: expected behavior.
+4. If no explanation in event log: go to Spark UI → Executors tab → get logs from the failed executors.
+
+=== NEXT STEP ===
+"If you've gotten this far, the likeliest explanation is a memory issue."
+Next: see "Spark memory issues" page.
+
+=== LINKED PAGES ===
+- /aws/en/compute/configure#autoscaling
+- /aws/en/optimizations/spark-ui-guide/losing-spot-instances
+- /aws/en/optimizations/spark-ui-guide/spark-memory-issues
+
+=== IMAGES ===
+01-failing-jobs.png — Jobs list showing red/failed jobs
+02-failed-stage-reason.png — Failed stage with failure reason text
+03-failed-stage-description.png — Stage description link for more info
+04-failed-tasks.png — Task-level failure detail
+05-event-log.png — Cluster Event log showing executor events
+06-executors-tab.png — Spark UI Executors tab
+07-failed-executors.png — Example of failed executors in the list

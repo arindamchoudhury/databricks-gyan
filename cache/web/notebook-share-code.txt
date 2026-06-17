@@ -1,0 +1,30 @@
+Source: https://docs.databricks.com/aws/en/notebooks/share-code
+Fetched: 2026-06-17
+
+NOTE: Code examples on this page are rendered as images, not text — not capturable via WebFetch.
+
+Main heading:
+"You can modularize your code by creating Python files in the Databricks workspace and importing them into your notebooks."
+
+== Runtime requirement ==
+
+"With Databricks Runtime 11.3 LTS and above, you can create and manage source code files in the Databricks workspace, and then import these files into your notebooks as needed."
+
+== Section structure ==
+
+Sections (no text code blocks, images only):
+1. Create a Python file — Workspace sidebar > Create > File > name ending in .py; auto-saves
+2. Import a file into a notebook — standard Python import commands (shown as image)
+3. Import a file from another folder — "If a helper file is in another folder, you must use the full file path." (copy via kebab menu > Copy URL/path > Full path)
+4. Run a file — Shift+Enter (full cell) / Shift+Ctrl+Enter (selected code)
+5. Delete a file — workspace menu
+6. Rename a file — inline edit or File > Rename
+7. Control access to a file — "If your Databricks account has the Premium plan or above, you can use Workspace access control to control who has access to a file."
+
+== Git integration ==
+
+"You can also use a Databricks repo to sync your files with a Git repository."
+
+== Multi-task jobs ==
+
+"Databricks also supports multi-task jobs which allow you to combine notebooks into workflows with complex dependencies."

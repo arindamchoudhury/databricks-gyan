@@ -1,0 +1,116 @@
+Source: https://docs.databricks.com/aws/en/notebooks/widgets
+Fetched: 2026-06-17
+
+Main heading:
+"Input widgets allow you to add parameters to your notebooks and dashboards. You can add a widget from the Databricks UI or using the widget API."
+
+== Widget types ==
+
+- text: "Input a value in a text box"
+- dropdown: "Select a value from a list of provided values"
+- combobox: "Combination of text and dropdown. Select a value from a provided list or input one in the text box"
+- multiselect: "Select one or more values from a list of provided values"
+
+== Creating widgets ==
+
+Python:
+```python
+dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY", "OR", "VA"])
+```
+
+Scala:
+```scala
+dbutils.widgets.dropdown("state", "CA", Seq("CA", "IL", "MI", "NY", "OR", "VA"))
+```
+
+R:
+```r
+dbutils.widgets.dropdown("state", "CA", list("CA", "IL", "MI", "NY", "OR", "VA"))
+```
+
+SQL:
+```sql
+CREATE WIDGET DROPDOWN state DEFAULT "CA" CHOICES SELECT * FROM
+(VALUES ("CA"), ("IL"), ("MI"), ("NY"), ("OR"), ("VA"))
+```
+
+"The widget API in SQL is slightly different but equivalent to the other languages."
+
+== Accessing widget values ==
+
+Python/Scala/R:
+```python
+dbutils.widgets.get("state")
+dbutils.widgets.getAll()
+```
+
+SQL:
+```sql
+SELECT :state
+```
+
+== Removing widgets ==
+
+Python/Scala/R:
+```python
+dbutils.widgets.remove("state")
+dbutils.widgets.removeAll()
+```
+
+SQL:
+```sql
+REMOVE WIDGET state
+```
+
+== Widget restrictions ==
+
+"Widgets only accept string values."
+
+== SQL parameter markers ==
+
+"Parameter markers protect your code from SQL injection attacks by clearly separating provided values from the SQL statements."
+
+Requires: Databricks Runtime 15.2 and above
+
+Examples:
+```sql
+SELECT :state
+
+SHOW TABLES IN IDENTIFIER(:database)
+
+SELECT * FROM IDENTIFIER(:database || '.' || :table) WHERE col == :filter_value LIMIT 100
+```
+
+DDL string clauses (DBR 18.0+):
+```sql
+CREATE EXTERNAL TABLE my_table USING DELTA LOCATION :path
+```
+For DBR 14.3-17.3 LTS: use EXECUTE IMMEDIATE instead.
+
+== Execution behaviors (widget on-change action) ==
+
+1. "Run Notebook": "Reruns the entire notebook every time you select a new value."
+2. "Run Accessed Commands": "Reruns only cells that retrieve the values for that particular widget every time you select a new value. This is the default setting when you create a widget. SQL cells are not rerun in this configuration."
+3. "Do Nothing": "Does not rerun anything when you select a new value."
+
+== Dashboard integration ==
+
+"When you create a dashboard from a notebook with input widgets, all the widgets display at the top. In presentation mode, every time you update the value of a widget, you can click the Update button to re-run the notebook and update your dashboard with new values."
+
+== %run parameter passing ==
+
+"If you run a notebook that contains widgets, the specified notebook is run with the widget's default values."
+
+Cluster-attached notebooks:
+%run /path/to/notebook $X="10" $Y="1"
+
+NOT available for SQL warehouses.
+
+== UI widget configuration ==
+
+Via "Edit > Add parameter". Dialog fields:
+- Parameter Name — identifier used in code
+- Widget Label — optional display name shown above widget
+- Type
+- Default value
+- Possible choices (for dropdown/combobox/multiselect)

@@ -1,0 +1,43 @@
+Source: https://docs.databricks.com/aws/en/notebooks/dashboards
+Fetched: 2026-06-17
+
+Main heading:
+"You can create dashboards from Databricks notebook cell outputs to publish graphs and visualizations and share them in a presentation format across your organization."
+
+== Two dashboard types ==
+
+Notebook Dashboards:
+- Reformat notebooks into presentations with content tied to cell outputs
+- Shareable and schedulable like regular notebooks
+- Create via cell menu: "Select Add to notebook dashboard >. If you select Add to new notebook dashboard, the new dashboard is automatically displayed."
+- CRITICAL: "Content in notebook dashboards are tied to the output of notebook cells. If you clear the cell output, the dashboard content is also cleared."
+
+AI/BI Dashboards:
+- Databricks recommends these for organizational sharing
+- "Only visualizations from SQL cells can be added to AI/BI dashboards."
+- Create via cell menu: "Select Add to dashboard. In the Add to dashboard dialog, select Create a new dashboard or Add to existing dashboard."
+
+== Dashboard features (notebook dashboards) ==
+
+Sizing & Placement:
+- Resize via corner handles: "To resize an item, click [corner resize icon] at the lower-right corner and move your cursor until the item is the size you want."
+- Move items by clicking and dragging
+- Two layout modes: "Stack" (aligned) or "Float" (free movement)
+
+Titling:
+- "Select the Settings icon [Gear fill icon]. The Configure Dashboard Element dialog appears. In the dialog, click Show Title, enter a title for the plot, and click Save."
+
+Navigation:
+- Dashboard icon (top right) displays all associated dashboards
+- Users switch between notebook and dashboard views
+- Hover over plots to access "new window" icon linking to source cells
+
+Scheduling:
+- "Click Schedule to create a scheduled job for the notebook that generates the dashboard plots."
+- "View last successful run" shows latest results
+
+Presentation Mode:
+- "To present a dashboard, click Fullscreen. To return to the interactive dashboard, click Exit in the upper-left corner or press the Esc key."
+
+Deletion:
+- "Delete this dashboard" removes the dashboard entirely

@@ -35,6 +35,6 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 | Ch 29 | [Infrastructure as Code with Terraform](ch29-infrastructure-as-code-terraform.md) | Expert | ✅ |
 | Ch 30 | [Practical AWS Deployment Walkthrough](ch30-practical-aws-deployment.md) | Expert | ✅ |
 
-**Progress: 6 / 30 chapters written.**
+**Progress: 6 / 30 chapters written (Ch 01 enriched 2026-06-17).**
 
 To trigger a chapter write: tell Claude "I finished topic B1" (or any topic code) and the `databricks-book` skill will write that chapter.

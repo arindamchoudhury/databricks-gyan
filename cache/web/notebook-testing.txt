@@ -1,0 +1,267 @@
+Source: https://docs.databricks.com/aws/en/notebooks/testing
+Fetched: 2026-06-17
+
+Core purpose:
+"Unit testing is an approach to testing self-contained units of code, such as functions, early and often."
+
+Scope exclusions: "stubs, mocks, and test harnesses" and "integration testing, system testing, acceptance testing, or non-functional testing" are all out of scope.
+
+== Storage approach by language ==
+
+Python/R: "Databricks recommends storing functions and their unit tests outside of notebooks."
+Scala: "Databricks recommends including functions in one notebook and their unit tests in a separate notebook."
+
+== Function design principle ==
+
+Functions should "return a single predictable outcome and be of a single data type" — don't return mixed types.
+
+== Critical best practice ==
+
+"In general, it is a best practice to not run unit tests against functions that work with data in production."
+— Create fake test data instead.
+
+== CI/CD ==
+
+"set up a continuous integration and continuous delivery or deployment (CI/CD) system, such as GitHub Actions, to automatically run your unit tests whenever your code changes."
+
+== Python (pytest) ==
+
+myfunctions.py:
+```python
+import pyspark
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Because this file is not a Databricks notebook, you
+# must create a Spark session. Databricks notebooks
+# create a Spark session for you by default.
+spark = SparkSession.builder \
+                    .appName('integrity-tests') \
+                    .getOrCreate()
+
+# Does the specified table exist in the specified database?
+def tableExists(tableName, dbName):
+  return spark.catalog.tableExists(f"{dbName}.{tableName}")
+
+# Does the specified column exist in the given DataFrame?
+def columnExists(dataFrame, columnName):
+  if columnName in dataFrame.columns:
+    return True
+  else:
+    return False
+
+# How many rows are there for the specified value in the specified column
+# in the given DataFrame?
+def numRowsInColumnForValue(dataFrame, columnName, columnValue):
+  df = dataFrame.filter(col(columnName) == columnValue)
+  return df.count()
+```
+
+test_myfunctions.py:
+```python
+import pytest
+import pyspark
+from myfunctions import *
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, StringType
+
+tableName    = "diamonds"
+dbName       = "default"
+columnName   = "clarity"
+columnValue  = "SI2"
+
+spark = SparkSession.builder \
+                    .appName('integrity-tests') \
+                    .getOrCreate()
+
+# Create fake data for the unit tests to run against.
+# In general, it is a best practice to not run unit tests
+# against functions that work with data in production.
+schema = StructType([ \
+  StructField("_c0",     IntegerType(), True), \
+  StructField("carat",   FloatType(),   True), \
+  StructField("cut",     StringType(),  True), \
+  StructField("color",   StringType(),  True), \
+  StructField("clarity", StringType(),  True), \
+  StructField("depth",   FloatType(),   True), \
+  StructField("table",   IntegerType(), True), \
+  StructField("price",   IntegerType(), True), \
+  StructField("x",       FloatType(),   True), \
+  StructField("y",       FloatType(),   True), \
+  StructField("z",       FloatType(),   True), \
+])
+data = [ (1, 0.23, "Ideal",   "E", "SI2", 61.5, 55, 326, 3.95, 3.98, 2.43 ), \
+         (2, 0.21, "Premium", "E", "SI1", 59.8, 61, 326, 3.89, 3.84, 2.31 ) ]
+df = spark.createDataFrame(data, schema)
+
+def test_tableExists():
+  assert tableExists(tableName, dbName) is True
+
+def test_columnExists():
+  assert columnExists(df, columnName) is True
+
+def test_numRowsInColumnForValue():
+  assert numRowsInColumnForValue(df, columnName, columnValue) > 0
+```
+
+Notebook cells to run pytest:
+Cell 1: %pip install pytest
+Cell 2:
+```python
+import pytest
+import sys
+
+# Skip writing pyc files on a readonly filesystem.
+sys.dont_write_bytecode = True
+
+# Run pytest.
+retcode = pytest.main([".", "-v", "-p", "no:cacheprovider"])
+
+# Fail the cell execution if there are any test failures.
+assert retcode == 0, "The pytest invocation failed. See the log for details."
+```
+
+== R (testthat) ==
+
+myfunctions.r:
+```r
+library(SparkR)
+
+table_exists <- function(table_name, db_name) {
+  tableExists(paste(db_name, ".", table_name, sep = ""))
+}
+
+column_exists <- function(dataframe, column_name) {
+  column_name %in% colnames(dataframe)
+}
+
+num_rows_in_column_for_value <- function(dataframe, column_name, column_value) {
+  df = filter(dataframe, dataframe[[column_name]] == column_value)
+  count(df)
+}
+```
+
+test_myfunctions.r:
+```r
+library(testthat)
+source("myfunctions.r")
+
+table_name   <- "diamonds"
+db_name      <- "default"
+column_name  <- "clarity"
+column_value <- "SI2"
+
+schema <- structType(
+  structField("_c0",     "integer"),
+  structField("carat",   "float"),
+  structField("cut",     "string"),
+  structField("color",   "string"),
+  structField("clarity", "string"),
+  structField("depth",   "float"),
+  structField("table",   "integer"),
+  structField("price",   "integer"),
+  structField("x",       "float"),
+  structField("y",       "float"),
+  structField("z",       "float"))
+data <- list(list(as.integer(1), 0.23, "Ideal",   "E", "SI2", 61.5, as.integer(55), as.integer(326), 3.95, 3.98, 2.43),
+             list(as.integer(2), 0.21, "Premium", "E", "SI1", 59.8, as.integer(61), as.integer(326), 3.89, 3.84, 2.31))
+df <- createDataFrame(data, schema)
+
+test_that ("The table exists.", {
+  expect_true(table_exists(table_name, db_name))
+})
+
+test_that ("The column exists in the table.", {
+  expect_true(column_exists(df, column_name))
+})
+
+test_that ("There is at least one row in the query result.", {
+  expect_true(num_rows_in_column_for_value(df, column_name, column_value) > 0)
+})
+```
+
+Notebook cells:
+Cell 1: install.packages("testthat")
+Cell 2:
+```r
+library(testthat)
+source("myfunctions.r")
+test_dir(".", reporter = "tap")
+```
+
+== Scala (ScalaTest) ==
+
+Notebook cell 1: %run ./myfunctions
+
+Notebook cell 2:
+```scala
+import org.scalatest._
+import org.apache.spark.sql.types.{StructType, StructField, IntegerType, FloatType, StringType}
+import scala.collection.JavaConverters._
+
+class DataTests extends AsyncFunSuite {
+  val tableName   = "diamonds"
+  val dbName      = "default"
+  val columnName  = "clarity"
+  val columnValue = "SI2"
+
+  val schema = StructType(Array(
+                 StructField("_c0",     IntegerType),
+                 StructField("carat",   FloatType),
+                 StructField("cut",     StringType),
+                 StructField("color",   StringType),
+                 StructField("clarity", StringType),
+                 StructField("depth",   FloatType),
+                 StructField("table",   IntegerType),
+                 StructField("price",   IntegerType),
+                 StructField("x",       FloatType),
+                 StructField("y",       FloatType),
+                 StructField("z",       FloatType)
+               ))
+  val data = Seq(
+                  Row(1, 0.23, "Ideal",   "E", "SI2", 61.5, 55, 326, 3.95, 3.98, 2.43),
+                  Row(2, 0.21, "Premium", "E", "SI1", 59.8, 61, 326, 3.89, 3.84, 2.31)
+                ).asJava
+  val df = spark.createDataFrame(data, schema)
+
+  test("The table exists") {
+    assert(tableExists(tableName, dbName) == true)
+  }
+
+  test("The column exists") {
+    assert(columnExists(df, columnName) == true)
+  }
+
+  test("There is at least one matching row") {
+    assert(numRowsInColumnForValue(df, columnName, columnValue) > 0)
+  }
+}
+
+nocolor.nodurations.nostacks.stats.run(new DataTests)
+```
+
+== SQL ==
+
+Create view cell:
+```sql
+USE CATALOG main;
+USE SCHEMA default;
+
+CREATE VIEW view_diamonds AS
+SELECT * FROM diamonds;
+```
+
+Test cells (SELECT if pattern):
+```sql
+SELECT if(table_exists("main", "default", "view_diamonds"),
+          printf("PASS: The table 'main.default.view_diamonds' exists."),
+          printf("FAIL: The table 'main.default.view_diamonds' does not exist."));
+
+SELECT if(column_exists("main", "default", "view_diamonds", "clarity"),
+          printf("PASS: The column 'clarity' exists in the table 'main.default.view_diamonds'."),
+          printf("FAIL: The column 'clarity' does not exists in the table 'main.default.view_diamonds'."));
+
+SELECT if(num_rows_for_clarity_in_diamonds("VVS2") > 0,
+          printf("PASS: ...has at least one row where the column 'clarity' equals 'VVS2'."),
+          printf("FAIL: ...does not have at least one row where the column 'clarity' equals 'VVS2'."));
+```
