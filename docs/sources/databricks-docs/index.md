@@ -22,5 +22,6 @@ Notes captured from individual Databricks official documentation pages. One file
 | [SQL warehouse overview](sql-warehouse-overview.md) | 2026-06-16 | compute, sql-warehouse, serverless, databricks-sql, BI, B1 |
 | [SQL warehouse types](sql-warehouse-types.md) | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
 | [Photon](photon.md) | 2026-06-16 | compute, photon, performance, vectorized, sql-warehouse, B1 |
+| [Lakeguard](lakeguard.md) | 2026-06-16 | compute, lakeguard, security, isolation, standard-compute, spark-connect, B1 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*

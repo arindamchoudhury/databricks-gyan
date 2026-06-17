@@ -46,6 +46,7 @@ nav = [
             { "SQL Warehouse Overview" = "sources/databricks-docs/sql-warehouse-overview.md" },
             { "SQL Warehouse Types" = "sources/databricks-docs/sql-warehouse-types.md" },
             { "Photon" = "sources/databricks-docs/photon.md" },
+            { "Lakeguard" = "sources/databricks-docs/lakeguard.md" },
         ]},
     ]},
     { "Release Notes" = [
