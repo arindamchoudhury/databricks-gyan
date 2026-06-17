@@ -45,6 +45,7 @@ nav = [
             { "Compute Pools (Instance Pools)" = "sources/databricks-docs/compute-pools.md" },
             { "SQL Warehouse Overview" = "sources/databricks-docs/sql-warehouse-overview.md" },
             { "SQL Warehouse Types" = "sources/databricks-docs/sql-warehouse-types.md" },
+            { "Photon" = "sources/databricks-docs/photon.md" },
         ]},
     ]},
     { "Release Notes" = [

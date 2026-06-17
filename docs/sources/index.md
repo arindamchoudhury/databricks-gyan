@@ -35,3 +35,4 @@ Course notebooks and external sources captured as structured notes.
 | [Compute pools (instance pools)](sources/databricks-docs/compute-pools.md) | documentation | 2026-06-16 | compute, pools, autoscaling, cost, B1 |
 | [SQL warehouse overview](sources/databricks-docs/sql-warehouse-overview.md) | documentation | 2026-06-16 | compute, sql-warehouse, serverless, databricks-sql, BI, B1 |
 | [SQL warehouse types](sources/databricks-docs/sql-warehouse-types.md) | documentation | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
+| [Photon](sources/databricks-docs/photon.md) | documentation | 2026-06-16 | compute, photon, performance, vectorized, sql-warehouse, B1 |

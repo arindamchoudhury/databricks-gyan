@@ -1,0 +1,50 @@
+# What is Photon?
+Source: https://docs.databricks.com/aws/en/compute/photon
+Fetched: 2026-06-16
+Last updated on page: Jun 16, 2026
+
+## What is Photon?
+"The Databricks-native vectorized query engine that accelerates your SQL workloads, DataFrame API calls, ETL pipelines, and stateless streaming workloads."
+"Up to 5x better price/performance for data and analytics workloads" (TPC-DS benchmarks vs competing cloud warehouses).
+
+## How Photon works
+Replaces "the JVM-based Spark SQL execution engine with a native C++ runtime" for supported operations.
+"Processes data in columnar batches rather than row by row" — enables SIMD instruction utilization across thousands of rows simultaneously.
+"When Photon encounters an unsupported operation during query execution, it transparently falls back to the Spark runtime for the remainder of that operation."
+
+## Performance optimizations
+- Hash joins replacing sort-merge joins
+- Native Parquet writer for Delta Lake, Apache Iceberg, and Parquet writes (supports UPDATE, DELETE, MERGE INTO, INSERT, CTAS)
+- Filter pushdown and dictionary pruning reducing storage reads
+
+## Integration with Databricks platform
+Enabled by default on: serverless compute, SQL warehouses.
+
+## Photon enablement
+Classic compute: Use Photon Acceleration checkbox under Performance.
+API (cluster/jobs): set `runtime_engine` to `PHOTON`.
+API (pipelines): set `photon` to `true`.
+
+## Features that require Photon enablement
+- Predictive IO (read and write)
+- Dynamic file pruning in MERGE, UPDATE, and DELETE statements
+
+## Supported instance types
+Photon supports a number of instance types including Graviton-based instances.
+"Photon instance types consume DBUs at a different rate" (see Databricks pricing page).
+
+## Supported operators, expressions, and data types
+Operators: Scan, Filter, Project, Hash Aggregate, Hash Join, Hash Shuffle, Window Functions, Sorts.
+Data types: numeric, string, date/timestamp, struct, array, map, geometry, geography.
+
+## Monitor Photon usage
+Spark UI: Photon operators shown in orange within the query DAG.
+Query profile (SQL warehouses / serverless): Photon operators shown in purple; standard operators in grey.
+
+## Limitations
+- Queries completing in under 2 seconds: no meaningful improvement.
+- UDFs (User Defined Functions): not supported.
+- RDD APIs: not supported.
+- Dataset APIs: not supported.
+- Stateful streaming: not supported.
+- Graviton + Photon: "Graviton-based instances with Photon don't support Databricks Container Services, or Databricks SQL warehouses."
