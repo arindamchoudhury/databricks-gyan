@@ -31,6 +31,7 @@ nav = [
         { "DCDE-SG (Study Guide)" = [
             { "Book Overview" = "sources/dcde-sg/index.md" },
             { "Ch 1: Getting Started with Databricks" = "sources/dcde-sg/ch01-getting-started-with-databricks.md" },
+            { "Ch 2: Managing Data with Delta Lake" = "sources/dcde-sg/ch02-managing-data-with-delta-lake.md" },
         ]},
         { "Databricks Docs" = [
             { "Overview" = "sources/databricks-docs/index.md" },

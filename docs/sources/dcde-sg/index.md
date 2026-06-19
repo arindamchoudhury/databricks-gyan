@@ -12,7 +12,7 @@ Reading notes for the O'Reilly DCDEA study guide. Detailed-outline style, one fi
 | Ch | Title | PDF pp. | Status | Tags |
 |---|---|---|---|---|
 | 1 | [Getting Started with Databricks](ch01-getting-started-with-databricks.md) | 20–113 | ✅ | platform, architecture, clusters, notebooks, B1 |
-| 2 | Managing Data with Delta Lake | 114–168 | ⬜ | delta, B5 |
+| 2 | [Managing Data with Delta Lake](ch02-managing-data-with-delta-lake.md) | 114–168 | ✅ | delta, B5 |
 | 3 | Mastering Relational Entities | 169–230 | ⬜ | databases, views, B4 |
 | 4 | Transforming Data with Spark | 231–314 | ⬜ | spark-sql, dataframes, B3 |
 | 5 | Processing Incremental Data | 315–398 | ⬜ | auto-loader, streaming, I1/I2 |
