@@ -73,7 +73,7 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 
 ---
 
-### ⬜ B2 — Apache Spark Architecture on Databricks
+### ✅ B2 — Apache Spark Architecture on Databricks
 
 **What it is:** The Spark driver/executor model, DAG execution, stages, and tasks — how Spark actually runs your code.
 
@@ -710,7 +710,7 @@ Expert (E1–E9)        → ~50 hrs  →  Architect-level mastery
 
 **Total estimate:** ~165 hrs of deliberate practice.
 
-**You are currently here:** Beginner — B1 complete. Next: B2 — Apache Spark Architecture on Databricks.
+**You are currently here:** Beginner — B2 complete. Next: B3 — PySpark DataFrame API Fundamentals.
 
 ---
 

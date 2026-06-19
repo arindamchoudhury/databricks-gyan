@@ -11,6 +11,7 @@ nav = [
     { "Book" = [
         { "Contents" = "book/index.md" },
         { "Ch 01 — Databricks Platform & Workspace" = "book/ch01-databricks-platform-workspace.md" },
+        { "Ch 02 — Apache Spark Architecture on Databricks" = "book/ch02-spark-architecture-databricks.md" },
         { "Ch 05 — Delta Lake Fundamentals" = "book/ch05-delta-lake-fundamentals.md" },
         { "Ch 06 — Data Ingestion Basics" = "book/ch06-data-ingestion-basics.md" },
         { "Ch 07 — Medallion Architecture" = "book/ch07-medallion-architecture.md" },

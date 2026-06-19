@@ -5,7 +5,7 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 | # | Topic | Level | Status |
 |---|---|---|---|
 | Ch 01 | [Databricks Platform & Workspace](ch01-databricks-platform-workspace.md) | Beginner | ✅ |
-| Ch 02 | Apache Spark Architecture on Databricks | Beginner | ⬜ |
+| Ch 02 | [Apache Spark Architecture on Databricks](ch02-spark-architecture-databricks.md) | Beginner | ✅ |
 | Ch 03 | PySpark DataFrame API Fundamentals | Beginner | ⬜ |
 | Ch 04 | Spark SQL & Relational Entities | Beginner | ⬜ |
 | Ch 05 | [Delta Lake Fundamentals](ch05-delta-lake-fundamentals.md) | Beginner | ✅ |
@@ -35,6 +35,6 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 | Ch 29 | [Infrastructure as Code with Terraform](ch29-infrastructure-as-code-terraform.md) | Expert | ✅ |
 | Ch 30 | [Practical AWS Deployment Walkthrough](ch30-practical-aws-deployment.md) | Expert | ✅ |
 
-**Progress: 6 / 30 chapters written (Ch 01 enriched 2026-06-17).**
+**Progress: 7 / 30 chapters written (Ch 02 written 2026-06-19).**
 
 To trigger a chapter write: tell Claude "I finished topic B1" (or any topic code) and the `databricks-book` skill will write that chapter.
