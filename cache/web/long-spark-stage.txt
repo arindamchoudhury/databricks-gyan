@@ -1,35 +1,55 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage
-FETCHED: 2026-06-17
-LAST UPDATED: 2026-03-06
-PART OF: Spark UI Guide series (Step 2 of 5)
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UILong Spark job
+Last updated on Mar 6, 2026
+Diagnosing a long job in Spark
 
-=== STEP 1 — IDENTIFY LONGEST STAGE ===
-"Start by identifying the longest stage of the job. Scroll to the bottom of the job's page to the list of stages and order them by duration"
+Start by identifying the longest stage of the job. Scroll to the bottom of the job's page to the list of stages and order them by duration:
 
-=== STEP 2 — EXAMINE I/O COLUMNS ===
-Four metrics to note:
-- "Input: How much data this stage read from storage. This could be reading from Delta, Parquet, CSV, etc."
-- "Output: How much data this stage wrote to storage. This could be writing to Delta, Parquet, CSV, etc."
-- "Shuffle Read: How much shuffle data this stage read."
-- "Shuffle Write: How much shuffle data this stage wrote."
-"Make note of these numbers as you'll likely need them later."
+Stage I/O details​
 
-=== STEP 3 — NUMBER OF TASKS ===
-"If you see one task, that could be a sign of a problem." → see One Spark task page
+To see high-level data about what this stage was doing, look at the Input, Output, Shuffle Read, and Shuffle Write columns:
 
-=== STEP 4 — MULTI-TASK: OPEN STAGE DETAIL ===
-"If the stage has more than one task, we recommend that you investigate further."
-"Click on the link in the stage's description to get more info about the longest stage"
-→ see Skew and spill page
+The columns mean the following:
 
-=== INTERNAL LINKS ===
-- /aws/en/optimizations/spark-ui-guide/one-spark-task
-- /aws/en/optimizations/spark-ui-guide/long-spark-stage-page (skew/spill)
-- databricks.com/discover/pages/optimize-data-workloads-guide#data-shuffling
+Input: How much data this stage read from storage. This could be reading from Delta, Parquet, CSV, etc.
+Output: How much data this stage wrote to storage. This could be writing to Delta, Parquet, CSV, etc.
+Shuffle Read: How much shuffle data this stage read.
+Shuffle Write: How much shuffle data this stage wrote.
 
-=== IMAGES ===
-(already downloaded to assets/spark-ui-guide/)
-07-long-stage.png — stage list sorted by duration
-08-long-stage-io.jpeg — I/O columns (Input, Output, Shuffle Read, Shuffle Write)
-09-long-stage-tasks.jpeg — task count in stage detail
-10-long-stage-description.png — clicking stage description link
+If you're not familiar with what shuffle is, now is a good time to learn more about what that means.
+
+Make note of these numbers as you'll likely need them later.
+
+Number of tasks​
+
+The number of tasks in the long stage can point you in the direction of your issue. Determine the number of tasks by looking here:
+
+If you see one task, that could be a sign of a problem. For more information, see One Spark task.
+
+View more stage details​
+
+If the stage has more than one task, we recommend that you investigate further. Click on the link in the stage's description to get more info about the longest stage:
+
+Now that you're in the stage's page, see Skew and spill.
+
+On this page
+Stage I/O details
+Number of tasks
+View more stage details
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/long-stage-1575dcfa2e8c9d80eefa0bd1b4d7bc19.png)
+*Long Stage (3798×404)*
+
+![](https://docs.databricks.com/aws/en/assets/images/long-stage-io-e2a24b5af9a1c769758cabc2249cf8d1.jpeg)
+*Long Stage I/O (3798×404)*
+
+![](https://docs.databricks.com/aws/en/assets/images/long-stage-tasks-cd16c86c31f1b8280322e3e0a8f941eb.jpeg)
+*Determining number of tasks (3798×404)*
+
+![](https://docs.databricks.com/aws/en/assets/images/long-stage-description-7bf4fb8e6365d3449bdfa81ab033301f.png)
+*Open Stage Info (3798×404)*

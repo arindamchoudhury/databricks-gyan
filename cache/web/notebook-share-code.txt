@@ -1,30 +1,73 @@
-Source: https://docs.databricks.com/aws/en/notebooks/share-code
-Fetched: 2026-06-17
+NotebooksDevelop code in notebooksShare code between notebooks
+Last updated on Jun 16, 2026
+Share code between Databricks notebooks
 
-NOTE: Code examples on this page are rendered as images, not text — not capturable via WebFetch.
+You can modularize your code by creating Python files in the Databricks workspace and importing them into your notebooks.
 
-Main heading:
-"You can modularize your code by creating Python files in the Databricks workspace and importing them into your notebooks."
+Databricks also supports multi-task jobs which allow you to combine notebooks into workflows with complex dependencies. For more information, see Lakeflow Jobs.
 
-== Runtime requirement ==
+Modularize your code using files​
 
-"With Databricks Runtime 11.3 LTS and above, you can create and manage source code files in the Databricks workspace, and then import these files into your notebooks as needed."
+With Databricks Runtime 11.3 LTS and above, you can create and manage source code files in the Databricks workspace, and then import these files into your notebooks as needed. You can also use a Databricks repo to sync your files with a Git repository. For details, see Work with Python and R modules and Databricks Git folders.
 
-== Section structure ==
+Create a Python file​
 
-Sections (no text code blocks, images only):
-1. Create a Python file — Workspace sidebar > Create > File > name ending in .py; auto-saves
-2. Import a file into a notebook — standard Python import commands (shown as image)
-3. Import a file from another folder — "If a helper file is in another folder, you must use the full file path." (copy via kebab menu > Copy URL/path > Full path)
-4. Run a file — Shift+Enter (full cell) / Shift+Ctrl+Enter (selected code)
-5. Delete a file — workspace menu
-6. Rename a file — inline edit or File > Rename
-7. Control access to a file — "If your Databricks account has the Premium plan or above, you can use Workspace access control to control who has access to a file."
+To create a file:
 
-== Git integration ==
+In the left sidebar, click Workspace.
+Click Create > File. The file will open in an editor window and changes are saved automatically.
+Enter a name for the file ending in .py.
+Import a file into a notebook​
 
-"You can also use a Databricks repo to sync your files with a Git repository."
+You can import a file into a notebook using standard Python import commands:
 
-== Multi-task jobs ==
+Suppose you have the following file:
 
-"Databricks also supports multi-task jobs which allow you to combine notebooks into workflows with complex dependencies."
+You can import that file into a notebook and call the functions defined in the file:
+
+Import a file from another folder into a notebook​
+
+If a helper file is in another folder, you must use the full file path. To copy the full path, navigate to the file in your workspace and in the kebab menu, click Copy URL/path > Full path.
+
+You can import a file from a different folder into a notebook as follows:
+
+Run a file​
+
+You can run a file from the editor. This is useful for testing. To run a file, place your cursor in the code area and select Shift + Enter to run the cell, or highlight code in the cell and press Shift + Ctrl + Enter to run only the selected code.
+
+Delete a file​
+
+See Work with folders and folder objects and Manage workspace objects for information about how to access the workspace menu and delete files or other items in the workspace.
+
+Rename a file​
+
+To change the title of an open file, click the title and edit inline or click File > Rename.
+
+Control access to a file​
+
+If your Databricks account has the Premium plan or above, you can use Workspace access control to control who has access to a file.
+
+On this page
+Modularize your code using files
+Create a Python file
+Import a file into a notebook
+Import a file from another folder into a notebook
+Run a file
+Delete a file
+Rename a file
+Control access to a file
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/functions-b9dfc1042f11656dd5c4dc8fdb7dc48d.png)
+*File that defines functions. (2558×1308)*
+
+![](https://docs.databricks.com/aws/en/assets/images/call-functions-cc8a4dfe3dac6638f4107c5ef096729d.png)
+*Import file into notebook. (2242×1602)*
+
+![](https://docs.databricks.com/aws/en/assets/images/call-functions2-e95301dc993f2fe2cdba57955fce6194.png)
+*Import file from another folder into a notebook. (2322×1676)*

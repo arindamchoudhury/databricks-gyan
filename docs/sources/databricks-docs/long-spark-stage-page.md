@@ -67,3 +67,16 @@ Go back to the job page. Scroll to top. Click **Associated Job Ids**.
 - [[long-spark-stage]] — Step 2 (longest stage); leads here
 - [[long-spark-stage-io]] — Step 4 (I/O bound check); follows from here
 - [[optimize-data-workloads-guide]] — spill AQE configs + skew salting remediation
+
+
+## Images
+
+[![Spill Stats](assets/long-spark-stage-page/01.png)](assets/long-spark-stage-page/01.png)
+*Spill Stats (852×422)*
+
+[![Skew Stats](assets/long-spark-stage-page/02.png)](assets/long-spark-stage-page/02.png)
+*Skew Stats (2990×643)*
+
+[![Stage to Job](assets/long-spark-stage-page/03.png)](assets/long-spark-stage-page/03.png)
+*Stage to Job (802×434)*
+

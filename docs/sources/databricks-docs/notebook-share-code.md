@@ -87,3 +87,16 @@ Page positions workspace files + Lakeflow Jobs as the full modularization + orch
 - [[notebook-workflows]] — covers the conceptual choice: workspace files (recommended) vs `%run` vs `dbutils.notebook.run()`; workspace files are the preferred modularization approach
 - [[notebook-testing]] — unit test files (`test_myfunctions.py`) live in workspace as `.py` files — same mechanism
 - [[notebook-ipywidgets]] — no relation to workspace files; separate Python-in-notebook pattern
+
+
+## Images
+
+[![File that defines functions.](assets/notebook-share-code/01.png)](assets/notebook-share-code/01.png)
+*File that defines functions. (2558×1308)*
+
+[![Import file into notebook.](assets/notebook-share-code/02.png)](assets/notebook-share-code/02.png)
+*Import file into notebook. (2242×1602)*
+
+[![Import file from another folder into a notebook.](assets/notebook-share-code/03.png)](assets/notebook-share-code/03.png)
+*Import file from another folder into a notebook. (2322×1676)*
+

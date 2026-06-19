@@ -171,3 +171,28 @@ Override values with named arguments (cluster-attached notebooks only):
 - [[notebook-dashboards]] — dashboards display widgets at top; Update button re-runs notebook
 - [[notebook-testing]] — pattern of passing parameters to notebooks complements `%run $X="10"` widget passing
 - [[workspace-walkthrough]] — DA-FREE M1; introduces the notebook UI where widgets appear
+
+
+## Images
+
+[![Widget in header](assets/notebook-widgets/01.png)](assets/notebook-widgets/01.png)
+*Widget in header (2228×312)*
+
+[![widget kebab menu](assets/notebook-widgets/02.png)](assets/notebook-widgets/02.png)
+*widget kebab menu (426×180)*
+
+[![create widget dialog](assets/notebook-widgets/03.png)](assets/notebook-widgets/03.png)
+*create widget dialog (596×702)*
+
+[![widget tooltip](assets/notebook-widgets/04.png)](assets/notebook-widgets/04.png)
+*widget tooltip (634×192)*
+
+[![Interact with widget](assets/notebook-widgets/05.png)](assets/notebook-widgets/05.png)
+*Interact with widget (218×144)*
+
+[![Widget settings](assets/notebook-widgets/06.png)](assets/notebook-widgets/06.png)
+*Widget settings (1274×696)*
+
+[![Dashboard with widgets](assets/notebook-widgets/07.png)](assets/notebook-widgets/07.png)
+*Dashboard with widgets (2260×1038)*
+

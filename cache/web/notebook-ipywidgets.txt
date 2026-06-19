@@ -1,72 +1,120 @@
-Source: https://docs.databricks.com/aws/en/notebooks/ipywidgets
-Fetched: 2026-06-17
+NotebooksDevelop code in notebooksDatabricks widgetsipywidgets
+Last updated on Jun 27, 2024
+Use ipywidgets in Databricks notebooks
 
-Overview:
-"ipywidgets are visual elements that allow users to specify parameter values in notebook cells."
-"over 30 different controls, including form controls such as sliders, text boxes, and checkboxes, as well as layout controls such as tabs, accordions, and grids."
+ipywidgets are visual elements that allow users to specify parameter values in notebook cells. You can use ipywidgets to make your Databricks Python notebooks interactive.
 
-== Version support ==
+The ipywidgets package includes over 30 different controls, including form controls such as sliders, text boxes, and checkboxes, as well as layout controls such as tabs, accordions, and grids. Using these elements, you can build graphical user interfaces to interface with your notebook code.
 
-Preview: "ipywidgets are available in preview in Databricks Runtime 11.0 through Databricks Runtime 12.2 LTS"
-GA: "generally available in Databricks Runtime 13.0 and above"
-Unity Catalog: "Support for Unity Catalog tables is available in Databricks Runtime 12.1 and above on Unity Catalog-enabled clusters"
+NOTE
+To determine the version of ipywidgets that your cluster supports, refer to the release notes for the Databricks Runtime version of your cluster.
+Some ipywidgets do not work in Databricks Runtime 15.0.
+For information about Databricks widgets, see Databricks widgets. For guidelines on when to use Databricks widgets or ipywidgets, see Best practices for using ipywidgets and Databricks widgets.
+Requirements​
+ipywidgets are available in preview in Databricks Runtime 11.0 through Databricks Runtime 12.2 LTS, and are generally available in Databricks Runtime 13.0 and above. Support for Unity Catalog tables is available in Databricks Runtime 12.1 and above on Unity Catalog-enabled clusters.
+To use ipywidgets on Databricks, your browser must be able to access the databricks-dev-cloudfront.dev.databricks.com domain.
 
-Known issue: "Some ipywidgets do not work in Databricks Runtime 15.0"
+By default, ipywidgets occupies port 6062. With Databricks Runtime 11.3 LTS and above, if you run into conflicts with third-party integrations such as Datadog, you can change the port using the following Spark config:
 
-== Browser requirement ==
+spark.databricks.driver.ipykernel.commChannelPort <port-number>
 
-"your browser must be able to access the databricks-dev-cloudfront.dev.databricks.com domain"
+For example:
 
-== Port configuration ==
+spark.databricks.driver.ipykernel.commChannelPort 1234
 
-Default port: 6062
-"With Databricks Runtime 11.3 LTS and above, if you run into conflicts with third-party integrations such as Datadog, you can change the port"
-Spark config: spark.databricks.driver.ipykernel.commChannelPort <port-number>
-"The Spark config must be set when the cluster is created."
+The Spark config must be set when the cluster is created.
 
-== ipywidgets vs Databricks widgets ==
+Usage​
 
-"You can use Databricks widgets to pass parameters between notebooks and to pass parameters to jobs; ipywidgets do not support these scenarios"
-Databricks recommends ipywidgets for Python; use Databricks widgets for other languages.
+The following code creates a histogram with a slider that can take on values between 3 and 10. The value of the widget determines the number of bins in the histogram. As you move the slider, the histogram updates immediately. See the ipywidgets example notebook to try this out.
 
-== Third-party widgets ==
-
-"Databricks provides best-effort support for third-party widgets" — ipyleaflet, bqplot, VegaFusion
-"some third-party widgets aren't supported"
-
-== Code examples ==
-
-1. Histogram with interact slider:
-```python
+Python
 import ipywidgets as widgets
 from ipywidgets import interact
+
+# Load a dataset
 sparkDF = spark.read.csv("/databricks-datasets/bikeSharing/data-001/day.csv", header="true", inferSchema="true")
-# (bins=(3, 10) defines an integer slider widget that allows values between 3 and 10.
+
+# In this code, `(bins=(3, 10)` defines an integer slider widget that allows values between 3 and 10.
 @interact(bins=(3, 10))
 def plot_histogram(bins):
   pdf = sparkDF.toPandas()
   pdf.hist(column='temp', bins=bins)
-```
 
-2. IntSlider:
-```python
+
+The following code creates an integer slider that can take on values between 0 and 10. The default value is 5. To access the value of the slider in your code, use int_slider.value.
+
+Python
 import ipywidgets as widgets
+
 int_slider = widgets.IntSlider(max=10, value=5)
 int_slider
-```
 
-3. Button with Unity Catalog (DBR 12.1+):
-```python
+
+The following code loads and displays a sample dataframe from a table in Unity Catalog. Support for Unity Catalog tables is available with Databricks Runtime 12.1 and above on Unity Catalog-enabled clusters.
+
+Python
 import ipywidgets as widgets
+
+# Create button widget. Clicking this button loads a sampled dataframe from UC table.
 button = widgets.Button(description="Load dataframe sample")
+
+# Output widget to display the loaded dataframe
 output = widgets.Output()
+
 def load_sample_df(table_name):
   return spark.sql(f"SELECT * FROM {table_name} LIMIT 1000")
+
 def on_button_clicked(_):
     with output:
       output.clear_output()
       df = load_sample_df('<catalog>.<schema>.<table>')
       print(df.toPandas())
+
+# Register the button's callback function to query UC and display results to the output widget
 button.on_click(on_button_clicked)
+
 display(button, output)
-```
+
+Notebook example: ipywidgets​
+
+The following notebook shows some examples of using ipywidgets in notebooks.
+
+ipywidgets example notebook
+Open notebook in new tab
+Copy link for import
+Expand notebook
+Notebook example: ipywidgets advanced example​
+
+The following notebook shows a more complex example using ipywidgets to create an interactive map.
+
+Advanced example: maps with ipywidgets
+Open notebook in new tab
+Copy link for import
+Expand notebook
+Best practices for using ipywidgets and Databricks widgets​
+
+To add interactive controls to Python notebooks, Databricks recommends using ipywidgets. For notebooks in other languages, use Databricks widgets.
+
+You can use Databricks widgets to pass parameters between notebooks and to pass parameters to jobs; ipywidgets do not support these scenarios.
+
+Which third-party Jupyter widgets are supported in Databricks?​
+
+Databricks provides best-effort support for third-party widgets, such as ipyleaflet, bqplot, and VegaFusion. However, some third-party widgets aren't supported. For a list of the widgets that have been tested in Databricks notebooks, contact your Databricks account team.
+
+Limitations​
+
+See Known limitations of Databricks notebooks for more information.
+
+On this page
+Requirements
+Usage
+Notebook example: ipywidgets
+Notebook example: ipywidgets advanced example
+Best practices for using ipywidgets and Databricks widgets
+Which third-party Jupyter widgets are supported in Databricks?
+Limitations
+Was this page helpful?
+Yes
+No
+Send feedback

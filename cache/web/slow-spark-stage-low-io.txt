@@ -1,72 +1,97 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io
-FETCHED: 2026-06-17
-PART OF: Spark UI Guide series (Step 5 of 5)
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UISlow stage I/O
+Last updated on Mar 6, 2026
+Slow Spark stage with little I/O
 
-=== DIAGNOSTIC APPROACH ===
-Navigate to the job page → click "Associated SQL Query" at top → SQL DAG opens.
-"these times are cumulative, so it's the total time spent on all the tasks, not the clock time."
-Some nodes show timing directly (e.g. "2.1 minutes"); others require expansion to reveal duration (e.g. "1.4 minutes").
-Timing in DAG correlates with clock time and cost.
+If you have a slow stage with not much I/O, this could be caused by:
 
-=== CAUSE 1: READING MANY SMALL FILES ===
-"If you're reading tens of thousands of files or more, you may have a small file problem. Your files should be no less than 8MB."
-Root cause: "most often caused by partitioning on too many columns or a high-cardinality column."
-Examine scan operator details for file counts.
+Reading a lot of small files
+Writing a lot of small files
+Slow UDF(s)
+Cartesian join
+Exploding join
 
-Remediation:
-- Execute OPTIMIZE command → https://docs.databricks.com/en/sql/language-manual/delta-optimize.html
-- Enable predictive optimization → /aws/en/optimizations/predictive-optimization
-- Reconsider file layout → databricks.com/discover/pages/optimize-data-workloads-guide#data-layout
+Almost all of these issues can be identified using the SQL DAG.
 
-=== CAUSE 2: WRITING MANY SMALL FILES ===
-"If you're writing tens of thousands of files or more, you may have a small file problem. Your files should be no less than 8MB."
-Root cause: "partitioning on too many columns or a high-cardinality column."
-Review write operation details for file count and data volume.
+Open the SQL DAG​
 
-Remediation:
-- Enable predictive optimization
-- Reconsider file layout
-- Activate optimized writes
+To open the SQL DAG, scroll up to the top of the job's page and click on Associated SQL Query:
 
-=== CAUSE 3: SLOW UDFs ===
-"If you think you're suffering from this problem, try commenting out your UDF to see how it impacts the speed of your pipeline."
-"If the UDF is indeed where the time is being spent, your best bet is to rewrite the UDF using native functions."
+You should now see the DAG. If not, scroll around a bit and you should see it:
 
-Parallelization fix:
-"If it's less than the number of cores on your cluster, repartition() your dataframe before using the UDF."
+Before you move on, familiarize yourself with the DAG and where time is being spent. Some nodes in the DAG have helpful time information and others don't. For example, this block took 2.1 minutes and even provides the stage ID:
 
-Code:
+This node requires you to open it to see that it took 1.4 minutes:
+
+These times are cumulative, so it's the total time spent on all the tasks, not the clock time. But it's still very useful as they are correlated with clock time and cost.
+
+It's helpful to familiarize yourself with where in the DAG the time is being spent.
+
+Reading a lot of small files​
+
+If you see one of your scan operators is taking a lot of time, open it up and look for the number of files read:
+
+If you're reading tens of thousands of files or more, you may have a small file problem. Your files should be no less than 8MB. The small file problem is most often caused by partitioning on too many columns or a high-cardinality column.
+
+If you're lucky, you might just need to run OPTIMIZE. Databricks recommends that you also enable predictive optimization and reconsider your file layout.
+
+Writing a lot of small files​
+
+If you see your write is taking a long time, open it up and look for the number of files and how much data was written:
+
+If you're writing tens of thousands of files or more, you may have a small file problem. Your files should be no less than 8MB. The small file problem is most often caused by partitioning on too many columns or a high-cardinality column. You need to enable predictive optimization, reconsider your file layout, or turn on optimized writes.
+
+Slow UDFs​
+
+If you know you have UDFs, or see something like this in your DAG, you might be suffering from slow UDFs:
+
+If you think you're suffering from this problem, try commenting out your UDF to see how it impacts the speed of your pipeline. If the UDF is indeed where the time is being spent, your best bet is to rewrite the UDF using native functions. If that's not possible, consider the number of tasks in the stage executing your UDF. If it's less than the number of cores on your cluster, repartition() your dataframe before using the UDF:
+
+Python
   (df
     .repartition(num_cores)
     .withColumn('new_col', udf(...))
   )
 
-Memory fix:
-"Each task may have to load all the data in its partition into memory. If this data is too big, things can get very slow or unstable. Repartition also can resolve this issue by making each task smaller."
 
-NOTE: UDF node image is a base64 data URI on this page — not downloadable as standalone file.
+UDFs can also suffer from memory issues. Consider that each task may have to load all the data in its partition into memory. If this data is too big, things can get very slow or unstable. Repartition also can resolve this issue by making each task smaller.
 
-=== CAUSE 4: CARTESIAN JOIN ===
-"If you see a cartesian join or nested loop join in your DAG, you should know that these joins are very expensive."
+Cartesian join​
 
-=== CAUSE 5: EXPLODING JOIN / EXPLODE ===
-"If you see a few rows going into a node and magnitudes more coming out, you may be suffering from an exploding join or explode()."
-Reference: databricks.com/discover/pages/optimize-data-workloads-guide#data-explosion
+If you see a cartesian join or nested loop join in your DAG, you should know that these joins are very expensive. Make sure that's what you intended and see if there's another way.
 
-=== INTERNAL LINKS ===
-- /aws/en/optimizations/spark-ui-guide/ (parent)
-- https://docs.databricks.com/en/sql/language-manual/delta-optimize.html (OPTIMIZE)
-- /aws/en/optimizations/predictive-optimization (NOT YET CAPTURED)
-- databricks.com/discover/pages/optimize-data-workloads-guide#data-layout
-- databricks.com/discover/pages/optimize-data-workloads-guide#data-explosion
+Exploding join or explode​
 
-=== IMAGES ===
-(already downloaded to assets/spark-ui-guide/)
-14-stage-to-sql.png — link from stage to associated SQL query ID
-15-sql-dag.png — full SQL DAG with timing on nodes
-16-slow-stage-in-dag.png — identifying the slow node in DAG
-17-slow-write-node.png — slow write node example
-18-many-files-read.png — scan operator showing many small files (reading)
-19-many-files-write.png — write operator showing many small files (writing)
-20-exploding-join.png — DAG node with few rows in, many rows out
-UDF node — base64 data URI embedded in page, ~650×435px, not downloadable
+If you see a few rows going into a node and magnitudes more coming out, you may be suffering from an exploding join or explode():
+
+Read more about explodes in the Databricks Optimization guide.
+
+On this page
+Open the SQL DAG
+Reading a lot of small files
+Writing a lot of small files
+Slow UDFs
+Cartesian join
+Exploding join or explode
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/stage-to-sql-f7ba3852d36180fe8773828781cc1a1d.png)
+*SQL ID (1428×482)*
+
+![](https://docs.databricks.com/aws/en/assets/images/sql-dag-2a8f12dd2f61c647627f5904dab9660f.png)
+*SLQ DAG (1546×1324)*
+
+![](https://docs.databricks.com/aws/en/assets/images/slow-stage-in-dag-edae6a325e7f57aa167840fbf592b564.png)
+*Slow Stage Node (2262×768)*
+
+![](https://docs.databricks.com/aws/en/assets/images/slow-write-node-3b48f241c1bf0aeda9693d76d68d1404.png)
+*Slow Write Node (1196×368)*
+
+![](https://docs.databricks.com/aws/en/assets/images/many-files-read-0dd6214287e5539fdd46e31c89c3d78a.png)
+*Reading Many Files (1442×660)*
+
+![](https://docs.databricks.com/aws/en/assets/images/many-files-write-ba91f30aa7be79f185146546b9a848e9.png)
+*Writing many files (1082×692)*
+
+![](https://docs.databricks.com/aws/en/assets/images/exploding-join-61db645ee4b7d964e216d3d88951a793.png)
+*Exploding Join (2312×512)*

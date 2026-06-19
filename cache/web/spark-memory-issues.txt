@@ -1,25 +1,34 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-memory-issues
-FETCHED: 2026-06-17
-LAST UPDATED: 2024-04-15
-PART OF: Spark UI Guide series (escalation from failing-spark-jobs)
-NOTE: Sparse index page — causes are links to detail pages; no content images.
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UIMemory issues
+Last updated on Apr 15, 2024
+Spark memory issues
+Verifying a memory issue​
 
-=== VERIFYING A MEMORY ISSUE ===
-"Memory issues often result in error messages such as the following"
+Memory issues often result in error messages such as the following:
 
-Exact SparkException:
-"SparkException: Job aborted due to stage failure: Task 3 in stage 0.0 failed 4 times, most recent failure: Lost task 3.3 in stage 0.0 (TID 30) (10.139.64.114 executor 4): ExecutorLostFailure (executor 4 exited caused by one of the running tasks) Reason: Remote RPC client disassociated."
+sh
+SparkException: Job aborted due to stage failure: Task 3 in stage 0.0 failed 4 times, most recent failure: Lost task 3.3 in stage 0.0 (TID 30) (10.139.64.114 executor 4): ExecutorLostFailure (executor 4 exited caused by one of the running tasks) Reason: Remote RPC client disassociated. Likely due to containers exceeding thresholds, or network issues. Check driver logs for WARN messages.
 
-Diagnostic test: "double the memory per core to see if it impacts your problem."
-"It's the ratio of cores to memory that matters here. If it takes longer to fail with the extra memory or doesn't fail at all, that's a good sign that you're on the right track."
 
-=== SIX CAUSES (with links) ===
-1. Too few shuffle partitions → https://www.databricks.com/discover/pages/optimize-data-workloads-guide#data-spilling
-2. Large broadcast → https://www.databricks.com/discover/pages/optimize-data-workloads-guide#broadcast-hash
-3. UDFs → /aws/en/udf/
-4. Window function without PARTITION BY → /aws/en/sql/language-manual/sql-ref-window-functions
-5. Skew → https://www.databricks.com/discover/pages/optimize-data-workloads-guide#data-skewness
-6. Streaming State → https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html#state-store
+These error messages, however, are often generic and can be caused by other issues. So, if you suspect you have a memory issue, you can verify the issue by doubling the memory per core to see if it impacts your problem.
 
-=== NO CONTENT IMAGES ===
-Page contains only logo SVGs and privacy icon.
+For example, if you have a worker type with 4 cores and 16GB per memory, you can try switching to a worker type that has 4 cores and 32GB of memory. That will give you 8GB per core compared to the 4GB per core you had before. It's the ratio of cores to memory that matters here. If it takes longer to fail with the extra memory or doesn't fail at all, that's a good sign that you're on the right track.
+
+If you can fix your issue by increasing the memory, great! Maybe that's the solution. If it doesn't fix the issue, or you can't bear the extra cost, you should dig deeper.
+
+Possible causes​
+
+There are a lot of potential reasons for memory problems:
+
+Too few shuffle partitions
+Large broadcast
+UDFs
+Window function without PARTITION BY statement
+Skew
+Streaming State
+On this page
+Verifying a memory issue
+Possible causes
+Was this page helpful?
+Yes
+No
+Send feedback

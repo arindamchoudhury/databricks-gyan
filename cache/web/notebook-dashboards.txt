@@ -1,43 +1,105 @@
-Source: https://docs.databricks.com/aws/en/notebooks/dashboards
-Fetched: 2026-06-17
+NotebooksCollaborate using notebooksDashboards in notebooks
+Last updated on Jun 16, 2026
+Dashboards in Databricks notebooks
 
-Main heading:
-"You can create dashboards from Databricks notebook cell outputs to publish graphs and visualizations and share them in a presentation format across your organization."
+You can create dashboards from Databricks notebook cell outputs to publish graphs and visualizations and share them in a presentation format across your organization.
 
-== Two dashboard types ==
+Create or add to a dashboard​
 
-Notebook Dashboards:
-- Reformat notebooks into presentations with content tied to cell outputs
-- Shareable and schedulable like regular notebooks
-- Create via cell menu: "Select Add to notebook dashboard >. If you select Add to new notebook dashboard, the new dashboard is automatically displayed."
-- CRITICAL: "Content in notebook dashboards are tied to the output of notebook cells. If you clear the cell output, the dashboard content is also cleared."
+You create a dashboard by adding an item to it. There are two types of dashboards you can create from a notebook.
 
-AI/BI Dashboards:
-- Databricks recommends these for organizational sharing
-- "Only visualizations from SQL cells can be added to AI/BI dashboards."
-- Create via cell menu: "Select Add to dashboard. In the Add to dashboard dialog, select Create a new dashboard or Add to existing dashboard."
+Notebook dashboard: Notebook dashboards reformat your notebook into a presentation. The dashboard content is tied to the output of a notebook cell. You can share and schedule notebook dashboards as you would with any notebook.
+AI/BI dashboard: Databricks recommends AI/BI dashboards for creating and sharing dashboards across an organization. For more information about AI/BI dashboards, see Dashboards.
 
-== Dashboard features (notebook dashboards) ==
+To add a visualization or output results table to a dashboard, click the down arrow next to the tab name. Then, choose the dashboard type you want to build.
 
-Sizing & Placement:
-- Resize via corner handles: "To resize an item, click [corner resize icon] at the lower-right corner and move your cursor until the item is the size you want."
-- Move items by clicking and dragging
-- Two layout modes: "Stack" (aligned) or "Float" (free movement)
+Create or add to a notebook dashboard​
+NOTE
 
-Titling:
-- "Select the Settings icon [Gear fill icon]. The Configure Dashboard Element dialog appears. In the dialog, click Show Title, enter a title for the plot, and click Save."
+Content in notebook dashboards are tied to the output of notebook cells. If you clear the cell output, the dashboard content is also cleared.
 
-Navigation:
-- Dashboard icon (top right) displays all associated dashboards
-- Users switch between notebook and dashboard views
-- Hover over plots to access "new window" icon linking to source cells
+To create a notebook dashboard, use the following steps:
 
-Scheduling:
-- "Click Schedule to create a scheduled job for the notebook that generates the dashboard plots."
-- "View last successful run" shows latest results
+Select Add to notebook dashboard >.
+If you select Add to new notebook dashboard, the new dashboard is automatically displayed.
+To add the plot to an existing dashboard, click the name of the dashboard. A checkmark appears to indicate that the plot is now on that dashboard. The dashboard is not automatically displayed. To go to the dashboard, click  to the right of the dashboard name.
+Create or add to an AI/BI dashboard​
+NOTE
 
-Presentation Mode:
-- "To present a dashboard, click Fullscreen. To return to the interactive dashboard, click Exit in the upper-left corner or press the Esc key."
+Only visualizations from SQL cells can be added to AI/BI dashboards.
 
-Deletion:
-- "Delete this dashboard" removes the dashboard entirely
+To create an AI/BI dashboard, use the following steps:
+
+Select Add to dashboard.
+In the Add to dashboard dialog, select Create a new dashboard or Add to existing dashboard.
+
+If you select Create new dashboard:
+
+An automatically generated dashboard title is provided in the Name field. Enter a new name to rename the dashboard.
+Select the widgets you want to appear on the dashboard.
+Click Create.
+
+If you select Add to existing dashboard:
+
+Use the drop-down menu in the Name field to select the dashboard for your visualization.
+Select the widgets that you want to include.
+Click Import.
+
+You can configure and edit visualizations on your dashboard's pages. You can access the queries associated with your visualizations in your dashboard's Data tab. The remaining instructions on this page pertain to notebook dashboards. To learn how to manage and share your AI/BI dashboard, see Dashboards.
+
+Control size and placement of items on a notebook dashboard​
+To resize an item, click  at the lower-right corner and move your cursor until the item is the size you want.
+To move an item, click in the item and hold while you move your cursor.
+There are two layout options in the right panel, Stack and Float. Stack keeps the items neatly lined up on the dashboard. To move items around more freely, select Float.
+To add a name to a plot, move your cursor over the plot. A control panel  appears on the right.
+Select the Settings icon . The Configure Dashboard Element dialog appears.
+In the dialog, click Show Title, enter a title for the plot, and click Save.
+To remove the item from the dashboard, move your cursor over the plot to display the control panel in the upper-right corner, and click .
+Add a title to a notebook dashboard​
+
+On the right panel, click  to edit the dashboard title. Enter the new title for the dashboard. Click  to save the title.
+
+Navigate between a notebook dashboard and a notebook​
+
+In the top right of a notebook or notebook dashboard, click  to view all dashboards associated with the notebook. Click on a dashboard's name to switch to a view of that dashboard. Click Notebook view to switch back to the notebook editor.
+
+To go from a dashboard directly to the notebook cell that created a plot, hover over the plot, then click  on the right side.
+
+Present a notebook dashboard​
+
+To present a dashboard, click  Fullscreen. To return to the interactive dashboard, click Exit in the upper-left corner or press the Esc key.
+
+Delete a notebook dashboard​
+
+To delete a dashboard, click Delete this dashboard.
+
+Create a scheduled job to refresh a notebook dashboard​
+
+Click  Schedule to create a scheduled job for the notebook that generates the dashboard plots. The job refreshes the dashboard at the specified interval. For details about scheduled jobs, see Create and manage scheduled notebook jobs.
+
+To view the dashboard with results from the latest scheduled run, click  Notebook and dashboard views at the upper-right, then click  View last successful run next to the notebook dashboard. This dashboard view always shows the latest run results.
+
+From the regular dashboard view, you can also click the link under Last scheduled run to see the latest run results.
+
+On this page
+Create or add to a dashboard
+Create or add to a notebook dashboard
+Create or add to an AI/BI dashboard
+Control size and placement of items on a notebook dashboard
+Add a title to a notebook dashboard
+Navigate between a notebook dashboard and a notebook
+Present a notebook dashboard
+Delete a notebook dashboard
+Create a scheduled job to refresh a notebook dashboard
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/viz-and-md-dashboard-menus-c8bba49d9c8dbc618de4f70e501ceccd.png)
+*Menu the shows buttons for adding visualization to dashboard (1274×880)*
+
+![](https://assets.docs.databricks.com/_static/images/notebooks/notebook-dashboard-menu.gif)
+*Open notebook dashboard menu (1274×682)*

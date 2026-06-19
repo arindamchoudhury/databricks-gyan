@@ -1,38 +1,67 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/failing-spark-jobs
-FETCHED: 2026-06-17
-PART OF: Spark UI Guide series
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UIFailing jobs or executors removed
+Last updated on Mar 6, 2026
+Failing jobs or executors removed
 
-=== THREE CAUSES OF EXECUTOR REMOVAL ===
-1. Autoscaling — "In this case it's expected and not an error."
-2. Spot instance losses — "The cloud provider is reclaiming your VMs."
-3. Executors running out of memory
+So you're seeing failed jobs or removed executors:
 
-=== FAILING JOBS — DIAGNOSTIC STEPS ===
-1. Click the failing job to open its detail page.
-2. Scroll down to see the failed stage and failure reason.
-3. Click the link in the description for more info (if reason is generic).
-4. Scroll further to see why each task failed.
+The most common reasons for executors being removed are:
 
-=== FAILING EXECUTORS — DIAGNOSTIC STEPS ===
-1. Check the compute's Event log for an explanation (resizing, spot instance loss).
-2. If spot instances: see "Losing spot instances" page.
-3. If autoscaling resizing: expected behavior.
-4. If no explanation in event log: go to Spark UI → Executors tab → get logs from the failed executors.
+Autoscaling: In this case it's expected and not an error. See Enable autoscaling.
+Spot instance losses: The cloud provider is reclaiming your VMs. You can learn more about Spot instances here.
+Executors running out of memory
+Failing jobs​
 
-=== NEXT STEP ===
-"If you've gotten this far, the likeliest explanation is a memory issue."
-Next: see "Spark memory issues" page.
+If you see any failing jobs, click on them to get to their pages. Then scroll down to see the failed stage and a failure reason:
 
-=== LINKED PAGES ===
-- /aws/en/compute/configure#autoscaling
-- /aws/en/optimizations/spark-ui-guide/losing-spot-instances
-- /aws/en/optimizations/spark-ui-guide/spark-memory-issues
+You may get a generic error. Click on the link in the description to see if you can get more info:
 
-=== IMAGES ===
-01-failing-jobs.png — Jobs list showing red/failed jobs
-02-failed-stage-reason.png — Failed stage with failure reason text
-03-failed-stage-description.png — Stage description link for more info
-04-failed-tasks.png — Task-level failure detail
-05-event-log.png — Cluster Event log showing executor events
-06-executors-tab.png — Spark UI Executors tab
-07-failed-executors.png — Example of failed executors in the list
+If you scroll down in this page, you will be able to see why each task failed. In this case it's becoming clear there's a memory issue:
+
+Failing executors​
+
+To find out why your executors are failing, you'll first want to check the compute's Event log to see if there's any explanation for why the executors failed. For example, it's possible you're using spot instances and the cloud provider is taking them back.
+
+See if there are any events explaining the loss of executors. For example you may see messages indicating that the cluster is resizing or spot instances are being lost.
+
+If you are using spot instances, see Losing spot instances.
+If your compute was resized with autoscaling, it's expected and not an error. See Learn more about cluster resizing.
+
+If you don't see any information in the event log, navigate back to the Spark UI then click the Executors tab:
+
+Here you can get the logs from the failed executors:
+
+Next step​
+
+If you've gotten this far, the likeliest explanation is a memory issue. The next step is to dig into memory issues. See Spark memory issues.
+
+On this page
+Failing jobs
+Failing executors
+Next step
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/failing-jobs-049d0222bd62f5f2ef4c0132c42dade2.png)
+*Failing Jobs (1024×481)*
+
+![](https://docs.databricks.com/aws/en/assets/images/failed-stage-reason-71cbd81da8a994556b4909a48ff49a8f.png)
+*Failure Reason (2990×676)*
+
+![](https://docs.databricks.com/aws/en/assets/images/failed-stage-description-79fab841becd957b97f6a7041b6a4cf7.png)
+*Failure Description (2990×643)*
+
+![](https://docs.databricks.com/aws/en/assets/images/failed-tasks-71d26299f43b8e4826668c1736dfe0b8.png)
+*Failed Tasks (2990×580)*
+
+![](https://docs.databricks.com/aws/en/assets/images/event-log-131eeb372824091345bbfaabcb96cce0.png)
+*Event Log (1798×218)*
+
+![](https://docs.databricks.com/aws/en/assets/images/executors-a1878ece87f116ece50ce65d69323df0.png)
+*Executors tab (1926×366)*
+
+![](https://docs.databricks.com/aws/en/assets/images/failed-executors-6f343c043e0c15def8b9993d5f91c484.png)
+*Example of failed executors (2990×784)*

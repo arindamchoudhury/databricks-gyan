@@ -102,3 +102,13 @@ Scheduling creates a Lakeflow job that re-runs the notebook on a timer. "View la
 - [[notebooks-overview]] — hub page; "Dashboards in notebooks" is listed as a collaborate/share topic
 - [[lakeflow-jobs]] — scheduling a dashboard triggers a notebook job; see jobs notes for scheduling mechanics
 - [[workspace-walkthrough]] — DA-FREE M1; covers the notebook UI that dashboards live inside
+
+
+## Images
+
+[![Menu the shows buttons for adding visualization to dashboard](assets/notebook-dashboards/01.png)](assets/notebook-dashboards/01.png)
+*Menu the shows buttons for adding visualization to dashboard (1274×880)*
+
+[![Open notebook dashboard menu](assets/notebook-dashboards/02.gif)](assets/notebook-dashboards/02.gif)
+*Open notebook dashboard menu (1274×682)*
+

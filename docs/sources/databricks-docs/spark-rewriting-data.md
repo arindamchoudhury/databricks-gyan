@@ -54,3 +54,16 @@ This page covers detection only. For remediation:
 - [[spark-ui-guide]] — parent guide
 - [[long-spark-stage-io]] — Step 4; links here from high-output branch
 - [[optimize-data-workloads-guide]] — merge internals and optimizations
+
+
+## Images
+
+[![Stage to SQL](assets/spark-rewriting-data/01.png)](assets/spark-rewriting-data/01.png)
+*Stage to SQL (1428×482)*
+
+[![SQL DAG](assets/spark-rewriting-data/02.png)](assets/spark-rewriting-data/02.png)
+*SQL DAG (1546×1324)*
+
+[![Write Stats](assets/spark-rewriting-data/03.png)](assets/spark-rewriting-data/03.png)
+*Write Stats (1094×686)*
+

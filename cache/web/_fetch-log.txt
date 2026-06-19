@@ -1,0 +1,79 @@
+Fetch run started: 06/18/2026 12:33:22
+notebook-debugger: Images: captured 6 image(s) (880s)
+serverless-notebooks: Images: captured 2 image(s) (790s)
+serverless-jobs: Images: captured 4 image(s) (1000s)
+serverless-pipelines: Images: captured 1 image(s) (1120s)
+serverless-limitations: Images: captured 1 image(s) (789s)
+=== Batch fetch started 2026-06-19 08:35:29 ===
+[1/35] notebook-debugger  https://docs.databricks.com/aws/en/notebooks/debugger
+  OK  4s  Images: captured 6 image(s)
+[2/35] serverless-notebooks  https://docs.databricks.com/aws/en/compute/serverless/notebooks
+  OK  4s  Images: captured 1 image(s)
+[3/35] serverless-jobs  https://docs.databricks.com/aws/en/jobs/run-serverless-jobs
+  OK  3s  Images: captured 3 image(s)
+[4/35] serverless-pipelines  https://docs.databricks.com/aws/en/ldp/serverless
+  OK  4s  no images
+[5/35] serverless-limitations  https://docs.databricks.com/aws/en/compute/serverless/limitations
+  OK  3s  no images
+[6/35] classic-compute-overview  https://docs.databricks.com/aws/en/compute/use-compute
+  OK  4s  no images
+[7/35] classic-compute-configure  https://docs.databricks.com/aws/en/compute/configure
+  OK  3s  Images: captured 3 image(s)
+[8/35] standard-compute-overview  https://docs.databricks.com/aws/en/compute/standard-overview
+  OK  4s  no images
+[9/35] dedicated-compute-overview  https://docs.databricks.com/aws/en/compute/dedicated-overview
+  OK  4s  no images
+[10/35] compute-pools  https://docs.databricks.com/aws/en/compute/pool-index
+  OK  4s  Images: captured 1 image(s)
+[11/35] sql-warehouse-overview  https://docs.databricks.com/aws/en/compute/sql-warehouse/
+  OK  4s  no images
+[12/35] sql-warehouse-types  https://docs.databricks.com/aws/en/compute/sql-warehouse/warehouse-types
+  OK  3s  no images
+[13/35] photon  https://docs.databricks.com/aws/en/compute/photon
+  OK  3s  no images
+[14/35] lakeguard  https://docs.databricks.com/aws/en/compute/lakeguard
+  OK  3s  Images: captured 2 image(s)
+[15/35] notebooks-overview  https://docs.databricks.com/aws/en/notebooks/
+  OK  3s  Images: captured 1 image(s)
+[16/35] notebook-dashboards  https://docs.databricks.com/aws/en/notebooks/dashboards
+  OK  3s  Images: captured 2 image(s)
+[17/35] notebook-testing  https://docs.databricks.com/aws/en/notebooks/testing
+  OK  4s  no images
+[18/35] notebook-widgets  https://docs.databricks.com/aws/en/notebooks/widgets
+  OK  3s  Images: captured 7 image(s)
+[19/35] notebook-workflows  https://docs.databricks.com/aws/en/notebooks/notebook-workflows
+  OK  3s  Images: captured 2 image(s)
+[20/35] notebook-ipywidgets  https://docs.databricks.com/aws/en/notebooks/ipywidgets
+  OK  4s  no images
+[21/35] notebook-share-code  https://docs.databricks.com/aws/en/notebooks/share-code
+  OK  3s  Images: captured 3 image(s)
+[22/35] notebook-best-practices  https://docs.databricks.com/aws/en/notebooks/best-practices
+  OK  3s  no images
+[23/35] spark-ui-guide  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide
+  OK  3s  Images: captured 2 image(s)
+[24/35] optimize-data-workloads-guide  https://www.databricks.com/discover/pages/optimize-data-workloads-guide
+  OK  3s  Images: captured 26 image(s)
+[25/35] failing-spark-jobs  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/failing-spark-jobs
+  OK  3s  Images: captured 7 image(s)
+[26/35] long-spark-stage  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage
+  OK  4s  Images: captured 4 image(s)
+[27/35] long-spark-stage-page  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-page
+  OK  3s  Images: captured 3 image(s)
+[28/35] spark-memory-issues  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-memory-issues
+  OK  4s  no images
+[29/35] long-spark-stage-io  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-io
+  OK  3s  Images: captured 1 image(s)
+[30/35] slow-spark-stage-low-io  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io
+  OK  4s  Images: captured 7 image(s)
+[31/35] spark-rewriting-data  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-rewriting-data
+  OK  4s  Images: captured 3 image(s)
+[32/35] one-spark-task  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/one-spark-task
+  OK  4s  no images
+[33/35] losing-spot-instances  https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/losing-spot-instances
+  OK  4s  no images
+[34/35] sql-join-hints  https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-qry-select-hints
+  OK  4s  no images
+[35/35] aqe  https://docs.databricks.com/aws/en/optimizations/aqe
+  OK  4s  Images: captured 12 image(s)
+
+=== Done in 123s. Failed: 0 ===

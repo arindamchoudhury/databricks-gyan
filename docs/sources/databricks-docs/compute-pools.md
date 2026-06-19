@@ -85,3 +85,10 @@ Effects on attached clusters:
 
 - [[classic-compute-configure]] — autoscaling-with-pools constraints (idle count vs min workers, max size vs pool capacity); driver-type spot warning; tag propagation caveat.
 - [[classic-compute-overview]] — permission model for compute; pools have their own parallel permission system.
+
+
+## Images
+
+[![Set pool permissions](assets/compute-pools/01.png)](assets/compute-pools/01.png)
+*Set pool permissions (1264×554)*
+

@@ -216,3 +216,13 @@ Check the **SQL DAG** — navigate from the stage detail to the SQL plan.
 - [[classic-compute-overview]] — cluster architecture (drivers, workers, executors)
 - [[photon]] — Photon helps with I/O-bound read and write stages
 - [[sql-warehouse-types]] — serverless as alternative to resizing classic clusters
+
+
+## Images
+
+[![Navigate to Compute](assets/spark-ui-guide/01.png)](assets/spark-ui-guide/01.png)
+*Navigate to Compute (2256×764)*
+
+[![Navigate to SparkUI](assets/spark-ui-guide/02.png)](assets/spark-ui-guide/02.png)
+*Navigate to SparkUI (2446×670)*
+

@@ -172,3 +172,13 @@ Full examples are in downloadable sample notebooks (not shown inline on the docs
 - [[notebook-widgets]] — `%run /path $X="10"` passes widget values; constrained to classic compute only
 - [[notebook-testing]] — workspace files (the recommended modularization pattern) are also where test files live
 - [[lakeflow-jobs]] — DA-FREE M2-04; the recommended primary orchestration mechanism this page defers to
+
+
+## Images
+
+[![Shared code notebook](assets/notebook-workflows/01.png)](assets/notebook-workflows/01.png)
+*Shared code notebook (941×264)*
+
+[![Notebook import example](assets/notebook-workflows/02.png)](assets/notebook-workflows/02.png)
+*Notebook import example (959×374)*
+

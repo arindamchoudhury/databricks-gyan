@@ -88,3 +88,10 @@ Lets Spark calculate optimal partition count automatically via AQE. See [[optimi
 - [[long-spark-stage-page]] — Step 3 (skew/spill); leads here via "Associated Job Ids"
 - [[slow-spark-stage-low-io]] — Step 5 (other causes); follows from "no high I/O"
 - [[optimize-data-workloads-guide]] — shuffle partition formula, broadcast config, Delta cache vs Spark cache
+
+
+## Images
+
+[![Long Stage I/O](assets/long-spark-stage-io/01.jpeg)](assets/long-spark-stage-io/01.jpeg)
+*Long Stage I/O (3798×404)*
+

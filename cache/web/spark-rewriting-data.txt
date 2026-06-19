@@ -1,22 +1,27 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-rewriting-data
-FETCHED: 2026-06-17
-PART OF: Spark UI Guide series (linked from long-spark-stage-io high output section)
-NOTE: Detection-only page — no remediation here; remediation is in long-spark-stage-io (output section).
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UISpark rewriting data
+Last updated on Apr 15, 2024
+How to determine if Spark is rewriting data
 
-=== STEPS TO CHECK FOR DATA REWRITING ===
-1. "First open the SQL DAG for your write stage. Scroll up to the top of the job's page and click on the Associated SQL Query."
-2. "You should now see the DAG. If not, scroll around a bit and you should see it."
-3. For Delete/Update: "look at the amount of data being written by the writer versus what you expect. If you're seeing a lot more data being written than you expect, you're probably rewriting data."
-4. For Merge: "If you're doing a merge, the merge node has explicit statistics about how much data it's rewriting."
+First open the SQL DAG for your write stage. Scroll up to the top of the job's page and click on the Associated SQL Query:
 
-No specific threshold defined — comparison against expectation only.
-No remediation on this page — see long-spark-stage-io high output section.
+You should now see the DAG. If not, scroll around a bit and you should see it:
 
-=== INTERNAL LINKS ===
-- /aws/en/optimizations/spark-ui-guide/ (parent)
-- /aws/en/compute/troubleshooting/ (compute troubleshooting)
+If you're doing a Delete or Update operation, look at the amount of data being written by the writer versus what you expect. If you're seeing a lot more data being written than you expect, you're probably rewriting data:
 
-=== IMAGES ===
-stage-to-sql → already at assets/spark-ui-guide/14-stage-to-sql.png
-sql-dag → already at assets/spark-ui-guide/15-sql-dag.png
-write-stats → assets/spark-rewriting-data/01-write-stats.png (NEW — downloaded)
+If you're doing a merge, the merge node has explicit statistics about how much data it's rewriting.
+
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/stage-to-sql-f7ba3852d36180fe8773828781cc1a1d.png)
+*Stage to SQL (1428×482)*
+
+![](https://docs.databricks.com/aws/en/assets/images/sql-dag-2a8f12dd2f61c647627f5904dab9660f.png)
+*SQL DAG (1546×1324)*
+
+![](https://docs.databricks.com/aws/en/assets/images/write-stats-ea42a244af99b39d4454cbd31902eaef.png)
+*Write Stats (1094×686)*

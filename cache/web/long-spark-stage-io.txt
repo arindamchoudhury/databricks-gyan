@@ -1,48 +1,58 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-io
-FETCHED: 2026-06-17
-PART OF: Spark UI Guide series (Step 4 of 5)
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UIHigh I/O
+Last updated on Jun 11, 2026
+Spark stage high I/O
 
-=== WHAT IS HIGH I/O? ===
-"How much data needs to be in an I/O column to be considered high? To figure this out, first start with the highest number in any of the given columns. Then consider the total number of CPU cores you have across all our workers. Generally each core can read and write about 3 MBs per second. Divide your biggest I/O column by the number of cluster worker cores, then divide that by duration seconds. If the result is around 3 MB, then you're probably I/O bound. That would be high I/O."
+Next, look at the I/O stats of the longest stage again:
 
-Formula: max_IO_column_bytes / worker_cores / duration_seconds ≈ 3 MB/s → I/O bound
+What is high I/O?​
 
-=== HIGH INPUT ===
-"If you see a lot of input into your stage, that means you're spending a lot of time reading data."
+How much data needs to be in an I/O column to be considered high? To figure this out, first start with the highest number in any of the given columns. Then consider the total number of CPU cores you have across all our workers. Generally each core can read and write about 3 MBs per second.
 
-Recommendations:
-- Use Delta
-- Use liquid clustering for data skipping → /aws/en/tables/clustering
-- Try Photon
-- Make queries more selective
-- Reconsider data layout
-- Use Delta cache for repeated reads
-- Consider DFP (Dynamic File Pruning) for joins
-- Increase cluster size or use serverless compute
+Divide your biggest I/O column by the number of cluster worker cores, then divide that by duration seconds. If the result is around 3 MB, then you're probably I/O bound. That would be high I/O.
 
-=== HIGH OUTPUT ===
-"If you see a lot of output from your stage, that means you're spending a lot of time writing data."
+High input​
 
-Recommendations:
-- Check if rewriting data → /aws/en/optimizations/spark-ui-guide/spark-rewriting-data
-- Optimize merges
-- Use deletion vectors → /aws/en/tables/features/deletion-vectors
-- Enable Photon
-- Increase cluster size or use serverless compute
+If you see a lot of input into your stage, that means you're spending a lot of time reading data. First, identify what data this stage is reading. See Identifying an expensive read in Spark's DAG.
 
-=== HIGH SHUFFLE ===
-"Databricks recommends you set spark.sql.shuffle.partitions=auto to let Spark pick the number of optimal shuffle partitions automatically."
+After you identify the specific data, here are some approaches to speeding up your reads:
 
-=== NO HIGH I/O ===
-"If you don't see high I/O in any of the columns, then you need to dig deeper. See Slow Spark stage with little I/O"
-→ /aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io
+Use Delta.
+Use liquid clustering for better data skipping. See Use liquid clustering for tables.
+Try Photon. It can help a lot with read speed, especially for wide tables.
+Make your query more selective so it doesn't need to read as much data.
+Reconsider your data layout so that data skipping is more effective.
+If you're reading the same data multiple times, use the Delta cache.
+If you're doing a join, consider trying to get DFP working.
+Increase the size of your cluster or use serverless compute.
+High output​
 
-=== INTERNAL LINKS ===
-- /aws/en/tables/clustering (liquid clustering)
-- /aws/en/optimizations/spark-ui-guide/spark-rewriting-data (check data rewriting — NOT YET CAPTURED)
-- /aws/en/tables/features/deletion-vectors (deletion vectors)
-- /aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io (Step 5)
+If you see a lot of output from your stage, that means you're spending a lot of time writing data. Here are some approaches to resolving this:
 
-=== IMAGES ===
-(already downloaded to assets/spark-ui-guide/)
-08-long-stage-io.jpeg — stage I/O columns showing Input/Output/Shuffle Read/Shuffle Write
+Are you rewriting a lot of data? See How to determine if Spark is rewriting data to check. If you are rewriting a lot of data:
+See if you have a merge that needs to be optimized.
+Use deletion vectors to mark existing rows as removed or changed without rewriting the Parquet file.
+Enable Photon if it isn't already. Photon can help a lot with write speed.
+Increase the size of your cluster or use serverless compute.
+High shuffle​
+
+Databricks recommends you set spark.sql.shuffle.partitions=auto to let Spark pick the number of optimal shuffle partitions automatically. If you're not familiar with shuffle, this is the time to learn.
+
+No high I/O​
+
+If you don't see high I/O in any of the columns, then you need to dig deeper. See Slow Spark stage with little I/O.
+
+On this page
+What is high I/O?
+High input
+High output
+High shuffle
+No high I/O
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/long-stage-io-e2a24b5af9a1c769758cabc2249cf8d1.jpeg)
+*Long Stage I/O (3798×404)*

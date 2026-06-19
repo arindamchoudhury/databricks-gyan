@@ -101,3 +101,25 @@ Three ways to start, plus a post-error path:
 
 - [[ch01-getting-started-with-databricks]] — DCDE-SG Ch 1; covers notebooks, cells, and the cluster access modes referenced in the requirements
 - [[workspace-walkthrough]] — DA-FREE M1; the notebook UI this debugger lives in
+
+
+## Images
+
+[![create and remove breakpoints video](assets/notebook-debugger/01.gif)](assets/notebook-debugger/01.gif)
+*create and remove breakpoints video (438×250)*
+
+[![debug cell item in cell run menu](assets/notebook-debugger/02.png)](assets/notebook-debugger/02.png)
+*debug cell item in cell run menu (270×197)*
+
+[![example step in](assets/notebook-debugger/03.gif)](assets/notebook-debugger/03.gif)
+*example step in (2164×1613)*
+
+[![debug_console](assets/notebook-debugger/04.gif)](assets/notebook-debugger/04.gif)
+*debug_console (3226×1698)*
+
+[![example variable explorer panel](assets/notebook-debugger/05.png)](assets/notebook-debugger/05.png)
+*example variable explorer panel (432×705)*
+
+[![Company Logo](assets/notebook-debugger/06.png)](assets/notebook-debugger/06.png)
+*Company Logo (1420×224)*
+

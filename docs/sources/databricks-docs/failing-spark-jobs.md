@@ -82,3 +82,28 @@ Sub-page of the Spark UI Guide series. Covers the three causes of executor remov
 
 - [[spark-ui-guide]] — parent guide; this page is part of the Jobs Timeline diagnostic branch
 - [[optimize-data-workloads-guide]] — broader optimization context (memory, spill, cluster config)
+
+
+## Images
+
+[![Failing Jobs](assets/failing-spark-jobs/01.png)](assets/failing-spark-jobs/01.png)
+*Failing Jobs (1024×481)*
+
+[![Failure Reason](assets/failing-spark-jobs/02.png)](assets/failing-spark-jobs/02.png)
+*Failure Reason (2990×676)*
+
+[![Failure Description](assets/failing-spark-jobs/03.png)](assets/failing-spark-jobs/03.png)
+*Failure Description (2990×643)*
+
+[![Failed Tasks](assets/failing-spark-jobs/04.png)](assets/failing-spark-jobs/04.png)
+*Failed Tasks (2990×580)*
+
+[![Event Log](assets/failing-spark-jobs/05.png)](assets/failing-spark-jobs/05.png)
+*Event Log (1798×218)*
+
+[![Executors tab](assets/failing-spark-jobs/06.png)](assets/failing-spark-jobs/06.png)
+*Executors tab (1926×366)*
+
+[![Example of failed executors](assets/failing-spark-jobs/07.png)](assets/failing-spark-jobs/07.png)
+*Example of failed executors (2990×784)*
+

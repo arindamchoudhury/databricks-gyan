@@ -135,3 +135,16 @@ Serverless compute for workflows has a dedicated limitations page. See [Serverle
 - [[serverless-notebooks]] — the interactive-notebook counterpart: same UC prerequisite, same "no Spark UI → use query insights/timeline" pattern, same Photon-auto-enabled story. Key difference: jobs has performance modes and auto-optimization; notebooks have overspend timeout.
 - [[ch01-getting-started-with-databricks]] — DCDE-SG Ch 1 §8 covers job clusters as the production compute path; serverless jobs supersedes job clusters for supported task types (no cluster config, auto-managed, same cost efficiency goal).
 - [[notebook-debugger]] — debugging notebook tasks in jobs: the interactive debugger works with serverless compute, making it useful when a notebook task misbehaves.
+
+
+## Images
+
+[![Create serverless task](assets/serverless-jobs/01.png)](assets/serverless-jobs/01.png)
+*Create serverless task (1107×566)*
+
+[![Switch task to serverless compute](assets/serverless-jobs/02.png)](assets/serverless-jobs/02.png)
+*Switch task to serverless compute (1107×171)*
+
+[![A task with several query statements and their runtimes in timeline view from the jobs UI.](assets/serverless-jobs/03.png)](assets/serverless-jobs/03.png)
+*A task with several query statements and their runtimes in timeline view from the jobs UI. (400×283)*
+

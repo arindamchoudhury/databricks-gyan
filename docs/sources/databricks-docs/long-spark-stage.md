@@ -60,3 +60,19 @@ Scroll to the stage list at the bottom of the job's detail page. Sort by **Durat
 - [[spark-ui-guide]] — parent guide; this is Step 2 of 5
 - [[spark-ui-guide]] Step 3: [[long-spark-stage-page]] — skew/spill (not yet a separate note)
 - [[optimize-data-workloads-guide]] — shuffle data sizing formulas used in Step 4
+
+
+## Images
+
+[![Long Stage](assets/long-spark-stage/01.png)](assets/long-spark-stage/01.png)
+*Long Stage (3798×404)*
+
+[![Long Stage I/O](assets/long-spark-stage/02.jpeg)](assets/long-spark-stage/02.jpeg)
+*Long Stage I/O (3798×404)*
+
+[![Determining number of tasks](assets/long-spark-stage/03.jpeg)](assets/long-spark-stage/03.jpeg)
+*Determining number of tasks (3798×404)*
+
+[![Open Stage Info](assets/long-spark-stage/04.png)](assets/long-spark-stage/04.png)
+*Open Stage Info (3798×404)*
+

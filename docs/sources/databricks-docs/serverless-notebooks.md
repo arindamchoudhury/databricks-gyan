@@ -81,3 +81,10 @@ Databricks imposes an **execution timeout** to prevent runaway spend from long-i
 
 - [[notebook-debugger]] — also covers notebooks; the interactive debugger mentions serverless as a supported compute option (no cluster config required); the Spark UI absence noted here means debugger + query insights are the two complementary tools for serverless notebook observability.
 - [[ch01-getting-started-with-databricks]] — DCDE-SG Ch 1 §9 Note: confirms Unity Catalog + serverless account enablement as prerequisites, consistent with this page.
+
+
+## Images
+
+[![Show query performance](assets/serverless-notebooks/01.png)](assets/serverless-notebooks/01.png)
+*Show query performance (1001×255)*
+

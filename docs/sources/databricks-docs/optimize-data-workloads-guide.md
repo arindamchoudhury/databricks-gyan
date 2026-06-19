@@ -262,3 +262,85 @@ Enable on all all-purpose clusters (default idle timeout: 120 minutes).
 - [[sql-warehouse-types]] — serverless as scaling alternative to cluster resizing
 - [[classic-compute-configure]] — cluster config details (instance types, autoscaling)
 - [[compute-pools]] — pre-warmed instances to reduce cold start
+
+
+## Images
+
+[![Optimize Databricks, Spark and Delta Lake Workloads](assets/optimize-data-workloads-guide/01.png)](assets/optimize-data-workloads-guide/01.png)
+*Optimize Databricks, Spark and Delta Lake Workloads (1118×648)*
+
+[![Delta Lake](assets/optimize-data-workloads-guide/02.png)](assets/optimize-data-workloads-guide/02.png)
+*Delta Lake (300×300)*
+
+[![icon-graphic-8](assets/optimize-data-workloads-guide/03.png)](assets/optimize-data-workloads-guide/03.png)
+*icon-graphic-8 (519×522)*
+
+[![Data Shuffling](assets/optimize-data-workloads-guide/04.png)](assets/optimize-data-workloads-guide/04.png)
+*Data Shuffling (283×166)*
+
+[![Data Spilling](assets/optimize-data-workloads-guide/05.png)](assets/optimize-data-workloads-guide/05.png)
+*Data Spilling (283×166)*
+
+[![Data Spilling](assets/optimize-data-workloads-guide/06.png)](assets/optimize-data-workloads-guide/06.png)
+*Data Spilling (425×291)*
+
+[![Data Spilling](assets/optimize-data-workloads-guide/07.png)](assets/optimize-data-workloads-guide/07.png)
+*Data Spilling (850×365)*
+
+[![Data Spilling](assets/optimize-data-workloads-guide/08.png)](assets/optimize-data-workloads-guide/08.png)
+*Data Spilling (638×607)*
+
+[![Data Spilling](assets/optimize-data-workloads-guide/09.png)](assets/optimize-data-workloads-guide/09.png)
+*Data Spilling (850×248)*
+
+[![Data Skewness — Identification and Remediation](assets/optimize-data-workloads-guide/10.png)](assets/optimize-data-workloads-guide/10.png)
+*Data Skewness — Identification and Remediation (283×165)*
+
+[![Data Skewness](assets/optimize-data-workloads-guide/11.png)](assets/optimize-data-workloads-guide/11.png)
+*Data Skewness (850×299)*
+
+[![Data Skewness](assets/optimize-data-workloads-guide/12.png)](assets/optimize-data-workloads-guide/12.png)
+*Data Skewness (638×142)*
+
+[![Data Skewness](assets/optimize-data-workloads-guide/13.png)](assets/optimize-data-workloads-guide/13.png)
+*Data Skewness (850×345)*
+
+[![data-skewness](assets/optimize-data-workloads-guide/14.png)](assets/optimize-data-workloads-guide/14.png)
+*data-skewness (850×475)*
+
+[![Data Explosion](assets/optimize-data-workloads-guide/15.png)](assets/optimize-data-workloads-guide/15.png)
+*Data Explosion (283×165)*
+
+[![Data Explosion](assets/optimize-data-workloads-guide/16.png)](assets/optimize-data-workloads-guide/16.png)
+*Data Explosion (425×300)*
+
+[![Data Explosion](assets/optimize-data-workloads-guide/17.png)](assets/optimize-data-workloads-guide/17.png)
+*Data Explosion (567×239)*
+
+[![Data Skipping and Pruning](assets/optimize-data-workloads-guide/18.png)](assets/optimize-data-workloads-guide/18.png)
+*Data Skipping and Pruning (283×166)*
+
+[![Data Caching](assets/optimize-data-workloads-guide/19.png)](assets/optimize-data-workloads-guide/19.png)
+*Data Caching (283×166)*
+
+[![Delta Merge](assets/optimize-data-workloads-guide/20.png)](assets/optimize-data-workloads-guide/20.png)
+*Delta Merge (283×165)*
+
+[![Delta Live Tables](assets/optimize-data-workloads-guide/21.png)](assets/optimize-data-workloads-guide/21.png)
+*Delta Live Tables (638×416)*
+
+[![Delta Live Tables](assets/optimize-data-workloads-guide/22.png)](assets/optimize-data-workloads-guide/22.png)
+*Delta Live Tables (638×338)*
+
+[![Delta Live Tables](assets/optimize-data-workloads-guide/23.png)](assets/optimize-data-workloads-guide/23.png)
+*Delta Live Tables (638×394)*
+
+[![Databricks Cluster](assets/optimize-data-workloads-guide/24.png)](assets/optimize-data-workloads-guide/24.png)
+*Databricks Cluster (850×432)*
+
+[![Databricks Cluster](assets/optimize-data-workloads-guide/25.png)](assets/optimize-data-workloads-guide/25.png)
+*Databricks Cluster (567×565)*
+
+[![Company Logo](assets/optimize-data-workloads-guide/26.png)](assets/optimize-data-workloads-guide/26.png)
+*Company Logo (1420×224)*
+

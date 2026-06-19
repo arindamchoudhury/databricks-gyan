@@ -1,32 +1,48 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-page
-FETCHED: 2026-06-17
-PART OF: Spark UI Guide series (Step 3 of 5)
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UISkew and spill
+Last updated on Apr 19, 2024
+Skew and spill
+Spill​
 
-=== SPILL ===
-"The first thing to look for in a long-running stage is whether there's spill."
-"Spill is what happens when Spark runs low on memory. It starts to move data from memory to disk, and this can be quite expensive."
-Check stage page top for spill statistics.
-No spill stats shown → no spill.
-Spill stats shown → consult shuffle/spill optimization guidance.
+The first thing to look for in a long-running stage is whether there's spill.
 
-=== SKEW ===
-"The next thing we want to look into is whether there's skew."
-"Skew is when one or just a few tasks take much longer than the rest."
-Navigate to Summary Metrics.
-Compare Max duration vs 75th percentile duration.
-"If the Max duration is 50% more than the 75th percentile, you may be suffering from skew."
-Equal values → healthy.
+At the top of the stage's page you'll see the details, which may include stats about spill:
 
-=== NO SKEW / NO SPILL PATH ===
-Return to job page → scroll to top → click "Associated Job Ids"
-→ leads to Spark stage high I/O troubleshooting (Step 4)
+Spill is what happens when Spark runs low on memory. It starts to move data from memory to disk, and this can be quite expensive. It is most common during data shuffling.
 
-=== INTERNAL LINKS ===
-- /aws/en/optimizations/spark-ui-guide/long-spark-stage-io (Spark stage high I/O — Step 4)
-- databricks.com/discover/pages/optimize-data-workloads-guide (spill and skew remediation)
+If you don't see any stats for spill, that means the stage doesn't have any spill. If the stage has some spill, see this guide on how to deal with spill caused by shuffle.
 
-=== IMAGES ===
-(already downloaded to assets/spark-ui-guide/)
-11-spill-stats.png — spill statistics on stage page
-12-skew-stats.png — summary metrics showing skew (max vs 75th percentile)
-13-stage-to-job.png — "Associated Job Ids" navigation link
+Skew​
+
+The next thing we want to look into is whether there's skew. Skew is when one or just a few tasks take much longer than the rest. This results in poor cluster utilization and longer jobs.
+
+Scroll down to the Summary Metrics. The main thing we're looking for is the Max duration being much higher than the 75th percentile duration. The screenshot below shows a healthy stage, where the 75th percentile and Max are the same:
+
+If the Max duration is 50% more than the 75th percentile, you may be suffering from skew.
+
+If you see skew, learn about skew remediation steps here.
+
+No skew or spill​
+
+If you don't see skew or spill, go back to the job page to get an overview of what's going on. Scroll up to the top of the page and click Associated Job Ids:
+
+If the stage doesn't have spill or skew, see Spark stage high I/O for the next steps.
+
+On this page
+Spill
+Skew
+No skew or spill
+Was this page helpful?
+Yes
+No
+Send feedback
+
+=== Images ===
+
+![](https://docs.databricks.com/aws/en/assets/images/spill-stats-27f362b259d25820050f6425429dbded.png)
+*Spill Stats (852×422)*
+
+![](https://docs.databricks.com/aws/en/assets/images/skew-stats-867429c20fe7c3437fc0cac74b101691.png)
+*Skew Stats (2990×643)*
+
+![](https://docs.databricks.com/aws/en/assets/images/stage-to-job-c28c26c60dcf241a35513de692a80306.png)
+*Stage to Job (802×434)*

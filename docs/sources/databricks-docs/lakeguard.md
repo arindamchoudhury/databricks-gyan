@@ -77,3 +77,13 @@ Lakeguard prevents users from "accessing data resulting from over-fetching when 
 - [[serverless-limitations]] — Spark Connect is the only API surface on serverless; Lakeguard is why.
 - [[dedicated-compute-overview]] — dedicated compute does NOT use Lakeguard (single-user; no isolation needed); that's why it can expose RDD APIs and privileged access.
 - [[classic-compute-configure]] — access mode setting controls whether Lakeguard applies (Standard mode) or not (Dedicated mode).
+
+
+## Images
+
+[![Traditional Spark architecture](assets/lakeguard/01.png)](assets/lakeguard/01.png)
+*Traditional Spark architecture (600×419)*
+
+[![Lakeguard architecture](assets/lakeguard/02.png)](assets/lakeguard/02.png)
+*Lakeguard architecture (680×348)*
+

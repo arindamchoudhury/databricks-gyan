@@ -66,6 +66,8 @@ nav = [
             { "How to Determine if Spark is Rewriting Data" = "sources/databricks-docs/spark-rewriting-data.md" },
             { "One Spark Task" = "sources/databricks-docs/one-spark-task.md" },
             { "Losing Spot Instances" = "sources/databricks-docs/losing-spot-instances.md" },
+            { "SQL Hints: Join, Partition, Skew" = "sources/databricks-docs/sql-join-hints.md" },
+            { "Adaptive Query Execution (AQE)" = "sources/databricks-docs/aqe.md" },
         ]},
     ]},
     { "Release Notes" = [

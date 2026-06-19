@@ -126,3 +126,28 @@ Action: verify the fan-out is intentional; add filters or constraints before the
 - [[spark-ui-guide]] — parent guide; this is Step 5 of 5
 - [[long-spark-stage-io]] — Step 4 (I/O bound); "no high I/O" leads here
 - [[optimize-data-workloads-guide]] — data layout, small files, UDF repartition pattern, explosion mitigations
+
+
+## Images
+
+[![SQL ID](assets/slow-spark-stage-low-io/01.png)](assets/slow-spark-stage-low-io/01.png)
+*SQL ID (1428×482)*
+
+[![SLQ DAG](assets/slow-spark-stage-low-io/02.png)](assets/slow-spark-stage-low-io/02.png)
+*SLQ DAG (1546×1324)*
+
+[![Slow Stage Node](assets/slow-spark-stage-low-io/03.png)](assets/slow-spark-stage-low-io/03.png)
+*Slow Stage Node (2262×768)*
+
+[![Slow Write Node](assets/slow-spark-stage-low-io/04.png)](assets/slow-spark-stage-low-io/04.png)
+*Slow Write Node (1196×368)*
+
+[![Reading Many Files](assets/slow-spark-stage-low-io/05.png)](assets/slow-spark-stage-low-io/05.png)
+*Reading Many Files (1442×660)*
+
+[![Writing many files](assets/slow-spark-stage-low-io/06.png)](assets/slow-spark-stage-low-io/06.png)
+*Writing many files (1082×692)*
+
+[![Exploding Join](assets/slow-spark-stage-low-io/07.png)](assets/slow-spark-stage-low-io/07.png)
+*Exploding Join (2312×512)*
+

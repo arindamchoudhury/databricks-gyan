@@ -1,0 +1,66 @@
+ComputeClassic compute
+Last updated on Mar 25, 2026
+Classic compute overview
+
+This page explains how to access and create classic compute in your Databricks workspace.
+
+What is classic compute?​
+
+Classic compute refers to all-purpose, jobs, and Lakeflow Spark Declarative Pipelines compute resources that you create, configure, and manage for your workloads. Classic compute resources are deployed in your cloud provider account, and are not managed by Databricks.
+
+Classic compute is different from serverless compute, which is deployed and managed by Databricks.
+
+Who can access classic compute?​
+
+If you don't have unrestricted cluster creation permissions, you only have access to the compute and compute policies granted to you by your workspace admins. Users can have any of these permissions on a compute:
+
+CAN ATTACH TO: Allows you to attach your notebook to compute and view the compute metrics and Spark UI.
+CAN RESTART: Allows you to start, restart, and terminate compute. Also includes CAN ATTACH TO permissions.
+CAN MANAGE: Allows you to edit compute details, permissions, and size. Also includes CAN ATTACH TO and CAN RESTART permissions.
+NO PERMISSIONS: No permissions on the compute.
+
+If you have permissions to attach to a compute, you can select it from the compute drop-down menu in an opened notebook or from the Compute drop-down menu when creating a new job. For more information on compute permissions, see Compute permissions.
+
+What are compute access modes?​
+
+All-purpose and jobs compute have an access mode setting that determines who can attach to and use the compute resource.
+
+Standard: Allows any user with CAN ATTACH TO permission to attach to and concurrently execute workloads on the compute resource, allowing for cost savings and simplified compute management. This is achieved by Lakeguard's user workload isolation, which runs user code in full isolation with no access to lower-level resources. See Standard compute overview.
+Dedicated: The compute resource is assigned to a single user or group. Only the assigned single user or group can attach to and use the compute resource. See Dedicated compute overview.
+Who can create classic compute?​
+
+The ability to create compute depends on a user's entitlements.
+
+Workspace admins can create any type of compute. They also inherit the CAN MANAGE permission on all compute created in their workspace.
+Non-admin users with the Unrestricted cluster creation entitlement have access to all configuration settings when creating compute. They can access compute they've been given permissions to and can create any type of new compute. To learn about available configuration settings, see Compute configuration reference. Workspace admins can assign this entitlement to any user, group, or service principal. See Manage entitlements.
+Non-admin users without the Unrestricted cluster creation entitlement can only access compute they are granted permissions to or compute they create using policies they are assigned permission to.
+Create new compute using a policy​
+
+If you have permission to a compute policy, you can create your own compute. Policies have minimal configuration options and are designed to be efficient resources using their default settings. If you do wish to edit any settings, you can learn about each setting in the configuration settings reference.
+
+Click the Compute tab in your workspace sidebar.
+Click the Create compute button.
+Select a policy from the Policy drop-down menu.
+(Optional) Update the name of the compute.
+(Optional) Configure any available settings.
+Click Create.
+
+You now have a classic compute resource you can use to run your workloads.
+
+Update compute for Unity Catalog​
+
+If you have compute resources in your workspace that need to be updated to use Unity Catalog, see the following demos:
+
+All-purpose compute
+SQL warehouses
+On this page
+What is classic compute?
+Who can access classic compute?
+What are compute access modes?
+Who can create classic compute?
+Create new compute using a policy
+Update compute for Unity Catalog
+Was this page helpful?
+Yes
+No
+Send feedback

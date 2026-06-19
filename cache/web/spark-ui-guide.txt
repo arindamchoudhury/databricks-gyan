@@ -1,156 +1,42 @@
-SOURCE: https://docs.databricks.com/aws/en/optimizations/spark-ui-guide
-FETCHED: 2026-06-17
+ComputeClassic computeTroubleshoot compute issuesDiagnose cost and performance issues using the Spark UI
+Last updated on Apr 19, 2024
+Diagnose cost and performance issues using the Spark UI
 
-=== MAIN PAGE ===
-Title: Diagnose cost and performance issues using the Spark UI
-A step-by-step practical guide for using Spark UI to identify issues.
+This guide walks you through how to use the Spark UI to diagnose cost and performance issues. It's a step-by-step guide, and it's a practical how-to. Rather than just providing you an explanation of what each page in the Spark UI does, it tells you what to look for and what it means. If you aren't familiar with the concepts of driver, workers, executors, stages, and tasks, you might want to review the Spark architecture.
 
-Five sequential steps:
-1. Use the Jobs Timeline to identify major issues
-2. Look at longest stage
-3. Look for skew or spill
-4. Determine if longest stage is I/O bound
-5. Look for other causes of slow stage runtime
+If you are looking for a comprehensive list of various optimization tools, use the Databricks Optimization guide. Sections of the optimization guide are referenced in this Spark UI guide.
 
-Access Spark UI: navigate to cluster page → click "Spark UI" button.
-Prerequisite: if unfamiliar with driver, workers, executors, stages, and tasks → review the Spark architecture.
+Using this guide​
 
-=== STEP 1: JOBS TIMELINE ===
-URL: /aws/en/optimizations/spark-ui-guide/jobs-timeline
-Last updated: (not specified in fetched content)
+To navigate through the guide, use the links embedded in each page to be taken to the next step. The guide contains the following steps in order:
 
-"In the Spark UI, click on Jobs and Event Timeline as highlighted in red in the following screenshot."
+Use the Jobs Timeline to identify major issues
+Look at longest stage
+Look for skew or spill
+Determine if longest stage is I/O bound
+Look for other causes of slow stage runtime
 
-DIAGNOSTIC CASES:
+Let's get started!
 
-FAILING JOBS OR EXECUTORS:
-"If you see failing jobs or failing executors, see Failing jobs or executors removed"
-Indicator: Red status in the event timeline.
+How to open the Spark UI​
 
-GAPS IN EXECUTION:
-"If you see gaps in your timeline, are they a minute or more?"
-Key threshold: One minute or longer gaps warrant investigation.
-"If you do have longer gaps, are they in the middle of a pipeline?"
-"If you see long unexplained gaps in the middle of a pipeline, see Gaps between Spark jobs"
-"Short gaps are to be expected as the driver coordinates work"
+Navigate to your cluster's page:
 
-LONG JOBS:
-"Is the timeline dominated by one or a few long jobs?"
-"These long jobs would be something to investigate."
-"Click on the longest job to dig in."
+Click Spark UI:
 
-MANY SMALL JOBS:
-"What we're looking for here is a timeline dominated by tiny jobs"
-Pattern: Multiple small jobs each taking "a few seconds or less"
-"If your timeline is mostly small jobs, see Many small Spark jobs"
+Next step​
 
-DEFAULT CASE:
-"If your timeline doesn't look like any of the above, the next step is to identify the longest job. Sort the jobs by duration and click on the link in the description for the longest job."
+Now that you've opened the Spark UI, next review the event timeline to find out more about your pipeline or query. See Jobs timeline.
 
-=== STEP 2: LONGEST STAGE ===
-URL: /aws/en/optimizations/spark-ui-guide/long-spark-stage
-Last updated: March 6, 2026
+On this page
+Using this guide
+How to open the Spark UI
+Next step
 
-"Start by identifying the longest stage of the job. Scroll to the bottom of the job's page to the list of stages and order them by duration"
+=== Images ===
 
-I/O COLUMN DEFINITIONS:
-- "Input: How much data this stage read from storage. This could be reading from Delta, Parquet, CSV, etc."
-- "Output: How much data this stage wrote to storage. This could be writing to Delta, Parquet, CSV, etc."
-- "Shuffle Read: How much shuffle data this stage read."
-- "Shuffle Write: How much shuffle data this stage wrote."
-"Make note of these numbers as you'll likely need them later."
+![](https://docs.databricks.com/aws/en/assets/images/open-spark-ui-1-622b948b351114cbe1b1b29c5b94f921.png)
+*Navigate to Compute (2256×764)*
 
-NUMBER OF TASKS:
-"If you see one task, that could be a sign of a problem." → see "One Spark task"
-"If the stage has more than one task, we recommend that you investigate further." → see Skew and spill
-
-=== STEP 3: SKEW OR SPILL ===
-URL: /aws/en/optimizations/spark-ui-guide/long-spark-stage-page
-
-SPILL:
-"The first thing to look for in a long-running stage is whether there's spill."
-Spill occurs "when Spark runs low on memory. It starts to move data from memory to disk, and this can be quite expensive."
-Most common during data shuffling.
-"If no spill statistics appear, that means the stage doesn't have any spill."
-
-SKEW:
-"Skew is when one or just a few tasks take much longer than the rest."
-Result: "poor cluster utilization and longer jobs."
-Diagnostic: examine Summary Metrics — compare Max duration against 75th percentile duration.
-"If the Max duration is 50% more than the 75th percentile, you may be suffering from skew."
-
-NO SKEW OR SPILL:
-"go back to the job page to get an overview of what's going on"
-"click Associated Job Ids"
-Then proceed to "Spark stage high I/O" (Step 4).
-
-=== STEP 4: I/O BOUND ===
-URL: /aws/en/optimizations/spark-ui-guide/long-spark-stage-io
-
-I/O BOUND CALCULATION:
-"How much data needs to be in an I/O column to be considered high? To figure this out, first start with the highest number in any of the given columns. Then consider the total number of CPU cores you have across all our workers. Generally each core can read and write about 3 MBs per second."
-
-"Divide your biggest I/O column by the number of cluster worker cores, then divide that by duration seconds. If the result is around 3 MB, then you're probably I/O bound. That would be high I/O."
-
-Formula: max_IO_bytes / worker_cores / duration_seconds ≈ 3 MB/s → I/O bound
-
-HIGH INPUT:
-"If you see a lot of input into your stage, that means you're spending a lot of time reading data. First, identify what data this stage is reading."
-
-Speed up reads:
-- Use Delta
-- Use liquid clustering for better data skipping
-- Try Photon, which helps with read speed for wide tables
-- Make queries more selective to reduce data reading
-- Reconsider data layout for more effective data skipping
-- Use Delta cache for repeated data reads
-- Consider Dynamic File Pruning for joins
-- Increase cluster size or use serverless compute
-
-HIGH OUTPUT:
-"If you see a lot of output from your stage, that means you're spending a lot of time writing data."
-
-Speed up writes:
-- Check for excessive data rewriting; optimize merges or use deletion vectors
-- Enable Photon for write speed improvement
-- Increase cluster size or use serverless compute
-
-HIGH SHUFFLE:
-"Databricks recommends you set spark.sql.shuffle.partitions=auto to let Spark pick the number of optimal shuffle partitions automatically."
-
-NO HIGH I/O:
-"If you don't see high I/O in any of the columns, then you need to dig deeper." → Step 5
-
-=== STEP 5: OTHER CAUSES ===
-URL: /aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io
-
-Diagnostic approach: examine the SQL DAG (directed acyclic graph) to identify where time is spent.
-"these times are cumulative, so it's the total time spent on all the tasks, not the clock time."
-
-1. READING MANY SMALL FILES:
-"If you're reading tens of thousands of files or more, you may have a small file problem."
-Threshold: Files should be "no less than 8MB"
-Root cause: "The small file problem is most often caused by partitioning on too many columns or a high-cardinality column."
-Recommendations: Run OPTIMIZE, enable predictive optimization, reconsider file layout.
-
-2. WRITING MANY SMALL FILES:
-"If you're writing tens of thousands of files or more, you may have a small file problem."
-Threshold: Files should be "no less than 8MB"
-Root cause: Same as reading (over-partitioning, high-cardinality partition columns).
-Recommendations: enable predictive optimization, reconsider file layout, turn on optimized writes.
-
-3. SLOW UDFs:
-When UDFs appear in DAG consuming significant time.
-Recommendation: "repartition() your dataframe before using the UDF" if task count is "less than the number of cores on your cluster"
-Secondary concern: Memory issues from loading partition data into memory; repartitioning resolves this.
-Also consider: rewrite UDF using native Spark functions.
-
-4. CARTESIAN JOIN:
-When cartesian or nested loop joins appear in the DAG.
-Assessment: "very expensive"
-Action: Verify intent and seek alternative approaches.
-
-5. EXPLODING JOIN OR EXPLODE:
-"a few rows going into a node and magnitudes more coming out"
-Indicates data explosion from join or explode operations.
-Action: Verify intent.
+![](https://docs.databricks.com/aws/en/assets/images/open-spark-ui-2-96f7c585348ca49db3bfc4a208d00f2d.png)
+*Navigate to SparkUI (2446×670)*

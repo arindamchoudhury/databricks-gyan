@@ -42,5 +42,7 @@ Notes captured from individual Databricks official documentation pages. One file
 | [How to Determine if Spark is Rewriting Data](spark-rewriting-data.md) | 2026-06-17 | spark, spark-ui, debugging, delta, merge, delete, update, rewriting, B2, B12, B16 |
 | [One Spark Task](one-spark-task.md) | 2026-06-17 | spark, spark-ui, debugging, tasks, parallelism, UDF, gzip, coalesce, repartition, B2, B16 |
 | [Losing Spot Instances](losing-spot-instances.md) | 2026-06-17 | spark, spark-ui, debugging, spot-instances, AWS, executors, B2, B16 |
+| [SQL Hints: Join, Partition, and Skew](sql-join-hints.md) | 2026-06-18 | spark, sql, join-hints, broadcast, shuffle, partitioning, performance, optimization, B2, B8 |
+| [Adaptive Query Execution (AQE)](aqe.md) | 2026-06-18 | spark, aqe, performance, optimization, broadcast, skew, shuffle, partitioning, B2, B8, B16 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*

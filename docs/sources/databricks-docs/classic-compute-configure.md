@@ -327,3 +327,16 @@ Set custom environment variables accessible from init scripts via **Advanced > S
 - [[classic-compute-overview]] — permission levels, access mode summary, creation entitlements; this page is the companion config reference.
 - [[serverless-limitations]] — covers what is not available on serverless (no Spark config, no custom instance types, no EBS, no init scripts).
 - [[serverless-notebooks]], [[serverless-jobs]], [[serverless-pipelines]] — the serverless alternative path; no cluster config needed.
+
+
+## Images
+
+[![Simple compute form](assets/classic-compute-configure/01.png)](assets/classic-compute-configure/01.png)
+*Simple compute form (800×680)*
+
+[![Spark configuration](assets/classic-compute-configure/02.png)](assets/classic-compute-configure/02.png)
+*Spark configuration (800×289)*
+
+[![Environment Variables field](assets/classic-compute-configure/03.png)](assets/classic-compute-configure/03.png)
+*Environment Variables field (647×195)*
+

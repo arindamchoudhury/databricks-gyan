@@ -69,3 +69,10 @@ Hub page for Databricks notebooks documentation. Notebooks are described as "the
 - [[serverless-notebooks]] — serverless compute for notebooks; covers query insights and auto-suspend
 - [[workspace-walkthrough]] — DA-FREE M1; hands-on intro to the notebook UI
 - [[ch01-getting-started-with-databricks]] — DCDE-SG Ch 1; covers notebook fundamentals and cluster access modes
+
+
+## Images
+
+[![Demo of Databricks notebook](assets/notebooks-overview/01.gif)](assets/notebooks-overview/01.gif)
+*Demo of Databricks notebook (1116×696)*
+

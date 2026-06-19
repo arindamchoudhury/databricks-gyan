@@ -1,35 +1,53 @@
-# Standard Compute Overview
-Source: https://docs.databricks.com/aws/en/compute/standard-overview
-Fetched: 2026-06-16
-Last updated on page: October 7, 2025
+ComputeClassic computeCompute access modesStandard computeStandard compute overview
+Last updated on Oct 7, 2025
+Standard compute overview
 
-## What is standard compute?
-"Standard compute is compute configured with standard access mode. Standard compute resources can be used by any user given permission to do so."
-"Standard compute allows any number of users to attach and concurrently execute workloads on the same compute resource."
-"Standard compute is recommended for most workloads" — allows any number of users to attach and concurrently execute workloads, "providing cost savings and simplified compute management."
+This page provides an overview of standard compute.
 
-## Access mode selection
-Access mode configured in Advanced section during compute creation.
-API field: `data_security_mode`
-Default: Auto — automatically chosen based on selected Databricks Runtime.
-"Auto defaults to Standard unless a machine learning runtime or a Databricks Runtimes lower than 14.3 is selected, in which case Dedicated is used."
+What is standard compute?​
 
-## When to use standard compute
-- General data engineering and ETL pipelines
-- Collaborative data science projects
-- Interactive data exploration
-- Cost optimization
-"Choose dedicated compute only for specialized workloads requiring privileged machine access, RDD APIs, distributed ML, GPUs, or R."
+Standard compute is compute configured with standard access mode. Standard compute resources can be used by any user given permission to do so.
 
-## Language and runtime support
-- Python: Full support for all Databricks Runtime versions
-- SQL: Full support for all Databricks Runtime versions
-- Scala: Supported on Databricks Runtime 13.3 LTS and above with Unity Catalog
-- R: Not supported on standard compute
+Standard compute is recommended for most workloads. Standard compute allows any number of users to attach and concurrently execute workloads on the same compute resource, providing cost savings and simplified compute management. Standard compute runs user code in full isolation with no access to lower-level resources.
 
-## Lakeguard for user isolation
-"Standard compute uses Databricks Lakeguard to provide secure user isolation and data governance."
-"Uses advanced code isolation techniques that separate user code from the underlying Spark infrastructure."
+Access mode selection​
 
-## Linked pages
-- Standard compute requirements and limitations (separate page)
+Access mode is configured when creating an all-purpose or job compute resource. The access mode setting is under the Advanced section in the compute UI and represented by data_security_mode in the API.
+
+By default in the UI, access mode is set to Auto, which means the access mode is automatically chosen for you based on your selected Databricks Runtime. Auto defaults to Standard unless a machine learning runtime or a Databricks Runtimes lower than 14.3 is selected, in which case Dedicated is used.
+
+When to use standard compute​
+
+Standard compute is recommended for most workloads, including:
+
+General data engineering and ETL pipelines: Most data processing workloads
+Collaborative data science projects: Teams working together on analysis and model development
+Interactive data exploration: Ad-hoc analysis and notebook-based development
+Cost optimization: When you want to share compute resources across multiple users
+
+Choose dedicated compute only for specialized workloads requiring privileged machine access, RDD APIs, distributed ML, GPUs, or R. For a list of standard compute limitations, see Standard compute requirements and limitations.
+
+Language and runtime support​
+
+Standard compute has the following programming language support:
+
+Python: Full support for all Databricks Runtime versions
+SQL: Full support for all Databricks Runtime versions
+Scala: Supported on Databricks Runtime 13.3 LTS and above with Unity Catalog
+R: Not supported on standard compute
+Lakeguard for user isolation​
+
+Standard compute uses Databricks Lakeguard to provide secure user isolation and data governance. Lakeguard employs advanced code isolation techniques that separate user code from the underlying Spark infrastructure.
+
+For more information, see How does Databricks enforce user isolation?.
+
+On this page
+What is standard compute?
+Access mode selection
+When to use standard compute
+Language and runtime support
+Lakeguard for user isolation
+Was this page helpful?
+Yes
+No
+Send feedback
