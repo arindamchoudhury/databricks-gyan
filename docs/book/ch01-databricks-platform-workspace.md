@@ -353,6 +353,8 @@ result = my_transform_function(df)
 
 For separate execution with parameter passing and return values, use `dbutils.notebook.run()` — but prefer **Lakeflow Jobs** for any production scheduling. Rule: **`%run` merges scopes; `dbutils.notebook.run()` starts a separate job.**
 
+> ⚠️ **Never schedule a production job with the notebook's schedule button** — it targets the latest *working* copy (unsaved edits included). Schedule a **Lakeflow Job** against the committed version in a Git folder instead.
+
 ### 7.4 Interactive debugger
 
 The built-in Python debugger (DBR 14.3 LTS+ on Standard; 13.3 LTS+ on Dedicated; Serverless) sets breakpoints, steps through code, and inspects variables live. Enable: **Settings → Developer → Python Notebook Interactive Debugger**. Start with **Run → Debug cell** (`Alt+Shift+D`); the **Variable Explorer** (right) shows in-scope values, the **Debug Console** (bottom) runs Python in the current frame.
@@ -416,34 +418,11 @@ Each `auth login` saves a named profile; pass `-p <profile>` to target one. Work
 
 ---
 
-## Best practices
-
-- **Default to Serverless** for interactive work; use a classic cluster only for a missing library, GPU, or Spark config Serverless doesn't expose.
-- Use **Job Compute** (not All-Purpose) for scheduled jobs — ~70% cheaper, isolated per run.
-- Use **Standard access mode** for all multi-user ETL; **Dedicated** only for single-user ML/GPU/RDD work.
-- Grant permissions at the **schema or catalog level** when possible — it scales better than table-by-table.
-- Store reusable functions in **workspace files** (`.py`), not notebook cells — files are importable, testable, versionable.
-- **Never use the notebook schedule button** for production jobs — it targets the latest *working* copy (unsaved edits included). Use a **Lakeflow Job** against the committed version in a Git folder.
-- Use **UC Volumes**, not DBFS or `file:/tmp/`, for file storage.
-
-## Common pitfalls
-
-- **All-Purpose cluster on a job task** — billing warning + the higher DBU rate. Use Job Compute or Serverless.
-- **Wrong access mode** — code calling `sc` (SparkContext) or `.rdd` on a Standard cluster fails; Spark Connect doesn't expose `SparkContext`. Switch to Dedicated for RDD/GPU.
-- **Expecting Photon to speed up Python UDFs** — it won't; rewrite as a native Spark/SQL expression.
-- **`file:/tmp/` in `spark.read`** — raises `LocalFilesystemAccessDeniedException`; use a UC Volume path.
-- **Forgetting `USE CATALOG`/`USE SCHEMA`** — tables land in the wrong place. Check `current_catalog()`/`current_schema()` first.
-- **Widget "Run Accessed Commands" skips SQL cells** — SQL cells won't re-run on widget change under the default; re-run manually or switch to "Run Notebook".
-- **Confusing Repos (legacy) with Git folders** — use Git folders for new work.
-- **Mixing Databricks widgets and ipywidgets** — ipywidgets can't pass values to jobs or across `%run`; use `dbutils.widgets` for parameter flow.
-
 ## Exercises
 
 1. **Recall** — Trace the warehouse → lake → lakehouse evolution: what did each step solve, and what did it give up?
-2. **Explain** — In one paragraph, how does the Delta transaction log deliver ACID on top of plain Parquet files? Which two lakehouse features (of the eight) does it directly provide?
-3. **Apply** — Open a workspace, create a notebook, attach Serverless, run `SELECT current_catalog(), current_schema()`, then change schema with `USE SCHEMA`.
-4. **Locate the planes** — For each of these, say whether it runs in the **control plane** or the **compute plane**, and whose cloud account it lives in: (a) the workspace web UI, (b) a query in a serverless notebook, (c) a classic job cluster running ETL.
-5. **Extend** — Connect a GitHub repo as a Git folder, create a notebook inside it, commit, and verify the commit appears on GitHub.
+2. **Locate the planes** — For each of these, say whether it runs in the **control plane** or the **compute plane**, and whose cloud account it lives in: (a) the workspace web UI, (b) a query in a serverless notebook, (c) a classic job cluster running ETL.
+3. **Apply** — Open a workspace, create a notebook, attach Serverless, run `SELECT current_catalog(), current_schema()`, then change the schema with `USE SCHEMA`.
 
 ## Summary
 
