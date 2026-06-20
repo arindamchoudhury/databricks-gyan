@@ -23,12 +23,12 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 | Ch 17 | Liquid Clustering & Storage Optimization | Advanced | ⬜ |
 | Ch 18 | Lakeflow Connect & Enterprise Ingestion | Advanced | ⬜ |
 | Ch 19 | Data Privacy, PII & Compliance | Advanced | ⬜ |
-| Ch 20 | Declarative Automation Bundles (DABs) & CI/CD | Advanced | ⬜ |
+| Ch 20 | [Declarative Automation Bundles (DABs) & CI/CD](ch20-databricks-asset-bundles-cicd.md) | Advanced | 🚧 stub |
 | Ch 21 | Production Pipeline Operations & Observability | Advanced | ⬜ |
 | Ch 22 | Lakehouse Federation & OpenSharing | Advanced | ⬜ |
 | Ch 23 | Photon Engine & Cluster Cost Optimization | Expert | ⬜ |
 | Ch 24 | Advanced Streaming Patterns | Expert | ⬜ |
-| Ch 25 | DevOps: Testing & Multi-Environment Deployment | Expert | ⬜ |
+| Ch 25 | [DevOps: Testing & Multi-Environment Deployment](ch25-devops-testing-deployment.md) | Expert | 🚧 stub |
 | Ch 26 | Cost Management & FinOps on Databricks | Expert | ⬜ |
 | Ch 27 | End-to-End Lakehouse Architecture Design | Expert | ⬜ |
 | Ch 28 | Databricks SDK & API Automation | Expert | ⬜ |

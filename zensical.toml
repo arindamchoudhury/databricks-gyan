@@ -15,6 +15,8 @@ nav = [
         { "Ch 05 — Delta Lake Fundamentals" = "book/ch05-delta-lake-fundamentals.md" },
         { "Ch 06 — Data Ingestion Basics" = "book/ch06-data-ingestion-basics.md" },
         { "Ch 07 — Medallion Architecture" = "book/ch07-medallion-architecture.md" },
+        { "Ch 20 — DABs & CI/CD (stub)" = "book/ch20-databricks-asset-bundles-cicd.md" },
+        { "Ch 25 — DevOps: Testing & Deployment (stub)" = "book/ch25-devops-testing-deployment.md" },
         { "Ch 29 — Infrastructure as Code with Terraform" = "book/ch29-infrastructure-as-code-terraform.md" },
         { "Ch 30 — Practical AWS Deployment Walkthrough" = "book/ch30-practical-aws-deployment.md" },
     ]},
