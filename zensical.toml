@@ -41,6 +41,14 @@ nav = [
             { "Ch 4: Building AI Applications" = "sources/dip-dummies/ch04-building-ai-applications.md" },
             { "Ch 5: Ten Reasons You Need a DIP" = "sources/dip-dummies/ch05-ten-reasons.md" },
         ]},
+        { "Lakehouse For Dummies" = [
+            { "Book Overview" = "sources/lakehouse-dummies/index.md" },
+            { "Ch 1: Making the Case for Data Lakehouses" = "sources/lakehouse-dummies/01-making-the-case.md" },
+            { "Ch 2: Explaining Data Lakehouses" = "sources/lakehouse-dummies/02-explaining-lakehouses.md" },
+            { "Ch 3: Understanding the Underlying Technology" = "sources/lakehouse-dummies/03-underlying-technology.md" },
+            { "Ch 4: Bringing Data Intelligence to the Lakehouse" = "sources/lakehouse-dummies/04-data-intelligence.md" },
+            { "Ch 5: Ten Reasons You Need a Data Lakehouse" = "sources/lakehouse-dummies/05-ten-reasons.md" },
+        ]},
         { "Databricks Docs" = [
             { "Overview" = "sources/databricks-docs/index.md" },
             { "Debug Notebooks (Interactive Debugger)" = "sources/databricks-docs/notebook-debugger.md" },

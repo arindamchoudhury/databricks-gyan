@@ -26,6 +26,11 @@ Terms added as they are encountered. Source column shows where the definition ca
 | **Databricks Apps** | Build/deploy secure data + AI apps directly on Databricks (no separate infra) — serverless compute, one-click Lakebase integration, UC governance, open Python/JS frameworks. | DIP-Dummies Ch 3–4 |
 | **Databricks Assistant** | Context-aware AI assistant native in notebooks, SQL editor, and file editor; generates SQL from English, documents and debugs code using UC metadata. | DIP-Dummies Ch 3 |
 | **Clean Rooms** | Secure, privacy-centric environment for collaborating on data with partners across clouds; powered by OpenSharing. | DIP-Dummies Ch 3 |
+| **Data & AI maturity curve** | The journey from descriptive (DB/DW: what happened) → predictive (data lakes: what may happen) → prescriptive (best action) → GenAI on proprietary data with automated decisions. | Lakehouse-Dummies Ch 2 |
+| **Decoupled storage & compute** | Lakehouse property of scaling storage and compute independently, so you pay for one without the other — enables near-limitless scale and many concurrent users. | Lakehouse-Dummies Ch 2 |
+| **Vendor lock-in** | Dependence on one vendor such that switching is prohibitively costly (license fees, forced data copies, custom integration code). Open formats (Delta/Iceberg) avoid it. | Lakehouse-Dummies Ch 2 |
+| **LLMOps** | Operating LLMs end-to-end — development, training, judging, and operationalizing with humans in the loop; the GenAI counterpart to MLOps. | Lakehouse-Dummies Ch 3 |
+| **AI Gateway** | Databricks governance/control layer for AI models and agents — enforces access controls, rate limits, and guardrails, including models hosted outside Databricks. | Lakehouse-Dummies Ch 4 |
 | **DBU** | Databricks Unit — the billing unit for compute usage on the platform | Databricks docs |
 | **Control Plane / Data Plane** | Control plane: Databricks-managed services (UI, REST API, cluster manager). Data plane: customer's cloud account where compute runs and data lives | Databricks docs |
 | **`read_files()`** | SQL table-valued function for reading files from a Volume or path with inline format options (format, header, inferSchema). Automatically adds a `_rescued_data` column for rows that don't match the inferred schema. | DA-FREE M2-01 |

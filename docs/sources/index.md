@@ -31,6 +31,17 @@ Course notebooks and external sources captured as structured notes.
 | [Ch 4: Building AI Applications](dip-dummies/ch04-building-ai-applications.md) | book | 2026-06-20 | agent-bricks, mlops, mcp, ai-bi, databricks-apps |
 | [Ch 5: Ten Reasons You Need a DIP](dip-dummies/ch05-ten-reasons.md) | book | 2026-06-20 | summary, benefits |
 
+## Lakehouse-Dummies — *The Data Lakehouse For Dummies* (Kaplan & Kara, Wiley 2nd Databricks Special Ed., © 2026)
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [Book Overview & reading log](lakehouse-dummies/index.md) | book | 2026-06-20 | lakehouse, overview |
+| [Ch 1: Making the Case for Data Lakehouses](lakehouse-dummies/01-making-the-case.md) | book | 2026-06-20 | data-warehouse, data-lake, silos, ACID, B1 |
+| [Ch 2: Explaining Data Lakehouses](lakehouse-dummies/02-explaining-lakehouses.md) | book | 2026-06-20 | lakehouse, maturity-curve, serverless, B1 |
+| [Ch 3: Understanding the Underlying Technology](lakehouse-dummies/03-underlying-technology.md) | book | 2026-06-20 | delta-lake, unity-catalog, lakebase, mlops, B1, B5 |
+| [Ch 4: Bringing Data Intelligence to the Lakehouse](lakehouse-dummies/04-data-intelligence.md) | book | 2026-06-20 | data-intelligence, genie, agent-bricks, rag |
+| [Ch 5: Ten Reasons You Need a Data Lakehouse](lakehouse-dummies/05-ten-reasons.md) | book | 2026-06-20 | summary, benefits |
+
 ## Databricks Blog — concept & engineering posts (databricks.com/blog)
 
 | Title | Type | Added | Tags |
