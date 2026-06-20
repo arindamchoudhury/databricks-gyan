@@ -63,7 +63,7 @@
       btn.textContent = nowCollapsed ? expandChar : collapseChar;
     });
 
-    sidebar.prepend(btn);
+    sidebar.appendChild(btn);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -71,8 +71,8 @@
 
     var nav = document.querySelector('.md-sidebar--primary');
     var toc = document.querySelector('.md-sidebar--secondary');
-    if (nav) setup(nav, 'sidebar-nav-collapsed', '◀', '▶');
-    if (toc) setup(toc, 'sidebar-toc-collapsed', '▶', '◀');
+    if (nav) setup(nav, 'sidebar-nav-collapsed', '««', '»»');
+    if (toc) setup(toc, 'sidebar-toc-collapsed', '»»', '««');
 
     var drawer = document.getElementById('__drawer');
     if (drawer) drawer.addEventListener('change', applyState);
