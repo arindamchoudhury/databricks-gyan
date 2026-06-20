@@ -65,11 +65,11 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 **How to learn it:**
 
 1. **Free course — DA-FREE** (~2 hrs) — Official Databricks workspace tour covering platform architecture, cluster types, Delta Lake intro, and Lakeflow overview. Self-paced, no cost; complete all demos.
-2. **Hands-on — Sign up for Databricks Free Edition** (~1 hr) — Create an all-purpose cluster, run a `spark.range(10).show()` notebook, browse a Unity Catalog Volume in the Data Explorer, and look at the cluster event log. Sign up at [docs.databricks.com/aws/en/getting-started/free-edition](https://docs.databricks.com/aws/en/getting-started/free-edition).
+2. **Hands-on — Sign up for Databricks Free Edition** (~1 hr) — Attach **Serverless** compute (Free Edition is serverless-only — no cluster creation), run a `spark.range(10).display()` notebook, browse a Unity Catalog Volume in the Data Explorer, and inspect a query in the query profile. Sign up at [docs.databricks.com/aws/en/getting-started/free-edition](https://docs.databricks.com/aws/en/getting-started/free-edition).
 3. **Book chapter — DCDE-SG Ch 1** (~2 hrs) — Read "Introducing the Databricks Platform", "Understanding High-Level Architecture", "Creating Clusters", and "Working with Notebooks". Skip the chapter on Deployment of Databricks Resources (not needed yet).
 4. **Reference — DB-DOCS** — Bookmark the [Clusters](https://docs.databricks.com/aws/en/compute/) and [Notebooks](https://docs.databricks.com/aws/en/notebooks/) docs pages for cluster config reference.
 
-**Milestone:** You can create a cluster in Free Edition, run a notebook, explain the difference between all-purpose and job clusters, and describe what the control plane and data plane are.
+**Milestone:** You can attach serverless compute in Free Edition and run a notebook, explain the difference between all-purpose and job clusters (paid-workspace concepts), and describe what the control plane and compute plane are.
 
 ---
 

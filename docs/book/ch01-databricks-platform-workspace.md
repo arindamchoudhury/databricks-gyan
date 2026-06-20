@@ -129,7 +129,7 @@ You don't need every surface for data engineering, but knowing the map stops you
 | **Governance** | **Unity Catalog (UC)** | One governance layer for data *and* AI: `catalog.schema.object`, ACLs, lineage, semantics | Ch 14 |
 | **Engineering** | **Lakeflow** | Declarative ETL: **Connect** (ingest), **Spark Declarative Pipelines** (transform), **Jobs** (orchestrate) | Ch 8, 10, 13, 18 |
 | **Analytics** | **Databricks SQL** + **Photon** | Serverless data warehouse for ETL + BI on governed data | Ch 15, 23 |
-| **OLTP** | **Lakebase** | Postgres-based transactional DB for the agentic era | awareness only |
+| **OLTP** | **Lakebase** | Serverless Postgres transactional DB for the agentic era. June 2026's **LTAP** (Lake Transactional/Analytical Processing) unifies it with the lakehouse on one storage copy + one governance model | awareness only |
 | **AI/agents** | **Agent Bricks** | Build/evaluate/govern composable AI agents on your data | awareness only |
 | **Self-serve BI** | **AI/BI Genie / Dashboards** | NL chatbot over your data (Genie) + self-serve dashboards | Ch 15 (Genie) |
 | **Apps** | **Databricks Apps** | Deploy data/AI apps on serverless compute, governed by UC | awareness only |
@@ -185,7 +185,7 @@ flowchart TB
     CCP --> WS
 ```
 
-> ⚠️ The "your data stays in your cloud account" guarantee is strongest for **classic** compute. **Serverless** compute runs in a Databricks-managed plane, within a per-workspace network boundary with multiple isolation layers. DCDE-SG's #1 exam fact — *"customer data lives in the data/compute plane, not the control plane"* — assumes classic compute.
+> ⚠️ The "your data stays in your cloud account" guarantee is strongest for **classic** compute. **Serverless** compute runs in a Databricks-managed plane, within a per-workspace network boundary with multiple isolation layers. DCDE-SG's #1 exam fact — *"customer data lives in the compute plane, not the control plane"* — assumes classic compute. (Older docs and courses call the compute plane the **data plane**; same thing, renamed.)
 
 ### 4.3 Workspace storage
 
@@ -207,7 +207,7 @@ How it's stored depends on workspace type:
 
 ## 5. Navigating the workspace
 
-You interact with the **control plane** through the workspace UI; your data never leaves your cloud account. The left sidebar groups activities:
+The workspace UI is your window into the control plane. The left sidebar groups activities:
 
 ```
 + New             → create any asset (notebook, job, cluster, warehouse…)
@@ -223,13 +223,15 @@ The **top bar** has AI-powered **Search** (natural language across tables, noteb
 
 The **Catalog Explorer** browses the Unity Catalog hierarchy — inspect schemas, manage permissions, and view lineage without writing SQL. Unity Catalog gets a full chapter (*Ch 14*); for now the key fact is that **every table, view, function, model, and volume lives in `catalog.schema.object`**.
 
-The **Workspace browser** is a hierarchical file tree: **Home** (your personal area), **Workspace** root (all users' homes under `Users/`), **Trash** (deleted items kept 30 days). **Repos** is the legacy Git UI — replaced by **Git folders** (§9.4).
+The **Workspace browser** is a hierarchical file tree: **Home** (your personal area), **Workspace** root (all users' homes under `Users/`), **Trash** (deleted items kept 30 days). **Repos** is the legacy Git UI — replaced by **Git folders** (§8.3).
 
 ---
 
 ## 6. Compute on Databricks
 
 Compute is where code runs. Picking the right type is the first cost and performance decision you make.
+
+> 📌 **On Free Edition, all compute is serverless** — there's no cluster creation, no GPU, and no custom compute ([Free Edition limitations](https://docs.databricks.com/aws/en/getting-started/free-edition-limitations)). The classic-cluster types and access modes below are **conceptual for a Free Edition learner** and apply to paid workspaces; you can still do every hands-on exercise in this chapter on serverless.
 
 | Type | Use case | Billing |
 |------|----------|---------|
@@ -281,6 +283,16 @@ Serverless SQL Warehouses always run on Photon. **Pro** is required when a SQL W
 ---
 
 ## 7. Working with notebooks
+
+### 7.0 Your first notebook
+
+Before the mechanics, run something. In a new workspace: **+ New → Notebook**, click **Connect → Serverless**, then run one cell:
+
+```python
+spark.range(10).display()
+```
+
+`spark` is already there (§8.1 explains why), `display()` renders a sortable, chartable table, and Serverless attached in seconds with no cluster to configure. That round trip — write, attach, run — is the whole inner loop; everything below refines it.
 
 A Databricks notebook has four cell types: **Code** (Python, SQL, Scala, or R), **Markdown** (`%md` — headers populate the notebook's table of contents), **Result** (output below each code cell), and **Visualization** (inline chart). Switch a single cell's language with the `%python`, `%sql`, `%scala`, or `%r` magic.
 
@@ -379,50 +391,26 @@ The `/Volumes/<catalog>/<schema>/<volume>/` path works directly in `spark.read` 
 
 Import via the UI (**Workspace → ⋮ → Import → choose `.ipynb`**) or the CLI (§8.3). Then **Connect → Serverless** (or an All-Purpose cluster) → **Run all**.
 
-### 8.2 Running from VS Code
+### 8.2 Beyond the UI: VS Code and the CLI
 
-The **Databricks extension for VS Code** runs notebooks on your workspace from a local folder — no manual import.
+You don't have to live in the browser. Two local paths matter for now; both authenticate against a profile in `~/.databrickscfg`. A dedicated tooling chapter covers DABs and CI/CD later (*Ch 20, 25*).
 
-1. Install the **Databricks** extension (Databricks Inc.).
-2. Open a folder → click the Databricks icon → **Create configuration** → pick a workspace (from `~/.databrickscfg`) → select/create a cluster.
+**VS Code** — the **Databricks extension** runs notebooks on your workspace from a local folder. Click the Databricks icon → **Create configuration** → pick a workspace and compute. Two modes: **Interactive** (Databricks Connect — Spark runs on remote compute, the rest locally; works on Serverless or a classic cluster) and **Run as Job** (submits the notebook as a Lakeflow Job run).
 
-Two execution modes:
-
-- **Interactive (Databricks Connect)** — Spark ops run on remote compute, everything else locally; feels like local Jupyter. Works with a classic All-Purpose cluster (DBR 13.3+) **or Serverless** (Databricks Connect **15.4 LTS+**). Select serverless with `serverless_compute_id = "auto"` (or `DATABRICKS_SERVERLESS_COMPUTE_ID`). `spark`, `dbutils`, `display`, `sql` are pre-injected.
-- **Run as Job** — submits the whole notebook as a Lakeflow Job run (any compute, incl. Serverless). Click **Run on Databricks → Run File as Workflow**.
-
-> **Historical note:** early Databricks Connect "v2" (DBR 13.3, 2023) targeted only classic clusters; serverless support arrived in the 15.x line. Pre-mid-2024 notes claiming serverless is unsupported are stale.
-
-### 8.3 The Databricks CLI
-
-The current CLI is the Go-based binary from [github.com/databricks/cli](https://github.com/databricks/cli) — **not** the legacy `databricks-cli` pip package (deprecated Oct 2023).
+**CLI** — the current CLI is the Go binary from [github.com/databricks/cli](https://github.com/databricks/cli) (**not** the legacy `databricks-cli` pip package). Install, authenticate with OAuth, and you can script workspace operations:
 
 ```bash
-# Install
-winget install Databricks.DatabricksCLI          # Windows
-brew tap databricks/tap && brew install databricks  # macOS / Linux
-
-# Authenticate (OAuth U2M — opens a browser)
+winget install Databricks.DatabricksCLI                       # Windows; brew on macOS/Linux
 databricks auth login --host https://<workspace>.cloud.databricks.com
-
-# Import a notebook
 databricks workspace import /Users/you@example.com/intro \
   --file notebooks/intro.ipynb --format JUPYTER --overwrite
 ```
 
-Workspace URL by cloud:
+Each `auth login` saves a named profile; pass `-p <profile>` to target one. Workspace URLs differ by cloud — `*.cloud.databricks.com` (AWS), `*.azuredatabricks.net` (Azure), `*.gcp.databricks.com` (GCP).
 
-| Cloud | Workspace URL |
-|-------|--------------|
-| AWS (incl. Free Edition) | `https://<workspace>.cloud.databricks.com` |
-| Azure | `https://<workspace>.azuredatabricks.net` |
-| GCP | `https://<workspace>.gcp.databricks.com` |
+> 📌 **Databricks Free Edition** runs on AWS (sign up at `login.databricks.com`); serverless, no cloud account needed. **Community Edition retired January 1, 2026.**
 
-Each `auth login` saves a named profile to `~/.databrickscfg`; commands without `-p` use `DEFAULT`. List them with `databricks auth profiles`, and pass `-p <profile>` to target a specific one. Use `databricks configure --token` only if the workspace doesn't support OAuth.
-
-> 📌 **Databricks Free Edition** runs on AWS (sign up at `login.databricks.com`); it's serverless and needs no cloud account. **Community Edition retired January 1, 2026.**
-
-### 8.4 Git folders
+### 8.3 Git folders
 
 **Git folders** (formerly Repos) bring real Git into the workspace. Create via **+ New → Git folder → paste repo URL**. Public repos clone with no auth; private repos/push need a linked provider (**Settings → Linked accounts**; prefer the **Databricks GitHub App** over a PAT). Branch, commit, and push from the Git dialog — but **pull requests happen on the provider** (GitHub/GitLab), not in Databricks. Built-in notebook version history exists but has no branching and can be deleted by users — use Git folders for anything serious.
 
@@ -454,7 +442,8 @@ Each `auth login` saves a named profile to `~/.databrickscfg`; commands without 
 1. **Recall** — Trace the warehouse → lake → lakehouse evolution: what did each step solve, and what did it give up?
 2. **Explain** — In one paragraph, how does the Delta transaction log deliver ACID on top of plain Parquet files? Which two lakehouse features (of the eight) does it directly provide?
 3. **Apply** — Open a workspace, create a notebook, attach Serverless, run `SELECT current_catalog(), current_schema()`, then change schema with `USE SCHEMA`.
-4. **Extend** — Connect a GitHub repo as a Git folder, create a notebook inside it, commit, and verify the commit appears on GitHub.
+4. **Locate the planes** — For each of these, say whether it runs in the **control plane** or the **compute plane**, and whose cloud account it lives in: (a) the workspace web UI, (b) a query in a serverless notebook, (c) a classic job cluster running ETL.
+5. **Extend** — Connect a GitHub repo as a Git folder, create a notebook inside it, commit, and verify the commit appears on GitHub.
 
 ## Summary
 
@@ -463,7 +452,7 @@ Each `auth login` saves a named profile to `~/.databrickscfg`; commands without 
 - **Eight features** define a lakehouse; the load-bearing two are **decoupled storage/compute** (lake economics for many workloads) and **openness** (no lock-in).
 - **Delta Lake** makes the lakehouse real: a **transaction log** over Parquet delivers ACID, schema enforcement, time travel, and incremental quality — *"turns a folder of files into a table you can trust."*
 - **Databricks** is the lakehouse platform — the **Data Intelligence Platform** — with **Unity Catalog** as the governance through-line across every surface.
-- **Architecture**: account → workspace → UC metastore (`catalog.schema.object`); **control plane** (Databricks-managed) vs **compute plane** (serverless in Databricks' account, classic in yours). Workspace storage ≠ your data; never delete classic workspace storage.
+- **Architecture**: account → workspace → UC metastore (`catalog.schema.object`); **control plane** (Databricks-managed) vs **compute plane** — formerly "data plane" — (serverless in Databricks' account, classic in yours). Workspace storage ≠ your data; never delete classic workspace storage.
 - **Compute**: All-Purpose vs Job vs SQL Warehouse vs **Serverless** (the modern default); classic clusters have a **Standard** vs **Dedicated** access mode (formerly Shared/Single User).
 - **Notebooks** integrate widgets, `%run`/workspace files, and a debugger; run code via the UI, **VS Code** (Databricks Connect), or the **CLI**. **Git folders** replace legacy Repos.
 
