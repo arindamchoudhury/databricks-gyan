@@ -1,35 +1,32 @@
-/* Sidebar collapse */
-.md-sidebar {
+/* ---- Maximized window: custom sticky/collapsible sidebars ---- */
+/* All custom sidebar layout is scoped to .is-maximized so it never */
+/* interferes with Material's native slide-out drawer on narrow widths. */
+body.is-maximized .md-sidebar {
   position: sticky;
   top: 0;
   align-self: flex-start;
   transition: width 0.2s ease, min-width 0.2s ease;
 }
 
-/* CSS fallback: hide sidebars when JS hasn't yet added is-maximized */
-body:not(.is-maximized) .md-sidebar {
-  display: none !important;
-}
-
-.md-sidebar__scrollwrap {
+body.is-maximized .md-sidebar__scrollwrap {
   visibility: visible;
   opacity: 1;
   transition: visibility 0.2s, opacity 0.2s;
 }
 
-.md-sidebar.is-collapsed {
+body.is-maximized .md-sidebar.is-collapsed {
   width: 1.4rem !important;
   min-width: 1.4rem !important;
   overflow: hidden;
 }
 
-.md-sidebar.is-collapsed .md-sidebar__scrollwrap {
+body.is-maximized .md-sidebar.is-collapsed .md-sidebar__scrollwrap {
   visibility: hidden;
   opacity: 0;
 }
 
-/* Toggle button */
-.sidebar-toggle {
+/* Toggle button (◀/▶) only makes sense for the maximized sticky sidebars */
+body.is-maximized .sidebar-toggle {
   position: absolute;
   top: 0.6rem;
   z-index: 10;
@@ -42,9 +39,19 @@ body:not(.is-maximized) .md-sidebar {
   line-height: 1;
 }
 
-.sidebar-toggle:hover {
+body.is-maximized .sidebar-toggle:hover {
   color: var(--md-accent-fg-color);
 }
 
-.md-sidebar--primary .sidebar-toggle { right: 0; }
-.md-sidebar--secondary .sidebar-toggle { left: 0; }
+body.is-maximized .md-sidebar--primary .sidebar-toggle { right: 0; }
+body.is-maximized .md-sidebar--secondary .sidebar-toggle { left: 0; }
+
+/* Hide the collapse button inside the narrow drawer */
+body:not(.is-maximized) .sidebar-toggle { display: none !important; }
+
+/* ---- Not maximized: hide standalone sidebars (reading view) ---- */
+/* CSS fallback before JS adds .is-maximized; JS re-shows the primary */
+/* sidebar as the drawer when the hamburger is open. */
+body:not(.is-maximized) .md-sidebar--secondary {
+  display: none !important;
+}
