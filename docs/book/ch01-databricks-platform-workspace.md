@@ -1,276 +1,416 @@
-# Chapter 1: The Databricks Platform & Workspace
+# Chapter 1: From Data Warehouse to the Databricks Lakehouse
 
-> **Source:** DA-FREE v3.1.1 — M1: Databricks Workspace Walkthrough
-> **Added:** 2026-06-11
+> **Sources:** Lakehouse (Armbrust et al., CIDR 2021) · What Is a Lakehouse? (Databricks, 2020) · The Data Lakehouse For Dummies Ch 1–2 (2026) · DCDE-SG Ch 1 (2025) · Databricks high-level architecture docs · DA-FREE M1 Workspace Walkthrough
+> **Added:** 2026-06-11 · **Restructured:** 2026-06-20
 
 ## What you'll learn
 
-- How the Databricks workspace is structured and how to navigate it
-- The difference between compute types and when to use each
-- How Unity Catalog fits into the workspace as the governance layer
-- How Git integration works via Git folders
-- How Serverless compute differs from classic clusters
+- Why analytics evolved through **data warehouses → data lakes → the lakehouse**, and what problem each step solved
+- How **Delta Lake** turns a cheap data lake into a transactional lakehouse
+- What **Databricks** is — the Data Intelligence Platform — and how its surfaces map to the lakehouse
+- The **Databricks architecture**: account, workspace, Unity Catalog metastore, and the control-plane / compute-plane split
+- How to navigate the **workspace**, pick the right **compute**, and run code via notebooks, VS Code, and the CLI
 
 ## Introduction
 
-Databricks provides a unified analytics platform that combines data engineering, SQL analytics, machine learning, and AI in a single workspace. Without knowing how the workspace is structured, every task — finding a table, attaching a cluster, granting permissions, connecting a Git repo — requires trial-and-error. This chapter gives you the mental map so you can orient yourself immediately in any Databricks workspace.
+Every data platform decision in this book traces back to one question: *where does the data live, and how many copies of it do you have to operate?* For two decades the answer forced a painful trade-off — a cheap, flexible **data lake** that couldn't be trusted, or a reliable, fast **data warehouse** that was expensive and rigid. Most companies ran both, copied data between them constantly, and paid for the privilege in staleness, cost, and fractured governance.
 
-## What is a lakehouse?
+The **lakehouse** is the architecture that collapses that trade-off into one system holding one copy of the data. Databricks is the platform that commercialised it. This chapter builds the idea from the ground up — the evolution that motivated it, the Delta Lake table format that makes it real, and the Databricks architecture that delivers it — before touring the workspace you'll actually click in.
 
-Before the workspace mechanics, the idea the whole platform rests on. The **lakehouse** is an open architecture that puts data-**warehouse** management features — ACID transactions, schema enforcement, governance, BI — directly on top of low-cost cloud object storage in open formats (Parquet), the cheap and flexible storage of a data **lake**. It's "what you would get if you had to redesign data warehouses in the modern world," now that object stores are cheap and reliable ([Databricks, 2020](../sources/databricks-blog/what-is-a-lakehouse.md)).
+---
 
-It exists to kill a two-tier tax. The old pattern was a **data lake** (cheap, flexible, but no transactions, no quality enforcement, no isolation — can't safely mix batch + streaming) feeding **one or more data warehouses** (reliable and fast on structured data, but poor on unstructured/AI data and not cheap), plus specialised systems for streaming, graph, and images. Every hop means copying data between systems → staleness, latency, and two copies to operate. The lakehouse collapses that into **one system, one copy** serving SQL/BI, data science, ML, and streaming.
+## 1. The evolution of data analytics
 
-Eight features define it — the rest of this book is largely how Databricks delivers each one:
+### 1.1 The data warehouse era — reliable but rigid
 
-| Lakehouse feature | Where Databricks delivers it |
-|---|---|
-| Transaction support (ACID) | Delta Lake — *Ch 5* |
-| Schema enforcement & governance | Delta Lake + Unity Catalog — *Ch 5, 14* |
-| BI on source data | Databricks SQL + Photon — *Ch 15, 23* |
-| Storage decoupled from compute | Compute model (this chapter) |
-| Openness (open formats + APIs) | Parquet / Delta, UniForm — *Ch 5, 22* |
-| Diverse data types | Unity Catalog volumes, unstructured data — *Ch 14* |
-| Diverse workloads | One platform: ETL, SQL, ML — *whole book* |
-| End-to-end streaming | Structured Streaming, Lakeflow — *Ch 9, 10* |
+Data warehouses have powered decision support and BI since the late 1980s. Massively parallel processing (MPP) let them scale, and they excel at one thing: **structured data served fast and reliably**. ACID transactions, schema enforcement, governance, and mature SQL/BI tooling all came built in. Data was loaded **schema-on-write** — validated and structured *as it lands*, optimised for downstream BI ([Lakehouse CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021.md)). The CIDR paper calls this the **first generation** of data analytics platforms.
 
-> 📎 Primary source: [What Is a Lakehouse? (Databricks, 2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — the post that named the architecture. Branding has since moved to the **Data Intelligence Platform**, but the argument is unchanged.
+Their limits showed as data changed shape. Warehouses are **not suited — and not cost-efficient — for unstructured and semi-structured data** (text, JSON, images, audio, video) arriving at high variety, velocity, and volume. Storage and compute are coupled, so scaling one means paying for both. And proprietary formats mean **vendor lock-in**: your data is only readable by the warehouse that owns it.
 
-## The Data Intelligence Platform at a glance
+On the data & AI maturity curve, the warehouse sits at the **descriptive** stage — *what happened* (historical sales, logs, canned reports).
 
-"Data Intelligence Platform" is the current name for the lakehouse plus an AI layer that learns your organisation's semantics — table/column descriptions, metrics, jargon, usage, and human feedback — so search, BI, and agents understand *your* business, not just generic SQL ([DIP-Dummies Ch 1, 3](../sources/dip-dummies/ch03-databricks-platform.md)). For orientation, the platform is a stack of surfaces sitting on one governed copy of data. You don't need all of them for data engineering — but knowing the map stops you reaching for the wrong tool.
+### 1.2 The data lake era — cheap and flexible but untrustworthy
+
+Around the early 2010s — starting with Hadoop/HDFS, then cheap cloud **object storage** (S3, ADLS, GCS) — a new pattern became possible: dump raw data of any type into a **data lake** in open formats, store first and structure later. This is **schema-on-read** — structure is applied at query time, not at load. Lakes nailed the warehouse's two weaknesses — they're inexpensive, and they hold any data type — which pushed organisations into the **predictive** stage of the maturity curve (*what may happen*: data science, ML on unstructured data). The CIDR paper calls this the **second generation**.
+
+But a bare lake gives up everything that made the warehouse trustworthy:
+
+- **No transactions (no ACID)** — concurrent appends and reads, or mixing batch and streaming, are "almost impossible" to do safely.
+- **No schema enforcement** — nothing stops bad data landing; quality rots over time.
+- **No isolation or consistency** — a failed job can leave half-written, corrupt output.
+
+The result: many data-lake promises never materialised, and in chasing flexibility companies *lost* the reliability of the warehouse. A lake without guarantees is often called a **data swamp**.
+
+### 1.3 The two-tier tax
+
+Because neither system alone was enough, the industry's de-facto architecture became **both, wired together**: a data lake for cheap storage and ML, feeding one or more data warehouses for BI, plus specialised systems for streaming, time-series, graph, and image data. The CIDR paper calls this the **two-tier architecture** and notes it became dominant — *"used at virtually all Fortune 500 enterprises."*
+
+```mermaid
+flowchart LR
+    S[Source systems] --> L[(Data Lake<br/>cheap, all data types<br/>no ACID/quality)]
+    L -->|ETL copy| W[(Data Warehouse<br/>reliable, fast, structured<br/>expensive, locked-in)]
+    L -->|copy| ST[Streaming system]
+    L -->|copy| G[Graph / image DBs]
+    W --> BI[BI & dashboards]
+    ST --> RT[Real-time apps]
+```
+
+Every arrow is a copy. The Lakehouse paper pins down exactly **four problems** this causes — much of it *accidental complexity* from how the platforms are wired, not anything intrinsic to the work:
+
+- **Reliability** — keeping lake and warehouse consistent needs continuous, bug-prone ETL; the two systems differ in data types, SQL dialects, and schemas.
+- **Data staleness** — the warehouse lags the lake by hours or days; a cited survey found **86% of analysts work with out-of-date data**.
+- **Limited advanced-analytics support** — TensorFlow/PyTorch/XGBoost can't run efficiently over a warehouse via ODBC/JDBC; exporting to files adds a *third* ETL hop.
+- **Total cost of ownership** — you pay **double storage** for the copied data, plus proprietary-format **lock-in** that makes migration costly.
+
+This duplication — paying to move and re-store the same data across systems — is the **two-tier tax** the lakehouse exists to kill.
+
+### 1.4 The lakehouse — one system, one copy
+
+A **lakehouse** is *"a new, open architecture that combines the best elements of data lakes and data warehouses … implementing similar data structures and data management features to those in a data warehouse directly on top of low-cost cloud storage in open formats"* ([Databricks, 2020](../sources/databricks-blog/what-is-a-lakehouse.md)). The authors framed it as **"what you would get if you had to redesign data warehouses in the modern world,"** now that cheap, reliable object stores exist.
+
+The payoff is consolidation: **one system, one copy** of the data serving SQL/BI, data science, ML, and streaming — covering the *whole* maturity curve (descriptive → predictive → **prescriptive** → **GenAI on proprietary data**) on a single architecture, instead of a different system at each stage.
+
+Eight features define a lakehouse — and the rest of this book is largely the story of how Databricks delivers each one:
+
+| # | Lakehouse feature | Where Databricks delivers it |
+|---|---|---|
+| 1 | Transaction support (ACID) | Delta Lake — *Ch 5* |
+| 2 | Schema enforcement & governance | Delta Lake + Unity Catalog — *Ch 5, 14* |
+| 3 | BI on source data (no second copy) | Databricks SQL + Photon — *Ch 15, 23* |
+| 4 | Storage decoupled from compute | Compute model — *this chapter* |
+| 5 | Openness (open formats + APIs) | Parquet / Delta, UniForm — *Ch 5, 22* |
+| 6 | Diverse data types | Unity Catalog volumes, unstructured data — *Ch 14* |
+| 7 | Diverse workloads (ETL, SQL, DS, ML) | One platform — *whole book* |
+| 8 | End-to-end streaming | Structured Streaming, Lakeflow — *Ch 9, 10* |
+
+Two of these properties do the heavy lifting and are worth fixing early:
+
+- **Decoupled storage & compute** (feature 4) — storage (cheap object store) and compute (clusters/warehouses) scale independently, so you pay for one without the other. This is what lets one copy serve many concurrent workloads *at lake economics*.
+- **Openness → no lock-in** (feature 5) — data stays in open formats (Parquet under Delta/Iceberg) readable by any engine. *Lock-in* = dependence on one vendor so switching is prohibitively costly (license fees, forced data copies, custom integration code); open formats are the escape hatch.
+
+> 💡 **The data & AI maturity curve** ([Lakehouse-Dummies Ch 2](../sources/lakehouse-dummies/02-explaining-lakehouses.md)) places the lakehouse cleanly: organisations climb **descriptive** (DB/DW) → **predictive** (lakes) → **prescriptive** → **GenAI on proprietary data**. Legacy stacks force a different system at each stage; the lakehouse covers the whole curve on one architecture.
+
+> 📎 Primary source: [What Is a Lakehouse? (Databricks, 2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — the post that named the architecture. The same warehouse→lake→lakehouse case is retold for a business audience in [Lakehouse-Dummies Ch 1–2](../sources/lakehouse-dummies/01-making-the-case.md).
+
+---
+
+## 2. Delta Lake — the engine of the lakehouse
+
+An architecture diagram doesn't enforce ACID — a **table format** does. The lakehouse only became real when an open format learned to put warehouse guarantees on top of object-store files. On Databricks that format is **Delta Lake**.
+
+A plain data lake stores bare **Parquet** files in a folder. Readers see whatever files happen to be there — including half-written ones from a job still running. Delta Lake wraps those same Parquet files with a **transaction log** (the `_delta_log/` directory): an ordered record of every commit. Readers consult the log to see *exactly* which files belong to the table at a given version, and writers commit atomically by appending to the log. The Lakehouse paper names this general idea a **transactional metadata layer** — a layer over object-store files that tracks which objects form a table version. Delta Lake, Apache **Iceberg** (Netflix), and Apache **Hudi** (Uber) are the three leading implementations, all descending from Apache Hive ACID.
+
+That one mechanism delivers the lakehouse's hardest features directly on cheap storage:
+
+- **ACID transactions** (feature 1) — a commit is all-or-nothing; concurrent readers never see a partial write. Batch and streaming can write to the same table safely.
+- **Schema enforcement & evolution** (feature 2) — writes that don't match the schema are rejected; schema changes are explicit and versioned.
+- **Time travel** — because the log keeps history, you can query the table *as of* an earlier version or timestamp.
+- **Incremental data quality** — Delta is designed to let you progressively refine data (raw → cleaned → curated) until it's fit for consumption — the foundation of the medallion architecture in *Ch 7*.
+
+Delta is **open** (a Linux Foundation project, Parquet underneath) so it isn't a lock-in trap. And via **Delta UniForm** the same table can be read as Apache **Iceberg** or Hudi, so external engines interoperate without copies (*Ch 22*). Apache Iceberg is a fully supported alternative table format on Databricks; the principles are the same.
+
+This is the "**Delta lakehouse**": the lakehouse architecture made concrete by the Delta table format. Chapters 5 and 12 go deep on the transaction log, `OPTIMIZE`, `MERGE`, time travel, and CDC. For now, hold one idea: **Delta Lake is what turns a folder of files into a table you can trust.**
+
+> 💡 **The deliberate trade-off:** a classic warehouse hides its storage format so it can optimise freely (*data independence*). A lakehouse **gives that up on purpose** — the open format becomes part of the public API so ML and analytics engines can read it directly. The [Lakehouse paper](../sources/databricks-papers/lakehouse-cidr-2021.md) shows the lost performance is won back with format-independent optimisations (caching, data-skipping statistics, data layout) — and proves it on **TPC-DS**, where the Databricks **Delta Engine** matched or beat four cloud warehouses at lower cost. Delta Engine is the direct ancestor of **Photon** (§6.3).
+
+> 📌 The **Databricks Runtime (DBR)** ships Spark + Delta Lake pre-installed, so every table you create on Databricks is a Delta table by default.
+
+---
+
+## 3. Databricks: the Data Intelligence Platform
+
+**Databricks** is the unified platform built on the lakehouse, founded by the original creators of Apache Spark. Its current name is the **Data Intelligence Platform (DIP)** — the lakehouse *plus* an AI layer that learns your organisation's semantics (table/column descriptions, metrics, jargon, usage, human feedback) so search, BI, and agents understand *your* business, not just generic SQL ([DIP-Dummies Ch 1, 3](../sources/dip-dummies/ch03-databricks-platform.md)).
+
+You don't need every surface for data engineering, but knowing the map stops you reaching for the wrong tool. The platform is a stack of surfaces over one governed copy of data:
 
 | Layer | Surface | What it is | In this book |
 |---|---|---|---|
-| **Storage** | Open Data Lake | One copy in open formats — **Delta Lake** or **Apache Iceberg**, no lock-in | Ch 5, 12, 22 |
+| **Storage** | Open Data Lake | One copy in open formats — **Delta Lake** or **Apache Iceberg** | Ch 5, 12, 22 |
 | **Governance** | **Unity Catalog (UC)** | One governance layer for data *and* AI: `catalog.schema.object`, ACLs, lineage, semantics | Ch 14 |
 | **Engineering** | **Lakeflow** | Declarative ETL: **Connect** (ingest), **Spark Declarative Pipelines** (transform), **Jobs** (orchestrate) | Ch 8, 10, 13, 18 |
 | **Analytics** | **Databricks SQL** + **Photon** | Serverless data warehouse for ETL + BI on governed data | Ch 15, 23 |
-| **OLTP** | **Lakebase** | Postgres-based transactional DB for the agentic era (compute/storage split, sub-second instances) | awareness only |
-| **AI/agents** | **Agent Bricks** | Build/evaluate/govern composable AI agents on your data (UC-governed, built-in LLM judges) | awareness only |
+| **OLTP** | **Lakebase** | Postgres-based transactional DB for the agentic era | awareness only |
+| **AI/agents** | **Agent Bricks** | Build/evaluate/govern composable AI agents on your data | awareness only |
 | **Self-serve BI** | **AI/BI Genie / Dashboards** | NL chatbot over your data (Genie) + self-serve dashboards | Ch 15 (Genie) |
 | **Apps** | **Databricks Apps** | Deploy data/AI apps on serverless compute, governed by UC | awareness only |
 | **Sharing** | **OpenSharing**, **Marketplace**, **Clean Rooms**, **Lakehouse Federation** | Share live data / query external sources with zero copy | Ch 22 |
-| **Assist** | **Databricks Assistant** | Context-aware AI in notebooks/SQL editor — generate, document, debug | this chapter |
+| **Assist** | **Databricks Assistant** | Context-aware AI in notebooks/SQL editor — generate, document, debug | *this chapter* |
 
-> 💡 The through-line is **Unity Catalog** — every surface above governs through it. "Learn UC once, it secures everything else" is the single highest-leverage idea in the platform. The newer AI surfaces (Lakebase, Agent Bricks, Apps) are out of scope for a data-engineering path but appear here so you recognise them; this book stays on the storage → governance → engineering → analytics spine.
+> 💡 The through-line is **Unity Catalog** — every surface above governs through it. *"Learn UC once, it secures everything else"* is the single highest-leverage idea in the platform. The newer AI surfaces (Lakebase, Agent Bricks, Apps) are out of scope for a data-engineering path but appear here so you recognise them; this book stays on the **storage → governance → engineering → analytics** spine.
 
-## How the workspace is structured
+---
 
-The Databricks workspace is an environment hosted in the **Control Plane** — the managed cloud service run by Databricks — that connects to your organisation's **Data Plane** (your cloud storage, compute, and networking). As a user, you interact with the Control Plane; your data never leaves your cloud account.
+## 4. Databricks architecture
 
-The workspace has a left sidebar with sections for different activities:
+Underneath the surfaces, every Databricks deployment is organised the same way: an **account** at the top, **workspaces** where work happens, **Unity Catalog metastores** governing the data, and a **control plane / compute plane** split that determines where your data is processed.
+
+> 📎 Primary source: [Databricks high-level architecture](../sources/databricks-docs/high-level-architecture.md) (docs).
+
+### 4.1 The object hierarchy: account → workspace → metastore
+
+A **Databricks account** is the top-level construct for managing Databricks across your organisation. At the account level you manage:
+
+- **Identity & access** — users, groups, service principals, SCIM provisioning, SSO
+- **Workspace management** — create/update/delete workspaces across regions
+- **Unity Catalog metastore management** — create metastores and attach them to workspaces
+- **Usage management** — billing, compliance, policies
+
+One account can hold **many workspaces and many metastores**.
+
+- **Workspaces** are the collaboration environment where users run compute workloads — ingestion, interactive exploration, scheduled jobs, ML training.
+- **Unity Catalog metastores** are the central governance system for data assets (tables, ML models), organised under the three-level namespace **`<catalog>.<schema>.<object>`**. A single metastore can attach to multiple workspaces *in the same region*, giving each the same data view with access controls managed across all of them.
+
+### 4.2 Control plane vs compute plane
+
+Databricks operates out of a **control plane** and a **compute plane**:
+
+- **Control plane** — the backend services Databricks manages: the web application, REST API, cluster manager, job scheduler, notebooks store. It lives in the **Databricks account, not your cloud account**.
+- **Compute plane** — where your data is actually processed. Two kinds:
+    - **Serverless compute plane** — runs in the **Databricks account** (in the same cloud region as your workspace). Databricks manages the infrastructure; you pay per second of use.
+    - **Classic compute plane** — runs in **your own cloud account**, inside each workspace's virtual network. It has natural isolation because it's your account; you manage the VMs.
+
+```mermaid
+flowchart TB
+    subgraph ACC[Databricks Account]
+        CP[Control Plane<br/>web app · REST API<br/>cluster manager · job scheduler]
+        SCP[Serverless compute plane<br/>managed clusters & warehouses]
+    end
+    subgraph CLOUD[Your Cloud Account]
+        CCP[Classic compute plane<br/>VMs in your VPC]
+        WS[(Workspace storage<br/>+ your data: UC tables & volumes)]
+    end
+    CP --- SCP
+    CP -. provisions .-> CCP
+    SCP --> WS
+    CCP --> WS
+```
+
+> ⚠️ The "your data stays in your cloud account" guarantee is strongest for **classic** compute. **Serverless** compute runs in a Databricks-managed plane, within a per-workspace network boundary with multiple isolation layers. DCDE-SG's #1 exam fact — *"customer data lives in the data/compute plane, not the control plane"* — assumes classic compute.
+
+### 4.3 Workspace storage
+
+Each workspace also keeps **workspace storage**, which is **separate from your own data objects** (UC tables and volumes). It holds two categories:
+
+- **Workspace file-system data** — assets you create in the UI: notebooks, SQL queries, dashboards, alerts, Git folders, libraries (`.whl`, `.jar`), small config files.
+- **Workspace system data** — generated internally by Databricks features: query/job results, notebook revisions, query plans for observability, cluster logs.
+
+How it's stored depends on workspace type:
+
+- **Serverless workspaces** use **default storage** — a fully managed location for system data *and* UC data assets; they can also connect to your own cloud storage.
+- **Classic workspaces** get **three cloud buckets** in your account: one for system data, one for the (legacy, often disabled) **DBFS root**, and — if auto-enabled for UC — one for the default workspace catalog.
+
+> ⚠️ **Never delete or modify classic workspace storage.** A workspace depends on both its control-plane databases and its workspace storage; if the storage is deleted, **the workspace cannot be recovered.**
+
+> 📌 **DBFS is legacy.** DBFS root and mounts (the `dbfs:/` namespace) are a **deprecated** pattern. New workspaces are Unity Catalog–only; use **UC Volumes** (`/Volumes/<catalog>/<schema>/<volume>/`) for file storage. The read-only `/databricks-datasets/` sample path still works.
+
+---
+
+## 5. Navigating the workspace
+
+You interact with the **control plane** through the workspace UI; your data never leaves your cloud account. The left sidebar groups activities:
 
 ```
-+ New          → create any asset (notebook, job, cluster, warehouse…)
-Workspace      → file browser for notebooks and folders
-Catalog        → Unity Catalog browser (tables, volumes, functions, models)
-Jobs & Pipelines → Lakeflow Jobs and Declarative Pipelines
-Compute        → clusters, SQL Warehouses, pools, policies
-SQL            → SQL Editor, Dashboards, Genie
-Data Engineering → Runs, Data Ingestion
++ New             → create any asset (notebook, job, cluster, warehouse…)
+Workspace         → file browser for notebooks and folders
+Catalog           → Unity Catalog browser (tables, volumes, functions, models)
+Jobs & Pipelines  → Lakeflow Jobs and Declarative Pipelines
+Compute           → clusters, SQL Warehouses, pools, policies
+SQL               → SQL Editor, Dashboards, Genie
+Data Engineering  → Runs, Data Ingestion
 ```
 
-**Unity Catalog** is the governance layer. Every table, view, function, model, and volume lives in a three-level namespace: `catalog.schema.object`. The Catalog Explorer in the sidebar lets you browse this hierarchy, inspect table schemas, manage permissions, and view lineage — all without writing SQL.
+The **top bar** has AI-powered **Search** (natural language across tables, notebooks, dashboards), a workspace switcher, the **Databricks Assistant** (UC-aware AI for generate/explain/debug), and profile/settings.
 
-**Compute** is split into types:
+The **Catalog Explorer** browses the Unity Catalog hierarchy — inspect schemas, manage permissions, and view lineage without writing SQL. Unity Catalog gets a full chapter (*Ch 14*); for now the key fact is that **every table, view, function, model, and volume lives in `catalog.schema.object`**.
+
+The **Workspace browser** is a hierarchical file tree: **Home** (your personal area), **Workspace** root (all users' homes under `Users/`), **Trash** (deleted items kept 30 days). **Repos** is the legacy Git UI — replaced by **Git folders** (§9.4).
+
+---
+
+## 6. Compute on Databricks
+
+Compute is where code runs. Picking the right type is the first cost and performance decision you make.
 
 | Type | Use case | Billing |
 |------|----------|---------|
-| All-Purpose | Interactive notebooks | All-Purpose DBU rate |
-| Job Compute | Scheduled jobs | Job DBU rate (~70% cheaper) |
-| SQL Warehouse | SQL Editor, dashboards | SQL DBU rate |
-| Serverless | Notebooks, jobs, SQL | Per-second, fully managed |
-| Vector Search | Embedding index queries | Dedicated DBU |
+| **All-Purpose** | Interactive notebooks, EDA | All-Purpose DBU rate (highest) |
+| **Job Compute** | Scheduled jobs | Job DBU rate (~70% cheaper) |
+| **SQL Warehouse** | SQL Editor, dashboards, BI | SQL DBU rate |
+| **Serverless** | Notebooks, jobs, SQL | Per-second, fully managed |
+| **Vector Search** | Embedding-index queries | Dedicated DBU |
 
-The key insight: **Serverless compute is the default** for notebooks on modern workspaces. You attach to it immediately — no cluster startup time. Under the hood, Databricks manages the infrastructure; you just pay for the seconds you actively use it.
+A cluster is a **driver** node (orchestrates) plus **worker** nodes (execute tasks in parallel). **DBU** (Databricks Unit) is the billing unit — processing capacity per hour. **Autoscaling** (min/max workers) and **auto-termination** (shut down after N idle minutes) control cost.
 
-**Photon** is a C++ vectorised query engine that replaces the JVM-based Spark execution engine for SQL and DataFrame operations. It's enabled at the cluster level and delivers significant speedups for aggregations, sorts, and joins. It does *not* accelerate Python UDFs, which still run on the JVM/Python interpreter. Photon is available on both classic clusters and SQL Warehouses (always on for Serverless SQL Warehouses). Chapter 23 covers its internals and cost trade-offs.
+The key modern default: **Serverless compute is the default** for notebooks on current workspaces. You attach immediately — no cluster startup wait — and pay only for the seconds you use.
 
-### Classic cluster access modes
+### 6.1 Classic cluster access modes
 
-All classic (non-serverless) clusters have an **access mode** that controls isolation and feature availability. This is one of the most exam-tested distinctions:
+Every classic (non-serverless) cluster has an **access mode** controlling isolation and feature availability — one of the most exam-tested distinctions:
 
-| Access mode | Users | RDD access | GPU | Spark config override | Lakeguard | Best for |
+| Access mode | Users | RDD | GPU | Spark config override | Lakeguard | Best for |
 |---|---|---|---|---|---|---|
-| **Standard** | Multi-user | ❌ | ❌ | ❌ (blocked) | ✅ (enforced) | Data engineering, SQL, most ETL |
-| **Dedicated** | Single-user | ✅ | ✅ | ✅ | ❌ | ML workloads, GPU compute, RDD-dependent code |
-| **No Isolation Shared** | Multi-user | ✅ | ❌ | Limited | ❌ | Dev/test only; not recommended for production |
+| **Standard** | Multi-user | ❌ | ❌ | ❌ (blocked) | ✅ enforced | Data engineering, SQL, most ETL |
+| **Dedicated** | Single user/group | ✅ | ✅ | ✅ | ❌ | ML, GPU, RDD-dependent code |
+| **No Isolation Shared** | Multi-user | ✅ | ❌ | Limited | ❌ | Dev/test only; not for production |
 
-**Standard access mode** (formerly "Shared") uses **Spark Connect** — a client-server model where each user's code runs in an isolated server process. This is what **Lakeguard** enforces: users cannot read each other's in-memory DataFrames or `SparkContext` state, cannot override Spark configuration at the cluster level, and cannot use RDD APIs. The tradeoff is automatic per-user isolation with no teardown — critical for multi-tenant environments.
+- **Standard** (formerly "Shared") uses **Spark Connect** — each user's code runs in an isolated server process. **Lakeguard** enforces the isolation: users can't read each other's in-memory DataFrames or `SparkContext`, can't override cluster Spark config, and can't use RDD APIs. Automatic per-user isolation with no teardown.
+- **Dedicated** (formerly "Single User") gives one user (or group) full Spark access — `SparkContext`, `RDD`, GPU kernels, arbitrary config. Required for RDD-API code or GPU ML libraries.
 
-**Dedicated access mode** (formerly "Single User") gives one user full Spark access — including `SparkContext`, `RDD`, GPU kernels, and arbitrary Spark config. Required for any code that still uses the RDD API or relies on GPU-accelerated ML libraries.
+> ⚠️ **Standard/Dedicated is the current (2025+) terminology.** Older docs, courses, and the DCDE-SG book say "Shared" and "Single User" — same modes, renamed. The Terraform API (`data_security_mode`) still uses the string values `USER_ISOLATION` (Standard) and `SINGLE_USER` (Dedicated).
 
-> ⚠️ **The Standard/Dedicated terminology is current as of 2025.** Older Databricks docs, courses, and the DCDE-SG book use "Shared" and "Single User". They are the same access modes under new names. The API name in Terraform (`data_security_mode`) still uses `"SINGLE_USER"` and `"USER_ISOLATION"` as string values.
+### 6.2 SQL Warehouse types
 
-### SQL Warehouse types
-
-SQL Warehouses run SQL queries and power the SQL Editor, dashboards, and BI tool connections. Three types:
+SQL Warehouses power the SQL Editor, dashboards, and BI connections:
 
 | Type | Cold start | Management | Best for |
 |---|---|---|---|
-| **Serverless** | ~1–3 sec | Fully managed | Interactive SQL, dashboards, most use cases |
-| **Pro** | ~2–4 min | Self-managed | Databricks SQL + Lakeflow Pipelines as source |
-| **Classic** | ~2–4 min | Self-managed | Legacy BI tool compatibility, predictable config |
+| **Serverless** | ~1–3 sec | Fully managed | Interactive SQL, dashboards, most cases |
+| **Pro** | ~2–4 min | Self-managed | DBSQL + Lakeflow Pipelines as a source |
+| **Classic** | ~2–4 min | Self-managed | Legacy BI compatibility, fixed config |
 
-Serverless SQL Warehouses always run on Photon. Pro is required when a SQL Warehouse is used as a data source for Lakeflow Spark Declarative Pipelines materialized views.
+Serverless SQL Warehouses always run on Photon. **Pro** is required when a SQL Warehouse is the source for a Lakeflow Spark Declarative Pipeline materialized view.
 
-### Compute pools (instance pools)
+### 6.3 Photon
 
-Compute pools are a fleet of pre-allocated cloud instances that clusters draw from. They eliminate cold-start time: instead of launching new VMs, a cluster borrows pre-warmed instances from the pool and starts in seconds. Useful when you need many short-lived clusters (e.g., CI job runs) or when the 5–10 minute cluster start time is unacceptable for your SLA. Pools are optional infrastructure — most teams add them after hitting cold-start friction in production.
+**Photon** is a C++ vectorised query engine that replaces JVM-based Spark execution for SQL and DataFrame operations. Enabled at the cluster level, it speeds up aggregations, sorts, and joins — but does **not** accelerate Python UDFs, which still run on the JVM/Python interpreter. It's available on classic clusters and SQL Warehouses (always on for Serverless SQL). Photon is the productised descendant of the **Delta Engine** that carried the [Lakehouse paper's](../sources/databricks-papers/lakehouse-cidr-2021.md) TPC-DS performance results (§2) — the proof that an open-format lakehouse can match a closed warehouse. *Ch 23* covers internals and cost trade-offs.
 
-## Code examples
+### 6.4 Compute pools
 
-### Setting the default catalog and schema
+**Compute pools** (instance pools) are a fleet of pre-warmed cloud instances clusters draw from, eliminating cold-start: a cluster borrows pre-allocated VMs and starts in seconds instead of minutes. Useful for many short-lived clusters (CI runs) or tight SLAs. Note: Databricks doesn't charge for idle pool VMs, **but your cloud provider does** — they're real running machines. Optional infrastructure most teams add after hitting cold-start friction.
 
-In any notebook, use `USE CATALOG` and `USE SCHEMA` to avoid typing fully-qualified names on every query:
+---
+
+## 7. Working with notebooks
+
+A Databricks notebook has four cell types: **Code** (Python, SQL, Scala, or R), **Markdown** (`%md` — headers populate the notebook's table of contents), **Result** (output below each code cell), and **Visualization** (inline chart). Switch a single cell's language with the `%python`, `%sql`, `%scala`, or `%r` magic.
+
+Other everyday magics: **`%run`** (execute another notebook inline; §7.3) and **`%fs`** (quick file-system ops, e.g. `%fs ls /databricks-datasets`). `dbutils` is the richer programmatic equivalent — `dbutils.fs.ls(...)` returns a list you can store and loop over; `display(x)` renders it as a sortable, chartable table (`print(x)` doesn't).
+
+> ⚠️ Calling `dbutils.fs.ls(...)` in a **SQL** cell raises a syntax error — the cell runs as SQL. Prefix the cell with `%python`. (A classic exam trap.)
+
+### 7.1 Setting the default catalog and schema
+
+Avoid typing fully-qualified names on every query:
 
 ```sql
 USE CATALOG my_catalog;
 USE SCHEMA my_schema;
 
--- Now all unqualified table names resolve to my_catalog.my_schema
+-- Now unqualified names resolve to my_catalog.my_schema
 SELECT * FROM my_table;
 ```
-
-In PySpark (Spark 3.4+):
 
 ```python
 spark.catalog.setCurrentCatalog("my_catalog")
 spark.catalog.setCurrentDatabase("my_schema")
 ```
 
-### Granting permissions via SQL
+Confirm with `SELECT current_catalog(), current_schema()` at the start of a notebook — creating tables in the wrong place is a common slip.
 
-```sql
--- Grant SELECT to all authenticated users in the account
-GRANT SELECT ON TABLE wine_quality_table TO `account users`;
+### 7.2 Databricks widgets — parameterising notebooks
 
--- Verify
-SHOW GRANTS ON TABLE wine_quality_table;
-```
-
-The same grant can be done through the Catalog Explorer: **Catalog → table → Permissions tab → Grant**.
-
-### Listing compute in a notebook
+Widgets add input controls and let jobs or `%run` calls pass parameters. Four types: `text`, `dropdown`, `combobox`, `multiselect`.
 
 ```python
-# Check which cluster/compute is currently attached
-print(spark.conf.get("spark.databricks.clusterUsageTags.clusterId"))
-print(spark.conf.get("spark.databricks.clusterUsageTags.clusterName"))
+# Create a dropdown (default CA; choices CA, IL, MI, NY)
+dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY"])
+
+# Read the value anywhere
+state = dbutils.widgets.get("state")
+
+# SQL — use parameter markers (DBR 15.2+; protects against injection)
+# SELECT * FROM orders WHERE state = :state
 ```
 
-### Connecting a Git folder
+Widgets accept **string values only**. In SQL cells use parameter markers (`:name`), not string interpolation, to prevent injection.
 
-```
-Workspace → + New → Git folder
-→ Paste repo URL (GitHub, GitLab, Bitbucket)
-→ Authenticate via Settings → Developer → Linked Accounts
-→ Create Git folder
-```
+> ⚠️ Default on-change behaviour is **"Run Accessed Commands"** — it reruns only cells that call `dbutils.widgets.get()`; **SQL cells are not rerun**. Switch to "Run Notebook" if SQL cells must refresh on change.
 
-After creation, right-click the folder → **Git** to pull, push, commit, or create branches.
+For rich interactive Python controls (sliders, buttons), use **ipywidgets** — but ipywidgets **cannot** pass values to jobs or between notebooks; use Databricks widgets for that.
 
-## Running a local notebook on Databricks
+### 7.3 Sharing code: `%run` vs workspace files
 
-> **Worked example:** [`notebooks/intro.ipynb`](../../notebooks/intro.ipynb) — a word-count notebook adapted from the local Spark environment. The original reads a local file and creates its own `SparkSession`; the Databricks copy applies all three changes below.
-
-A notebook written for a local Spark installation needs three changes before it will run on Databricks.
-
-### 1. Remove the SparkSession block
-
-On Databricks, `spark` is pre-created and injected into every notebook automatically. Any `SparkSession.builder` block — along with local-only setup such as `os.environ["SPARK_LOCAL_IP"]`, log4j config paths, and custom UI ports — must be removed entirely:
+- **Workspace files** (recommended): store functions in a `.py` file and `import` it like any Python module (DBR 11.3 LTS+). Importable, testable, version-controllable.
+- **`%run ./path`**: includes another notebook inline — its functions and variables enter the caller's scope. Must be alone in its cell.
 
 ```python
-# Remove this whole block — Databricks provides spark for you
-import os
-os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
-
-spark = (
-    SparkSession.builder
-    .appName("my-app")
-    .config("spark.ui.port", "4041")
-    ...
-    .getOrCreate()
-)
+%run ./utils/transforms
+# everything defined in transforms is now in scope
+result = my_transform_function(df)
 ```
 
-After removing it, `spark` just works in every cell.
+For separate execution with parameter passing and return values, use `dbutils.notebook.run()` — but prefer **Lakeflow Jobs** for any production scheduling. Rule: **`%run` merges scopes; `dbutils.notebook.run()` starts a separate job.**
 
-### 2. Fix local file paths
+### 7.4 Interactive debugger
 
-Local paths (`../data/file.txt`, `C:/Users/...`) don't exist on a Databricks cluster. Three options in order of convenience:
+The built-in Python debugger (DBR 14.3 LTS+ on Standard; 13.3 LTS+ on Dedicated; Serverless) sets breakpoints, steps through code, and inspects variables live. Enable: **Settings → Developer → Python Notebook Interactive Debugger**. Start with **Run → Debug cell** (`Alt+Shift+D`); the **Variable Explorer** (right) shows in-scope values, the **Debug Console** (bottom) runs Python in the current frame.
 
-| Option | When to use |
-|--------|-------------|
-| Download inline with `urllib` | Small public files (Project Gutenberg, sample data) |
-| Unity Catalog Volume (`/Volumes/catalog/schema/vol/file`) | Team data, persistent across sessions |
-| DBFS (`/dbfs/FileStore/...`) | Legacy; prefer UC Volumes on modern workspaces |
+> ⚠️ Debug sessions auto-terminate after **30 min** idle; the console has a **15-second** per-execution timeout and doesn't support `display()`.
 
-**Unity Catalog Volume example** (recommended — persists across sessions, works on all compute types):
+---
+
+## 8. Running code on Databricks
+
+### 8.1 Porting a local notebook
+
+A notebook written for a local Spark install needs three changes before it runs on Databricks ([worked example: `notebooks/intro.ipynb`](../../notebooks/intro.ipynb)):
+
+**1 — Remove the `SparkSession` block.** Databricks pre-creates `spark` in every notebook. Delete any `SparkSession.builder` block and local-only setup (`os.environ["SPARK_LOCAL_IP"]`, log4j paths, custom UI ports).
+
+**2 — Fix local file paths.** Local paths don't exist on a cluster. Use a **UC Volume** (recommended — persists, works on all compute):
 
 ```python
-# Create the UC hierarchy once
 spark.sql("CREATE CATALOG IF NOT EXISTS learning")
 spark.sql("CREATE SCHEMA IF NOT EXISTS learning.chap1")
 spark.sql("CREATE VOLUME IF NOT EXISTS learning.chap1.intro")
 
-# Download the file into the volume
 import urllib.request
 urllib.request.urlretrieve(
     "https://www.gutenberg.org/files/1342/1342-0.txt",
     "/Volumes/learning/chap1/intro/1342-0.txt",
 )
 
-# Read — no file: prefix needed
 book = spark.read.text("/Volumes/learning/chap1/intro/1342-0.txt")
 ```
 
-UC Volumes are the correct Databricks-native storage for files. The `/Volumes/<catalog>/<schema>/<volume>/` path works directly in `spark.read` without any URI prefix. Avoid `file:/tmp/` — Databricks restricts local filesystem access to `/Workspace` paths only.
+The `/Volumes/<catalog>/<schema>/<volume>/` path works directly in `spark.read` with no URI prefix. Avoid `file:/tmp/` — Databricks restricts local-filesystem access to `/Workspace` paths and raises `LocalFilesystemAccessDeniedException`.
 
-### 3. Remove `spark.stop()`
+**3 — Remove `spark.stop()`.** It kills the shared cluster context for *every* user attached. Databricks manages the lifecycle; never stop Spark manually.
 
-`spark.stop()` terminates the shared cluster context — it kills the compute for every user attached to that cluster. Remove it unconditionally. Databricks manages the cluster lifecycle; you never stop Spark manually.
+Import via the UI (**Workspace → ⋮ → Import → choose `.ipynb`**) or the CLI (§8.3). Then **Connect → Serverless** (or an All-Purpose cluster) → **Run all**.
 
-### Importing the notebook into the workspace
+### 8.2 Running from VS Code
 
-**Via the UI (simplest):**
+The **Databricks extension for VS Code** runs notebooks on your workspace from a local folder — no manual import.
 
-```
-Workspace → (navigate to target folder) → ⋮ menu → Import
-→ Select File → choose the .ipynb file → Import
-```
+1. Install the **Databricks** extension (Databricks Inc.).
+2. Open a folder → click the Databricks icon → **Create configuration** → pick a workspace (from `~/.databrickscfg`) → select/create a cluster.
 
-The notebook appears in the folder immediately, ready to attach compute and run.
+Two execution modes:
 
-**Via the Databricks CLI** (useful for scripting or CI):
+- **Interactive (Databricks Connect)** — Spark ops run on remote compute, everything else locally; feels like local Jupyter. Works with a classic All-Purpose cluster (DBR 13.3+) **or Serverless** (Databricks Connect **15.4 LTS+**). Select serverless with `serverless_compute_id = "auto"` (or `DATABRICKS_SERVERLESS_COMPUTE_ID`). `spark`, `dbutils`, `display`, `sql` are pre-injected.
+- **Run as Job** — submits the whole notebook as a Lakeflow Job run (any compute, incl. Serverless). Click **Run on Databricks → Run File as Workflow**.
+
+> **Historical note:** early Databricks Connect "v2" (DBR 13.3, 2023) targeted only classic clusters; serverless support arrived in the 15.x line. Pre-mid-2024 notes claiming serverless is unsupported are stale.
+
+### 8.3 The Databricks CLI
+
+The current CLI is the Go-based binary from [github.com/databricks/cli](https://github.com/databricks/cli) — **not** the legacy `databricks-cli` pip package (deprecated Oct 2023).
 
 ```bash
+# Install
+winget install Databricks.DatabricksCLI          # Windows
+brew tap databricks/tap && brew install databricks  # macOS / Linux
+
+# Authenticate (OAuth U2M — opens a browser)
+databricks auth login --host https://<workspace>.cloud.databricks.com
+
+# Import a notebook
 databricks workspace import /Users/you@example.com/intro \
-  --file notebooks/intro.ipynb \
-  --format JUPYTER \
-  --overwrite
+  --file notebooks/intro.ipynb --format JUPYTER --overwrite
 ```
 
-The current CLI is the Go-based binary from [github.com/databricks/cli](https://github.com/databricks/cli) (v1.3.0, 2026-06-10) — **not** the legacy `databricks-cli` pip package (deprecated Oct 2023).
-
-Install:
-
-```bash
-# Windows
-winget install Databricks.DatabricksCLI
-
-# macOS / Linux
-brew tap databricks/tap && brew install databricks
-```
-
-Authenticate (OAuth U2M — opens a browser):
-
-```bash
-databricks auth login --host https://<your-workspace>.cloud.databricks.com
-```
-
-URL format by cloud:
+Workspace URL by cloud:
 
 | Cloud | Workspace URL |
 |-------|--------------|
@@ -278,194 +418,61 @@ URL format by cloud:
 | Azure | `https://<workspace>.azuredatabricks.net` |
 | GCP | `https://<workspace>.gcp.databricks.com` |
 
-**Databricks Free Edition** runs on AWS — sign up at `login.databricks.com`. Community Edition retired January 1, 2026.
+Each `auth login` saves a named profile to `~/.databrickscfg`; commands without `-p` use `DEFAULT`. List them with `databricks auth profiles`, and pass `-p <profile>` to target a specific one. Use `databricks configure --token` only if the workspace doesn't support OAuth.
 
-Use `databricks configure --token` only if your workspace does not support OAuth.
+> 📌 **Databricks Free Edition** runs on AWS (sign up at `login.databricks.com`); it's serverless and needs no cloud account. **Community Edition retired January 1, 2026.**
 
-**Managing multiple profiles.** Each `auth login` saves a named profile to `~/.databrickscfg`. Commands without `-p` use the `DEFAULT` profile — if that profile is stale or points to a different workspace, authentication fails. List all configured profiles:
+### 8.4 Git folders
 
-```bash
-databricks auth profiles
-# DEFAULT            https://dbc-....cloud.databricks.com  NO   ← stale
-# my-workspace       https://dbc-....cloud.databricks.com  YES
-```
+**Git folders** (formerly Repos) bring real Git into the workspace. Create via **+ New → Git folder → paste repo URL**. Public repos clone with no auth; private repos/push need a linked provider (**Settings → Linked accounts**; prefer the **Databricks GitHub App** over a PAT). Branch, commit, and push from the Git dialog — but **pull requests happen on the provider** (GitHub/GitLab), not in Databricks. Built-in notebook version history exists but has no branching and can be deleted by users — use Git folders for anything serious.
 
-To make a workspace the default, re-run auth and accept `DEFAULT` as the profile name:
-
-```bash
-databricks auth login --host https://<your-workspace>.cloud.databricks.com
-# Profile name prompt → press Enter (saves as DEFAULT)
-```
-
-Or pass `-p <profile-name>` on every command to use a named profile explicitly.
-
-### Running the notebook
-
-1. Open the imported notebook.
-2. Click **Connect** (top-right) → select **Serverless** or an All-Purpose cluster.
-3. Click **Run all**, or `Shift+Enter` through cells.
-
-Serverless attaches in seconds with no cluster startup wait. Use an All-Purpose cluster only if you need custom libraries or Spark configuration not available on Serverless.
-
-## Running notebooks from VS Code
-
-The Databricks extension for VS Code lets you run notebooks on your workspace directly from a local folder — no manual import required.
-
-### Installation & configuration
-
-1. Install the **Databricks** extension (by Databricks Inc.) from the VS Code Extensions panel.
-2. Open a folder in VS Code (`File → Open Folder`), then click the Databricks icon in the sidebar.
-3. The panel shows **"Databricks project configuration was not detected"** with three buttons:
-   - **Create configuration** — creates a `.databricks/project.json` in the current folder and walks you through selecting a workspace host and cluster. **Start here.**
-   - **Select a project** — points to an existing configured folder.
-   - **Create a new project** — scaffolds a new project from a template.
-4. Click **Create configuration** → select your workspace from the dropdown (pulled from `~/.databrickscfg`) → select or create a cluster.
-
-### Open your course or project folder
-
-```
-File → Open Folder → C:\opt\learn\databricks\courses\<course-folder>
-```
-
-All notebooks in the folder are immediately available. No import step needed.
-
-### Two execution modes
-
-#### Interactive — cell by cell (Databricks Connect)
-
-Spark operations execute on remote Databricks compute; all other code runs locally. Feels identical to a local Jupyter notebook.
-
-- Works with **either a classic All-Purpose cluster** (DBR 13.3+) **or Serverless compute**. Serverless requires Databricks Connect **15.4 LTS or above** — pick a recent version and it works out of the box.
-- Select serverless by setting `serverless_compute_id = "auto"` in your connection config (or the `DATABRICKS_SERVERLESS_COMPUTE_ID` env var) instead of pointing at a `cluster_id`.
-- Install Databricks Connect inside the extension when prompted.
-- Open any `.ipynb` → run cells with the standard notebook toolbar.
-- `spark`, `dbutils`, `display`, and `sql` are pre-injected — no setup code needed.
-
-> **Historical note:** early Databricks Connect "v2" (released with DBR 13.3 in 2023) targeted only classic clusters — serverless support arrived in the 15.x line. Notes written before mid-2024 often still claim serverless is unsupported; that restriction no longer applies.
-
-#### Run as Job
-
-Submits the whole notebook as a Lakeflow Job run. Works with any compute including Serverless.
-
-Open the `.ipynb` → click the **Run on Databricks** icon in the title bar → **Run File as Workflow**. Results appear in a "Databricks Job Run" tab; click the run ID to open the full job detail in the workspace UI.
-
-### Creating an All-Purpose cluster for Databricks Connect
-
-Serverless is enough for most interactive work. Create a classic All-Purpose cluster only if you need a custom library, GPU support, or a Spark configuration that Serverless doesn't expose:
-
-```
-Databricks UI → Compute → Create compute
-→ Runtime: 18.x (Spark 4.1, Scala 2.13)
-→ Node type: smallest available (e.g. i3.xlarge)
-→ Auto-terminate: 30 min
-→ Create
-```
-
-Attach this cluster in the VS Code Databricks sidebar before running cells interactively.
-
-## Notebook features you'll use daily
-
-A Databricks notebook has four cell types: **Code** (Python, SQL, Scala, or R set by the `%lang` magic), **Markdown** (documentation), **Result** (output below each code cell), and **Visualization** (inline chart from a result). Switch language in a cell with `%python`, `%sql`, `%scala`, or `%r`.
-
-### Databricks widgets — parameterising notebooks
-
-Widgets add interactive input controls to a notebook and let you pass parameters from jobs or `%run` calls. Four types:
-
-| Type | What it does |
-|---|---|
-| `text` | Free text input |
-| `dropdown` | Pick one from a list |
-| `combobox` | Pick from list or type a custom value |
-| `multiselect` | Pick one or more from a list |
-
-```python
-# Create a dropdown (default CA; choices: CA, IL, MI, NY)
-dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY"])
-
-# Read the value anywhere in the notebook
-state = dbutils.widgets.get("state")
-
-# SQL — use parameter markers (DBR 15.2+; protects against injection)
-# SELECT * FROM orders WHERE state = :state
-```
-
-Widgets accept **string values only** — no integers or booleans. In SQL cells, use parameter markers (`:param_name`) instead of string interpolation to prevent SQL injection.
-
-> ⚠️ **On-change behaviour:** the default widget action is **"Run Accessed Commands"** — it reruns only cells that call `dbutils.widgets.get()` for that widget. SQL cells are **not** rerun in this mode. Switch to "Run Notebook" if you need SQL cells to refresh on widget change.
-
-For rich interactive Python controls (sliders, buttons, accordions), use **ipywidgets** instead. Key distinction: ipywidgets cannot pass parameters between notebooks or to jobs — use Databricks widgets for that.
-
-### Sharing code: %run and workspace files
-
-Two patterns for reusing code across notebooks:
-
-**Workspace files** (recommended): store functions in a `.py` file in the workspace and `import` it like any Python module. Requires DBR 11.3 LTS+. Supports Git, version control, and IDE debugging.
-
-**`%run`**: includes another notebook inline — all its functions and variables become available in the calling notebook's scope. Must be alone in its cell.
-
-```python
-# %run — must be the only thing in its cell
-%run ./utils/transforms
-
-# After %run, everything defined in transforms is in scope
-result = my_transform_function(df)
-```
-
-For orchestrating separate execution (with parameter passing and return values), use `dbutils.notebook.run()` — but prefer Lakeflow Jobs for any production scheduling need. The key rule: **`%run` merges scopes; `dbutils.notebook.run()` starts a separate job.**
-
-### Interactive debugger
-
-The built-in Python debugger (DBR 14.3 LTS+ on Standard; 13.3 LTS+ on Dedicated; Serverless) lets you set breakpoints, step through code, and inspect variables live without `print()` statements.
-
-Enable: Username → **Settings** → **Developer** → toggle **Python Notebook Interactive Debugger** on.
-
-Start a debug session: **Run > Debug cell** or `Alt+Shift+D`. Execution pauses before each breakpointed line. The **Variable Explorer** (right sidebar) shows all in-scope values; the **Debug Console** (bottom) lets you execute Python in the current frame.
-
-> ⚠️ Debug sessions auto-terminate after **30 minutes** idle. The debug console has a **15-second timeout** per execution and does not support `display()`.
+---
 
 ## Best practices
 
-- Use **Serverless compute** by default for interactive work. Switch to a classic cluster only if you need a specific library that isn't pre-installed, need GPU support, or need to configure Spark parameters that Serverless doesn't expose.
-- Use **Job Compute** (not All-Purpose) for scheduled jobs. The DBU rate is ~70% cheaper, and production jobs should have their own isolated cluster.
-- Pin frequently used notebooks to **Favorites** to avoid losing them in deep workspace hierarchies.
-- Use **Git folders** instead of manually copying notebooks. Git folders give you version history, branching, and the ability to review changes before committing.
-- Grant permissions at the **schema or catalog level** when possible, rather than table-by-table. It scales better as your data model grows.
-- **Never use the notebook schedule button** to create a production job. The schedule button creates a job against the latest *working* copy of the notebook — unsaved edits included. Use Lakeflow Jobs pointing at the latest *committed* version in a Git folder instead.
-- Store reusable functions in **workspace files** (`.py`), not in notebook cells. Files are importable, testable, and versionable; code buried in cells is none of those things.
-- Use **Standard access mode** (not Dedicated) for all multi-user ETL workloads. Dedicated is for single-user ML and GPU work only — it doesn't enforce isolation between users.
+- **Default to Serverless** for interactive work; use a classic cluster only for a missing library, GPU, or Spark config Serverless doesn't expose.
+- Use **Job Compute** (not All-Purpose) for scheduled jobs — ~70% cheaper, isolated per run.
+- Use **Standard access mode** for all multi-user ETL; **Dedicated** only for single-user ML/GPU/RDD work.
+- Grant permissions at the **schema or catalog level** when possible — it scales better than table-by-table.
+- Store reusable functions in **workspace files** (`.py`), not notebook cells — files are importable, testable, versionable.
+- **Never use the notebook schedule button** for production jobs — it targets the latest *working* copy (unsaved edits included). Use a **Lakeflow Job** against the committed version in a Git folder.
+- Use **UC Volumes**, not DBFS or `file:/tmp/`, for file storage.
 
 ## Common pitfalls
 
-- **Attaching an All-Purpose cluster to a job task** generates a billing warning and charges the higher All-Purpose DBU rate. Always choose Job Compute or Serverless for job tasks in production.
-- **Confusing Repos (legacy) with Git folders**: the legacy Repos feature has been replaced by Git folders. If you see "Repos" in the sidebar, it's the old UI. Use Git folders for new work.
-- **Photon doesn't help Python UDFs**: if your bottleneck is a Python function applied row-by-row with `udf()`, Photon won't accelerate it. Rewrite as a native Spark/SQL expression to get the speedup.
-- **Using `file:/tmp/` paths in `spark.read`**: Databricks restricts local filesystem access to `/Workspace` paths only. `spark.read.text("file:/tmp/...")` raises `LocalFilesystemAccessDeniedException`. Use a UC Volume path (`/Volumes/catalog/schema/volume/file`) instead — it works on all compute types without any URI prefix.
-- **Running notebooks as jobs without parameterisation**: hardcoded catalog/schema names in notebooks break when the same notebook is used in different environments. Use `dbutils.widgets` or job parameters.
-- **Using the wrong access mode for the workload**: attaching a Standard-mode cluster to code that calls `sc` (SparkContext) or `.rdd` methods fails with an access-denied error. Standard uses Spark Connect, which does not expose the `SparkContext`. Switch to Dedicated mode for RDD or GPU workloads.
-- **Mixing Databricks widgets and ipywidgets expectations**: ipywidgets cannot pass values to jobs or between notebooks via `%run`. If a widget value needs to flow into a job parameter, use `dbutils.widgets`, not `widgets.IntSlider`.
-- **Forgetting that widget "Run Accessed Commands" skips SQL cells**: if your notebook mixes Python widget reads and SQL cells, SQL cells will not re-execute when a widget value changes under the default on-change behaviour. Manually re-run SQL cells or switch to "Run Notebook" mode.
-- **Not setting `USE CATALOG`/`USE SCHEMA`** leads to tables being created in the wrong place. Always confirm `SELECT current_catalog(), current_schema()` at the start of a notebook.
+- **All-Purpose cluster on a job task** — billing warning + the higher DBU rate. Use Job Compute or Serverless.
+- **Wrong access mode** — code calling `sc` (SparkContext) or `.rdd` on a Standard cluster fails; Spark Connect doesn't expose `SparkContext`. Switch to Dedicated for RDD/GPU.
+- **Expecting Photon to speed up Python UDFs** — it won't; rewrite as a native Spark/SQL expression.
+- **`file:/tmp/` in `spark.read`** — raises `LocalFilesystemAccessDeniedException`; use a UC Volume path.
+- **Forgetting `USE CATALOG`/`USE SCHEMA`** — tables land in the wrong place. Check `current_catalog()`/`current_schema()` first.
+- **Widget "Run Accessed Commands" skips SQL cells** — SQL cells won't re-run on widget change under the default; re-run manually or switch to "Run Notebook".
+- **Confusing Repos (legacy) with Git folders** — use Git folders for new work.
+- **Mixing Databricks widgets and ipywidgets** — ipywidgets can't pass values to jobs or across `%run`; use `dbutils.widgets` for parameter flow.
 
 ## Exercises
 
-1. **Recall** — What are the three levels of the Unity Catalog namespace, and what kind of objects exist at each level?
-2. **Apply** — Open a Databricks workspace, create a new notebook, attach Serverless compute, run `SELECT current_catalog(), current_schema()`, and change the schema using `USE SCHEMA`.
-3. **Extend** — Connect a GitHub repository as a Git folder and create a new notebook inside it. Commit the notebook and verify the commit appears in GitHub.
+1. **Recall** — Trace the warehouse → lake → lakehouse evolution: what did each step solve, and what did it give up?
+2. **Explain** — In one paragraph, how does the Delta transaction log deliver ACID on top of plain Parquet files? Which two lakehouse features (of the eight) does it directly provide?
+3. **Apply** — Open a workspace, create a notebook, attach Serverless, run `SELECT current_catalog(), current_schema()`, then change schema with `USE SCHEMA`.
+4. **Extend** — Connect a GitHub repo as a Git folder, create a notebook inside it, commit, and verify the commit appears on GitHub.
 
 ## Summary
 
-- Databricks workspace = **Control Plane** (managed by Databricks) + **Data Plane** (your cloud). Your data never leaves your cloud account.
-- **Unity Catalog** governs all data objects in a `catalog.schema.object` three-level namespace. Every table, volume, function, and model lives here.
-- Compute breaks into: **All-Purpose** (interactive, expensive), **Job Compute** (~70% cheaper, production jobs), **SQL Warehouse** (SQL/BI, three sub-types), and **Serverless** (per-second, no startup, recommended default).
-- Classic clusters have an **access mode**: **Standard** (multi-user, Lakeguard-enforced isolation, no RDD, no GPU) vs **Dedicated** (single-user, full Spark including RDD and GPU).
-- **Standard = "Shared" (old name), Dedicated = "Single User" (old name)** — same modes, renamed in 2025.
-- Notebooks support four cell types and integrate deeply with **Databricks widgets** for parameterisation and **workspace files** for code reuse.
-- `%run` merges another notebook's scope inline; `dbutils.notebook.run()` starts a separate job. Both are fallbacks to Lakeflow Jobs for anything production.
-- Never schedule production jobs with the notebook schedule button — it targets the working copy, not the committed version.
-- **Git folders** replace legacy Repos for version-controlled development.
+- Analytics evolved **warehouse → lake → lakehouse**: warehouses were reliable but rigid and locked-in; lakes were cheap and flexible but had no ACID, schema, or isolation; the lakehouse unifies both as **one system, one copy**.
+- The **two-tier tax** — copying data between lake, warehouses, and specialised systems — is the cost the lakehouse exists to kill.
+- **Eight features** define a lakehouse; the load-bearing two are **decoupled storage/compute** (lake economics for many workloads) and **openness** (no lock-in).
+- **Delta Lake** makes the lakehouse real: a **transaction log** over Parquet delivers ACID, schema enforcement, time travel, and incremental quality — *"turns a folder of files into a table you can trust."*
+- **Databricks** is the lakehouse platform — the **Data Intelligence Platform** — with **Unity Catalog** as the governance through-line across every surface.
+- **Architecture**: account → workspace → UC metastore (`catalog.schema.object`); **control plane** (Databricks-managed) vs **compute plane** (serverless in Databricks' account, classic in yours). Workspace storage ≠ your data; never delete classic workspace storage.
+- **Compute**: All-Purpose vs Job vs SQL Warehouse vs **Serverless** (the modern default); classic clusters have a **Standard** vs **Dedicated** access mode (formerly Shared/Single User).
+- **Notebooks** integrate widgets, `%run`/workspace files, and a debugger; run code via the UI, **VS Code** (Databricks Connect), or the **CLI**. **Git folders** replace legacy Repos.
 
 ## References
 
-- [What Is a Lakehouse? — Databricks blog (2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — primary source for the lakehouse architecture and its eight defining features (reading notes).
+- [Lakehouse: A New Generation of Open Platforms… — Armbrust, Ghodsi, Xin, Zaharia, CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021.md) — the peer-reviewed paper: three platform generations, the four two-tier problems, the transactional-metadata-layer design, and TPC-DS results proving feasibility.
+- [What Is a Lakehouse? — Databricks blog (2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — general-audience companion to the paper; the lakehouse architecture and its eight features.
+- [The Data Lakehouse For Dummies — Ch 1–2 (Kaplan & Kara, 2026)](../sources/lakehouse-dummies/01-making-the-case.md) — warehouse→lake→lakehouse case, the data & AI maturity curve, decoupled storage/compute, lock-in.
+- [Databricks high-level architecture (docs)](../sources/databricks-docs/high-level-architecture.md) — account/workspace/metastore hierarchy and the control-plane / compute-plane split.
+- [DCDE-SG Ch 1 — Getting Started with Databricks (Alhussein, 2025)](../sources/dcde-sg/ch01-getting-started-with-databricks.md) — certification-angle framing of the same architecture, clusters, and workspace tour.
 
-The next chapter introduces Apache Spark's execution model — drivers, executors, DAGs, stages, and tasks — and how Databricks extends it with AQE and Photon.
+The next chapter goes one layer down — **Apache Spark's execution model** (drivers, executors, DAGs, stages, and tasks) and how Databricks extends it with AQE and Photon.

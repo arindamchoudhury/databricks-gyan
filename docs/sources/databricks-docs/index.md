@@ -9,6 +9,7 @@ Notes captured from individual Databricks official documentation pages. One file
 
 | Page | Added | Tags |
 |---|---|---|
+| [High-level architecture](high-level-architecture.md) | 2026-06-20 | architecture, control-plane, compute-plane, account, workspace, unity-catalog, serverless, classic, B1 |
 | [Debug notebooks (interactive debugger)](notebook-debugger.md) | 2026-06-14 | notebooks, debugging, variable-explorer, B1 |
 | [Serverless compute for notebooks](serverless-notebooks.md) | 2026-06-15 | serverless, notebooks, query-insights, B1 |
 | [Serverless compute for Lakeflow Jobs](serverless-jobs.md) | 2026-06-15 | serverless, jobs, lakeflow, workflows, I6 |

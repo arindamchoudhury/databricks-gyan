@@ -24,6 +24,10 @@ A Delta table is a directory of Parquet files plus a `_delta_log/` transaction l
 - **Schema enforcement**: writes that don't match the schema are rejected
 - **Time travel**: query any past version by version number or timestamp
 
+Critically, these ACID guarantees hold across **both batch and streaming** writers to the same table — the log is the single point of serialization — so you can append a stream and run a batch `MERGE` against one table without corrupting it. That is precisely what a raw data lake cannot do, and the reason the lakehouse can collapse batch + streaming onto one copy ([Lakehouse-Dummies Ch 3](../sources/lakehouse-dummies/03-underlying-technology.md)).
+
+> 💡 **Delta vs. Iceberg.** Delta Lake and Apache Iceberg are the two leading *open* table formats, and both sit on top of plain **Parquet** data files — the difference is the metadata/transaction layer above. Their feature sets are broadly similar; companies pick by ecosystem. Delta is Databricks-native with schema enforcement and built-in lineage. Because both are open, your data avoids vendor lock-in either way, and Databricks **UniForm** lets a Delta table expose Iceberg-compatible metadata so Iceberg readers can query it (Ch 22).
+
 The Unity Catalog namespace gives every table a stable address: `catalog.schema.table`. Tables created without `LOCATION` are **managed tables** — Databricks owns the lifecycle and deletes the underlying files when you `DROP TABLE`. Tables created with `LOCATION` pointing to external storage are **external tables** — dropping the table removes the catalog entry but not the files.
 
 `read_files()` is the recommended SQL function for reading raw files into a query or CTAS. It accepts format options inline and automatically adds a `_rescued_data` column to capture rows that don't fit the inferred schema.
@@ -169,5 +173,10 @@ Time travel requires that the old Parquet files haven't been vacuumed. By defaul
 - `read_files()` is the SQL TVF for reading raw files with format options; use it inside CTAS.
 - Every DML operation appends a new version to the transaction log, enabling time travel.
 - `DESCRIBE DETAIL` and `DESCRIBE HISTORY` are your primary inspection commands.
+- Delta and Iceberg are the two open table formats over Parquet; ACID holds across batch *and* streaming writers, which is what lets one table serve both.
+
+## References
+
+- [The Data Lakehouse For Dummies — Ch 3 (Kaplan & Kara, 2026)](../sources/lakehouse-dummies/03-underlying-technology.md) — open storage formats (Delta vs. Iceberg on Parquet), ACID across batch + streaming, and Unity Catalog governance (reading notes).
 
 The next chapter covers the different ways to ingest data into Delta tables: CTAS, COPY INTO, and Auto Loader.

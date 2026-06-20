@@ -48,10 +48,17 @@ Course notebooks and external sources captured as structured notes.
 |---|---|---|---|
 | [What Is a Data Lakehouse?](databricks-blog/what-is-a-lakehouse.md) | blog | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
 
+## Databricks Papers — research papers & whitepapers
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [Lakehouse: A New Generation of Open Platforms…](databricks-papers/lakehouse-cidr-2021.md) | paper | 2026-06-21 | lakehouse, architecture, delta-lake, metadata-layer, tpc-ds, foundations, B1 |
+
 ## Databricks Docs — official documentation (docs.databricks.com)
 
 | Title | Type | Added | Tags |
 |---|---|---|---|
+| [High-level Architecture](databricks-docs/high-level-architecture.md) | documentation | 2026-06-20 | architecture, control-plane, compute-plane, account, workspace, unity-catalog, serverless, classic, B1 |
 | [Debug Notebooks (Interactive Debugger)](databricks-docs/notebook-debugger.md) | documentation | 2026-06-14 | notebooks, debugging, variable-explorer, B1 |
 | [Serverless Compute for Notebooks](databricks-docs/serverless-notebooks.md) | documentation | 2026-06-15 | serverless, notebooks, query-insights, B1 |
 | [Serverless Compute for Lakeflow Jobs](databricks-docs/serverless-jobs.md) | documentation | 2026-06-15 | serverless, jobs, lakeflow, workflows, I6 |

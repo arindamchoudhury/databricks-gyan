@@ -4,7 +4,7 @@ Personal book synthesizing everything learned. One chapter per learning-path top
 
 | # | Topic | Level | Status |
 |---|---|---|---|
-| Ch 01 | [Databricks Platform & Workspace](ch01-databricks-platform-workspace.md) | Beginner | ✅ |
+| Ch 01 | [From Data Warehouse to the Databricks Lakehouse](ch01-databricks-platform-workspace.md) | Beginner | ✅ |
 | Ch 02 | [Apache Spark Architecture on Databricks](ch02-spark-architecture-databricks.md) | Beginner | ✅ |
 | Ch 03 | PySpark DataFrame API Fundamentals | Beginner | ⬜ |
 | Ch 04 | Spark SQL & Relational Entities | Beginner | ⬜ |

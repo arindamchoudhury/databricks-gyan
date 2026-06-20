@@ -6,7 +6,7 @@ Personal study notes for mastering Databricks Data Engineering, built while work
 
 - **[Learning Path](learning-path.md)** — 27 topics across Beginner → Expert, with a multi-modal study plan for each
 - **[Book](book/index.md)** — One chapter per topic, written after completing it (4 / 28 written)
-- **[Sources](sources/)** — Course notebook notes (DA-FREE: 5 notebooks)
+- **[Sources](sources/)** — Course notebooks, book notes, official docs, blog posts, and research papers (incl. the Lakehouse CIDR 2021 paper)
 - **[Glossary](reference/glossary.md)** — Key terms and definitions
 - **[Resources](reference/resources.md)** — All books, courses, and docs used
 

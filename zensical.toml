@@ -10,7 +10,7 @@ nav = [
     { "Learning Path" = "learning-path.md" },
     { "Book" = [
         { "Contents" = "book/index.md" },
-        { "Ch 01 — Databricks Platform & Workspace" = "book/ch01-databricks-platform-workspace.md" },
+        { "Ch 01 — From Data Warehouse to the Databricks Lakehouse" = "book/ch01-databricks-platform-workspace.md" },
         { "Ch 02 — Apache Spark Architecture on Databricks" = "book/ch02-spark-architecture-databricks.md" },
         { "Ch 05 — Delta Lake Fundamentals" = "book/ch05-delta-lake-fundamentals.md" },
         { "Ch 06 — Data Ingestion Basics" = "book/ch06-data-ingestion-basics.md" },
@@ -51,6 +51,7 @@ nav = [
         ]},
         { "Databricks Docs" = [
             { "Overview" = "sources/databricks-docs/index.md" },
+            { "High-level Architecture" = "sources/databricks-docs/high-level-architecture.md" },
             { "Debug Notebooks (Interactive Debugger)" = "sources/databricks-docs/notebook-debugger.md" },
             { "Serverless Compute for Notebooks" = "sources/databricks-docs/serverless-notebooks.md" },
             { "Serverless Compute for Lakeflow Jobs" = "sources/databricks-docs/serverless-jobs.md" },
@@ -90,6 +91,10 @@ nav = [
         { "Databricks Blog" = [
             { "Overview" = "sources/databricks-blog/index.md" },
             { "What Is a Data Lakehouse?" = "sources/databricks-blog/what-is-a-lakehouse.md" },
+        ]},
+        { "Databricks Papers" = [
+            { "Overview" = "sources/databricks-papers/index.md" },
+            { "Lakehouse (CIDR 2021)" = "sources/databricks-papers/lakehouse-cidr-2021.md" },
         ]},
     ]},
     { "Release Notes" = [
