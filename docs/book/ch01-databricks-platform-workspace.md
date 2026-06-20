@@ -11,11 +11,51 @@
 - How Git integration works via Git folders
 - How Serverless compute differs from classic clusters
 
-## The problem this solves
+## Introduction
 
 Databricks provides a unified analytics platform that combines data engineering, SQL analytics, machine learning, and AI in a single workspace. Without knowing how the workspace is structured, every task — finding a table, attaching a cluster, granting permissions, connecting a Git repo — requires trial-and-error. This chapter gives you the mental map so you can orient yourself immediately in any Databricks workspace.
 
-## Core concept
+## What is a lakehouse?
+
+Before the workspace mechanics, the idea the whole platform rests on. The **lakehouse** is an open architecture that puts data-**warehouse** management features — ACID transactions, schema enforcement, governance, BI — directly on top of low-cost cloud object storage in open formats (Parquet), the cheap and flexible storage of a data **lake**. It's "what you would get if you had to redesign data warehouses in the modern world," now that object stores are cheap and reliable ([Databricks, 2020](../sources/databricks-blog/what-is-a-lakehouse.md)).
+
+It exists to kill a two-tier tax. The old pattern was a **data lake** (cheap, flexible, but no transactions, no quality enforcement, no isolation — can't safely mix batch + streaming) feeding **one or more data warehouses** (reliable and fast on structured data, but poor on unstructured/AI data and not cheap), plus specialised systems for streaming, graph, and images. Every hop means copying data between systems → staleness, latency, and two copies to operate. The lakehouse collapses that into **one system, one copy** serving SQL/BI, data science, ML, and streaming.
+
+Eight features define it — the rest of this book is largely how Databricks delivers each one:
+
+| Lakehouse feature | Where Databricks delivers it |
+|---|---|
+| Transaction support (ACID) | Delta Lake — *Ch 5* |
+| Schema enforcement & governance | Delta Lake + Unity Catalog — *Ch 5, 14* |
+| BI on source data | Databricks SQL + Photon — *Ch 15, 23* |
+| Storage decoupled from compute | Compute model (this chapter) |
+| Openness (open formats + APIs) | Parquet / Delta, UniForm — *Ch 5, 22* |
+| Diverse data types | Unity Catalog volumes, unstructured data — *Ch 14* |
+| Diverse workloads | One platform: ETL, SQL, ML — *whole book* |
+| End-to-end streaming | Structured Streaming, Lakeflow — *Ch 9, 10* |
+
+> 📎 Primary source: [What Is a Lakehouse? (Databricks, 2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — the post that named the architecture. Branding has since moved to the **Data Intelligence Platform**, but the argument is unchanged.
+
+## The Data Intelligence Platform at a glance
+
+"Data Intelligence Platform" is the current name for the lakehouse plus an AI layer that learns your organisation's semantics — table/column descriptions, metrics, jargon, usage, and human feedback — so search, BI, and agents understand *your* business, not just generic SQL ([DIP-Dummies Ch 1, 3](../sources/dip-dummies/ch03-databricks-platform.md)). For orientation, the platform is a stack of surfaces sitting on one governed copy of data. You don't need all of them for data engineering — but knowing the map stops you reaching for the wrong tool.
+
+| Layer | Surface | What it is | In this book |
+|---|---|---|---|
+| **Storage** | Open Data Lake | One copy in open formats — **Delta Lake** or **Apache Iceberg**, no lock-in | Ch 5, 12, 22 |
+| **Governance** | **Unity Catalog (UC)** | One governance layer for data *and* AI: `catalog.schema.object`, ACLs, lineage, semantics | Ch 14 |
+| **Engineering** | **Lakeflow** | Declarative ETL: **Connect** (ingest), **Spark Declarative Pipelines** (transform), **Jobs** (orchestrate) | Ch 8, 10, 13, 18 |
+| **Analytics** | **Databricks SQL** + **Photon** | Serverless data warehouse for ETL + BI on governed data | Ch 15, 23 |
+| **OLTP** | **Lakebase** | Postgres-based transactional DB for the agentic era (compute/storage split, sub-second instances) | awareness only |
+| **AI/agents** | **Agent Bricks** | Build/evaluate/govern composable AI agents on your data (UC-governed, built-in LLM judges) | awareness only |
+| **Self-serve BI** | **AI/BI Genie / Dashboards** | NL chatbot over your data (Genie) + self-serve dashboards | Ch 15 (Genie) |
+| **Apps** | **Databricks Apps** | Deploy data/AI apps on serverless compute, governed by UC | awareness only |
+| **Sharing** | **OpenSharing**, **Marketplace**, **Clean Rooms**, **Lakehouse Federation** | Share live data / query external sources with zero copy | Ch 22 |
+| **Assist** | **Databricks Assistant** | Context-aware AI in notebooks/SQL editor — generate, document, debug | this chapter |
+
+> 💡 The through-line is **Unity Catalog** — every surface above governs through it. "Learn UC once, it secures everything else" is the single highest-leverage idea in the platform. The newer AI surfaces (Lakebase, Agent Bricks, Apps) are out of scope for a data-engineering path but appear here so you recognise them; this book stays on the storage → governance → engineering → analytics spine.
+
+## How the workspace is structured
 
 The Databricks workspace is an environment hosted in the **Control Plane** — the managed cloud service run by Databricks — that connects to your organisation's **Data Plane** (your cloud storage, compute, and networking). As a user, you interact with the Control Plane; your data never leaves your cloud account.
 
@@ -423,5 +463,9 @@ Start a debug session: **Run > Debug cell** or `Alt+Shift+D`. Execution pauses b
 - `%run` merges another notebook's scope inline; `dbutils.notebook.run()` starts a separate job. Both are fallbacks to Lakeflow Jobs for anything production.
 - Never schedule production jobs with the notebook schedule button — it targets the working copy, not the committed version.
 - **Git folders** replace legacy Repos for version-controlled development.
+
+## References
+
+- [What Is a Lakehouse? — Databricks blog (2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — primary source for the lakehouse architecture and its eight defining features (reading notes).
 
 The next chapter introduces Apache Spark's execution model — drivers, executors, DAGs, stages, and tasks — and how Databricks extends it with AQE and Photon.

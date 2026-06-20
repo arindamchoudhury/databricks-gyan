@@ -33,6 +33,14 @@ nav = [
             { "Ch 1: Getting Started with Databricks" = "sources/dcde-sg/ch01-getting-started-with-databricks.md" },
             { "Ch 2: Managing Data with Delta Lake" = "sources/dcde-sg/ch02-managing-data-with-delta-lake.md" },
         ]},
+        { "DIP For Dummies" = [
+            { "Book Overview" = "sources/dip-dummies/index.md" },
+            { "Ch 1: Understanding Data Intelligence" = "sources/dip-dummies/ch01-understanding-data-intelligence.md" },
+            { "Ch 2: Lakehouse as Foundation for Data and AI" = "sources/dip-dummies/ch02-lakehouse-foundation.md" },
+            { "Ch 3: Getting Started with the Platform" = "sources/dip-dummies/ch03-databricks-platform.md" },
+            { "Ch 4: Building AI Applications" = "sources/dip-dummies/ch04-building-ai-applications.md" },
+            { "Ch 5: Ten Reasons You Need a DIP" = "sources/dip-dummies/ch05-ten-reasons.md" },
+        ]},
         { "Databricks Docs" = [
             { "Overview" = "sources/databricks-docs/index.md" },
             { "Debug Notebooks (Interactive Debugger)" = "sources/databricks-docs/notebook-debugger.md" },
@@ -70,6 +78,10 @@ nav = [
             { "Losing Spot Instances" = "sources/databricks-docs/losing-spot-instances.md" },
             { "SQL Hints: Join, Partition, Skew" = "sources/databricks-docs/sql-join-hints.md" },
             { "Adaptive Query Execution (AQE)" = "sources/databricks-docs/aqe.md" },
+        ]},
+        { "Databricks Blog" = [
+            { "Overview" = "sources/databricks-blog/index.md" },
+            { "What Is a Data Lakehouse?" = "sources/databricks-blog/what-is-a-lakehouse.md" },
         ]},
     ]},
     { "Release Notes" = [

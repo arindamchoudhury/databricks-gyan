@@ -20,6 +20,23 @@ Course notebooks and external sources captured as structured notes.
 | [Ch 1: Getting Started with Databricks](dcde-sg/ch01-getting-started-with-databricks.md) | book | 2026-06-14 | platform, architecture, clusters, notebooks, B1 |
 | [Ch 2: Managing Data with Delta Lake](dcde-sg/ch02-managing-data-with-delta-lake.md) | book | 2026-06-19 | delta, transaction-log, acid, time-travel, optimize, vacuum, B5 |
 
+## DIP-Dummies — *The Data Intelligence Platform For Dummies* (Kaplan & Kara, Wiley 2nd Databricks Special Ed., © 2026)
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [Book Overview & reading log](dip-dummies/index.md) | book | 2026-06-20 | data-intelligence, overview |
+| [Ch 1: Understanding Data Intelligence](dip-dummies/ch01-understanding-data-intelligence.md) | book | 2026-06-20 | data-intelligence, genai, concepts |
+| [Ch 2: Lakehouse as Foundation for Data and AI](dip-dummies/ch02-lakehouse-foundation.md) | book | 2026-06-20 | lakehouse, genai-vs-classical-ai, B1 |
+| [Ch 3: Getting Started with the Platform](dip-dummies/ch03-databricks-platform.md) | book | 2026-06-20 | platform-components, unity-catalog, lakeflow, lakebase, dbsql, B1 |
+| [Ch 4: Building AI Applications](dip-dummies/ch04-building-ai-applications.md) | book | 2026-06-20 | agent-bricks, mlops, mcp, ai-bi, databricks-apps |
+| [Ch 5: Ten Reasons You Need a DIP](dip-dummies/ch05-ten-reasons.md) | book | 2026-06-20 | summary, benefits |
+
+## Databricks Blog — concept & engineering posts (databricks.com/blog)
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [What Is a Data Lakehouse?](databricks-blog/what-is-a-lakehouse.md) | blog | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
+
 ## Databricks Docs — official documentation (docs.databricks.com)
 
 | Title | Type | Added | Tags |
