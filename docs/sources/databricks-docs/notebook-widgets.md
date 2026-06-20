@@ -155,7 +155,7 @@ Override values with named arguments (cluster-attached notebooks only):
 
 > "Widgets only accept string values."
 
-> "SQL cells are not rerun in this [Run Accessed Commands] configuration."
+> "SQL cells are not rerun in this \[Run Accessed Commands\] configuration."
 
 > "Parameter markers protect your code from SQL injection attacks by clearly separating provided values from the SQL statements."
 

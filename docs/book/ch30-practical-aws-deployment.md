@@ -17,7 +17,7 @@ A misconfigured IAM trust policy can silently accept the workspace request, retu
 
 ## Free Edition vs paid account
 
-> **If you have a Databricks Free Edition account**, you already have one workspace provisioned by Databricks — you cannot create additional workspaces via `databricks_mws_*`. **Skip Steps 1–3** (bootstrap, networking, workspace). Go straight to [Step 4 — Unity Catalog](#step-4--unity-catalog-layer), which works against any existing workspace including Free Edition. You will still need a service principal (see below) and Terraform installed, but no AWS account is required for the UC layer alone.
+> **If you have a Databricks Free Edition account**, you already have one workspace provisioned by Databricks — you cannot create additional workspaces via `databricks_mws_*`. **Skip Steps 1–3** (bootstrap, networking, workspace). Go straight to [Step 4 — Unity Catalog](#step-4-unity-catalog-layer), which works against any existing workspace including Free Edition. You will still need a service principal (see below) and Terraform installed, but no AWS account is required for the UC layer alone.
 >
 > Steps 1–3 require a **paid Databricks account on AWS** (Trial or Enterprise) where you have permission to provision new workspaces. The standard way to get one is through the **AWS Marketplace**: search for "Databricks" at `https://us-east-1.console.aws.amazon.com/marketplace/search?text=databricks`, subscribe, and your DBU charges will flow through your AWS bill.
 >

@@ -57,7 +57,7 @@ This is the main gotcha: `Clear outputs` in a notebook silently wipes all notebo
 
 **Resize**
 
-> "To resize an item, click [corner resize icon] at the lower-right corner and move your cursor until the item is the size you want."
+> "To resize an item, click \[corner resize icon\] at the lower-right corner and move your cursor until the item is the size you want."
 
 **Move** — click and drag any item.
 
