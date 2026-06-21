@@ -1,8 +1,9 @@
 # Learning Path: Databricks Data Engineering
 
-> **Last updated:** 2026-06-11 (resources updated to reflect current Databricks training catalog)
+> **Last updated:** 2026-06-21 (research pass: synced B5/B6/B7 completion; verified certs/runtime/catalog against official sources; added DBR 19 Beta, Lakeflow Designer GA, DCDEA section rename, Predictive Optimization to A2/I5, Genie ZeroOps to A6. Confirmed DA-DE and DA-ADE module structures unchanged — DA-ADE Data Privacy module still present. Replaced retired DA-MGUC course (I7) with "Get Started with Data Governance on Databricks"; confirmed DA-DIUC and DA-SQL links live.)
 > **Current stable version:** Databricks Runtime 18 (released 2026-06-10) · Apache Spark 4.1.0
 > **LTS version:** DBR 17.3 LTS (released 2025-10-22) · Apache Spark 4.0.0
+> **In Beta:** DBR 19 (released 2026-06-15) · Apache Spark 4.2.0 — not yet GA; learn against DBR 18.
 >
 > **How to read this page.** Topics are the primary unit. Each topic has a "How to learn it"
 > section that recommends a multi-modal path — video first, then exercises, then depth reading.
@@ -23,7 +24,7 @@
 | **DA-FREE** | Get Started with Databricks for Data Engineering (Databricks Academy, 2 hrs, free) | Official Course | https://www.databricks.com/training/catalog/get-started-with-databricks-for-data-engineering-1511 |
 | **DA-DE** | Data Engineering with Databricks (Databricks Academy, 16 hrs) — M1: Lakeflow Connect · M2: Lakeflow Jobs · M3: Spark Declarative Pipelines · M4: DevOps Essentials | Official Course | https://www.databricks.com/training/catalog/data-engineering-with-databricks-911 |
 | **DA-ADE** | Advanced Data Engineering with Databricks (Databricks Academy, 16 hrs) — M1: Advanced Pipelines · M2: Data Privacy · M3: Performance Optimization · M4: Automated DABs Deployment | Official Course | https://www.databricks.com/training/catalog/advanced-data-engineering-with-databricks-971 |
-| **DA-MGUC** | Data Management and Governance with Unity Catalog (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/data-management-and-governance-with-unity-catalog-3145 |
+| **DA-DG** | Get Started with Data Governance on Databricks (Databricks Academy, 3 hrs, free) — replaces "Data Management and Governance with Unity Catalog", retired 2025-12-12 | Official Course | https://www.databricks.com/training/catalog/get-started-with-data-governance-on-databricks-4678 |
 | **DA-DIUC** | Data Interoperability with Unity Catalog (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/data-interoperability-with-unity-catalog-4557 |
 | **DA-SQL** | SQL Analytics on Databricks (Databricks Academy) | Official Course | https://www.databricks.com/training/catalog/sql-analytics-on-databricks-3928 |
 | **DB-DOCS** | Databricks official documentation | Docs | https://docs.databricks.com/aws/en/ |
@@ -42,7 +43,7 @@
 
 | Cert | Provider | Level | Topics tested (weights) | Fee | When to attempt |
 |---|---|---|---|---|---|
-| **Databricks Certified Data Engineer Associate (DCDEA)** | Databricks | Intermediate | Platform Fundamentals 10%, Development & Ingestion 30%, Data Processing & Transformations 31%, Productionizing Pipelines 18%, Data Governance & Quality 11% | $200 | After Intermediate level |
+| **Databricks Certified Data Engineer Associate (DCDEA)** | Databricks | Intermediate | Databricks Intelligence Platform 10%, Development & Ingestion 30%, Data Processing & Transformations 31%, Productionizing Pipelines 18%, Data Governance & Quality 11% | $200 | After Intermediate level |
 | **Databricks Certified Data Engineer Professional (DCDEP)** | Databricks | Advanced | Python/SQL Code 22%, Cost & Performance Optimization 13%, Monitoring & Alerting 10%, Data Security & Compliance 10%, Debugging & Deploying 10%, Data Transformation/Quality 10%, Data Ingestion 7%, Data Governance 7%, Data Modelling 6%, Data Sharing & Federation 5% | $200 | After Advanced level |
 
 Both exams: online proctored, multiple choice, valid 2 years, no formal prerequisites.
@@ -124,7 +125,7 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 
 ---
 
-### ⬜ B5 — Delta Lake Fundamentals
+### ✅ B5 — Delta Lake Fundamentals
 
 **What it is:** Delta Lake's ACID transaction model, the transaction log (_delta_log), and basic table operations: CREATE, INSERT, UPDATE, DELETE, MERGE.
 
@@ -141,7 +142,7 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 
 ---
 
-### ⬜ B6 — Data Ingestion Basics
+### ✅ B6 — Data Ingestion Basics
 
 **What it is:** The three core batch ingestion patterns — CTAS (Create Table As Select from file), COPY INTO, and reading raw file formats (Parquet, JSON, CSV, Avro).
 
@@ -158,7 +159,7 @@ Both exams: online proctored, multiple choice, valid 2 years, no formal prerequi
 
 ---
 
-### ⬜ B7 — Medallion Architecture
+### ✅ B7 — Medallion Architecture
 
 **What it is:** The multi-hop data design pattern — Bronze (raw ingest), Silver (validated/cleaned), Gold (aggregated/business-ready) — and the principles behind it.
 
@@ -248,6 +249,8 @@ You are ready to advance when you can:
 
 > 📌 DCDE-SG (Feb 2025) uses the term "Delta Live Tables" throughout. The framework is now **Lakeflow Spark Declarative Pipelines** but the SQL/Python API is identical. Treat the names as synonyms when reading the book.
 
+> 🆕 **Lakeflow Designer** (GA June 2026) — a no-code, drag-and-drop + natural-language ETL builder. Every visual flow it produces compiles to a **Lakeflow Spark Declarative Pipeline** and runs under Unity Catalog governance. It's a UI on top of the engine you learn here, not a separate framework. After you can hand-write a declarative pipeline, build the same Medallion flow in Designer once and read the generated code to see how the visual operators map to streaming tables / materialized views.
+
 **Milestone:** You can build a 3-layer Medallion Lakeflow pipeline in SQL with at least two `CONSTRAINT` expectations, explain the difference between a Materialized View and a Streaming Table, and describe what happens when an expectation fails with `ON VIOLATION DROP ROW`.
 
 ---
@@ -284,6 +287,8 @@ You are ready to advance when you can:
 
 > 📌 DCDE-SG covers Z-ORDER extensively. As of DBR 14+, **Liquid Clustering** replaces Z-order as the recommended layout strategy (covered in A2). Both names appear on exams.
 
+> 📌 In 2026, `OPTIMIZE` and `VACUUM` run **automatically** on Unity Catalog managed tables via Predictive Optimization (see A2). Learn the commands here for the exam and for external tables, but expect the platform to run them for you on managed tables in practice.
+
 > ⚠️ **DBR 18 breaking changes:**
 > - **NULL structs:** NULL structs are now stored as NULL (not as non-null structs with all-NULL fields) in MERGE, INSERT, and streaming with schema evolution. Test any MERGE statements that compared NULL struct fields.
 > - **Time travel hard-errors:** Queries with `VERSION AS OF` or `TIMESTAMP AS OF` beyond the `deletedFileRetentionDuration` threshold now raise an error instead of a warning. Aggressive `VACUUM` (< 7 days) will block time travel.
@@ -317,7 +322,7 @@ You are ready to advance when you can:
 
 **How to learn it:**
 
-1. **Official course — DA-MGUC, "Data Management and Governance with Unity Catalog"** (~4 hrs) — Comprehensive: UC architecture, three-level namespace, privilege model, external storage management, and fine-grained access controls including row/column security. Complete all labs.
+1. **Official course — DA-DG, "Get Started with Data Governance on Databricks"** (~3 hrs, free) — UC architecture, table/volume types, catalog & schema configuration, group-based access management, and fine-grained access controls: row-level security, column masking, and attribute-based access control (ABAC). Self-paced; complete all labs. (Replaces the retired "Data Management and Governance with Unity Catalog" course.)
 2. **Book chapter — DCDE-SG Ch 8, "Implementing Data Governance"** (~2 hrs) — UC architecture, three-level namespace, identity management, implementing row and column security. Read all sections.
 3. **Interactive — Free Edition or trial workspace** (~2 hrs) — Create a catalog, schema, and table in UC; grant SELECT to a second user; create a row filter and a column mask; inspect lineage in the Data Explorer.
 4. **Reference — DB-DOCS: [Unity Catalog](https://docs.databricks.com/aws/en/data-governance/unity-catalog/)** — Privilege model and securable objects reference.
@@ -391,7 +396,9 @@ You are ready to advance when you can:
 1. **Official course — DA-ADE Module 1, "Multi-flow pipelines and liquid clustering" section** (~1 hr) — Hands-on with clustering on a Lakeflow pipeline.
 2. **Video — Databricks YouTube: search "Liquid Clustering Databricks 2025"** (~30 min) — Official Databricks engineering explanation of why Liquid Clustering supersedes Z-order.
 3. **Interactive — Free Edition** (~2 hrs) — Create a 5M-row Delta table, run queries on an unclustured table (note scan size), add `CLUSTER BY (date, region)`, run `OPTIMIZE`, rerun queries, compare bytes scanned in Spark UI.
-4. **Reference — DB-DOCS: [Liquid Clustering](https://docs.databricks.com/aws/en/delta/clustering.html)**
+4. **Reference — DB-DOCS: [Liquid Clustering](https://docs.databricks.com/aws/en/delta/clustering.html)** and **[Predictive Optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization)**
+
+> 🆕 **Predictive Optimization (2026 default behavior):** For Unity Catalog **managed** tables, Databricks now autonomously runs `ANALYZE`, `OPTIMIZE`, and `VACUUM` on serverless compute — enabled by default for accounts created on/after 2024-11-11, with the rollout to older accounts completing ~August 2026. You still need to *understand* these operations (and choose `CLUSTER BY` keys — that part is not automated), but you no longer hand-schedule maintenance jobs on managed tables. Manual `OPTIMIZE`/`VACUUM` still matters for external tables and for reasoning about what the platform is doing.
 
 **Milestone:** You can define Liquid Clustering on a new table with `CLUSTER BY`, run `OPTIMIZE` to apply it, explain why you'd choose Liquid Clustering over partitioning for a high-cardinality filter column, and describe when a partition is still preferable.
 
@@ -459,6 +466,8 @@ You are ready to advance when you can:
 2. **Book chapter — BBDE, "Orchestrating Data Analytics With Databricks Workflows"** (~1 hr) — Operational patterns for production job management.
 3. **Interactive** (~2 hrs) — Create a Lakeflow pipeline with a deliberate expectation failure; inspect the event log and metrics; build a SQL query using `event_log(table(your_streaming_table))` to find quarantined rows; wire a Databricks SQL alert to the count.
 4. **Reference — DB-DOCS: [Pipeline event log](https://docs.databricks.com/aws/en/dlt/observability.html)** and **[System tables](https://docs.databricks.com/aws/en/admin/system-tables/)**
+
+> 🆕 **Genie ZeroOps (announced DAIS 2026):** a background AI agent that monitors data/AI assets, detects failures, and runs root-cause analysis using data-quality metrics, error logs, and Unity Catalog lineage. The manual `event_log()` + SQL-alert workflow below is still the foundation — and what you must be able to do by hand — but know that the platform direction is autonomous, agent-driven monitoring on top of these same signals.
 
 **Milestone:** You can use `event_log(table(...))` to query the last 5 expectation violations for a Lakeflow pipeline, build a Databricks SQL alert on a system table metric, and describe the difference between pipeline-level and job-level monitoring.
 
@@ -710,7 +719,7 @@ Expert (E1–E9)        → ~50 hrs  →  Architect-level mastery
 
 **Total estimate:** ~165 hrs of deliberate practice.
 
-**You are currently here:** Beginner — B2 complete. Next: B3 — PySpark DataFrame API Fundamentals.
+**You are currently here:** Beginner — B1, B2, B5, B6, B7 complete (5/7). Remaining: **B3 — PySpark DataFrame API Fundamentals** and **B4 — Spark SQL & Relational Entities** (both light passes given your Spark background — focus on Databricks-specific deltas). E7 (Terraform) done out of order. Finish B3/B4 to close the Beginner level, then move to Intermediate (I1).
 
 ---
 
@@ -721,7 +730,7 @@ Expert (E1–E9)        → ~50 hrs  →  Architect-level mastery
 - https://www.databricks.com/training/catalog/data-engineering-with-databricks-911
 - https://www.databricks.com/training/catalog/advanced-data-engineering-with-databricks-971
 - https://www.databricks.com/training/catalog/get-started-with-databricks-for-data-engineering-1511
-- https://www.databricks.com/training/catalog/data-management-and-governance-with-unity-catalog-3145
+- https://www.databricks.com/training/catalog/get-started-with-data-governance-on-databricks-4678
 - https://www.databricks.com/training/catalog/data-interoperability-with-unity-catalog-4557
 - https://www.databricks.com/training/catalog/sql-analytics-on-databricks-3928
 - https://www.databricks.com/learn/training/data-engineering-courses
