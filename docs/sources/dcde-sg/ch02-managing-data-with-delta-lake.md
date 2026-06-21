@@ -1,13 +1,14 @@
 # Ch 2 — Managing Data with Delta Lake
 
 > **Source:** Derar Alhussein, *Databricks Certified Data Engineer Associate Study Guide* (O'Reilly, 1st Ed., Feb 2025) — Chapter 2, PDF pp. 114–168.
+> **Companion notebook:** `Chapter 2 - Managing Data with Delta Lake/2.1 - Delta Lake.sql` — every cell maps 1:1 to the hands-on sections below (§5–§9).
 > **Added:** 2026-06-19
 > **Tags:** delta-lake, transaction-log, acid, time-travel, optimize, vacuum, liquid-clustering, deletion-vectors, B5
 > **Type:** book
 
 > *Delta Lake from first principles: the transaction log architecture, the four ACID scenarios, hands-on table DDL, time travel + rollback, compaction with OPTIMIZE/Z-Order, and VACUUM for storage cleanup.*
 
-> 📌 **Notes adapted to the 2026 platform.** The book targets DBR 13.3 LTS. Key shifts for this chapter flagged with ⚠️: (1) **Liquid Clustering** is now the Databricks-recommended replacement for Z-Order/partitioning; (2) **Deletion Vectors** (default-enabled since DBR 14.0+) change how UPDATE/DELETE work under the hood; (3) the book uses `hive_metastore` but **Unity Catalog is the default** in all new 2026 workspaces — stored at `__unitystorage`, not `dbfs:/user/hive/warehouse/`. See [research-cache](../../research-cache/dcde-sg-ch02-facts.md).
+> 📌 **Notes adapted to the 2026 platform.** The book targets DBR 13.3 LTS. Key shifts for this chapter flagged with ⚠️: (1) **Liquid Clustering** is now the Databricks-recommended replacement for Z-Order/partitioning (GA on DBR 15.4 LTS+; `CLUSTER BY AUTO` lets the platform pick keys); (2) **Deletion Vectors** (default-enabled since DBR 14.0+) change how UPDATE/DELETE work under the hood; (3) the book uses `hive_metastore` but **Unity Catalog is the default** in all new 2026 workspaces — stored at `__unitystorage`, not `dbfs:/user/hive/warehouse/`; (4) **Predictive Optimization** now runs `OPTIMIZE` / `VACUUM` / `ANALYZE` *automatically* on UC managed tables — the manual maintenance commands in §7–§8 are still valid but increasingly the platform's job, not yours. See [research-cache](../../research-cache/dcde-sg-ch02-facts.md).
 
 > 📎 **Overlaps:** personal book chapter [[ch05-delta-lake]] covers the same ground with deeper explanatory treatment.
 
@@ -238,11 +239,17 @@ OPTIMIZE product_info ZORDER BY product_id
 > CREATE TABLE product_info (...)
 > CLUSTER BY (product_id);
 >
-> -- Still run OPTIMIZE to trigger clustering:
+> -- Or let the platform choose keys (DBR 15.4 LTS+, UC managed only):
+> CREATE TABLE product_info (...)
+> CLUSTER BY AUTO;
+>
+> -- Still run OPTIMIZE to trigger clustering (or let Predictive Optimization do it):
 > OPTIMIZE product_info
 > ```
 >
-> Z-Order remains valid for existing tables and the DCDEA exam still tests it. Use Liquid Clustering for any new table on DBR 14.3 LTS+.
+> **Auto liquid clustering** (`CLUSTER BY AUTO`, GA DBR 15.4 LTS+): predictive optimization picks and adapts clustering keys from observed query patterns; UC managed tables only. `ALTER TABLE t CLUSTER BY AUTO` enables it on an existing table.
+>
+> Z-Order remains valid for existing tables and the DCDEA exam still tests it, but note **predictive optimization's `OPTIMIZE` never runs `ZORDER`** and ignores Z-ordered files — another reason Z-Order is legacy. Use Liquid Clustering for any new table; GA is **DBR 15.4 LTS+** (14.3 LTS supported it via DataFrame/DeltaTable API only).
 
 ---
 
@@ -274,6 +281,12 @@ VACUUM product_info RETAIN 0 HOURS
 ```
 
 > 💡 Exam: **7 days** is the default VACUUM retention. VACUUM affects time travel reach. VACUUM does **not** create a new table version — it just deletes physical files.
+
+> ⚠️ **2026 — Predictive Optimization runs VACUUM for you.** On UC managed tables, predictive optimization auto-runs `VACUUM` (and `OPTIMIZE`/`ANALYZE`) on serverless compute, billed at a serverless jobs SKU. The retention window is the table property `delta.deletedFileRetentionDuration` (default 7 days) — to keep longer time travel, raise it *before* enabling PO:
+> ```sql
+> ALTER TABLE product_info SET TBLPROPERTIES ('delta.deletedFileRetentionDuration' = 'interval 30 days');
+> ```
+> Default-on for accounts created on/after 2024-11-11; existing-account rollout completing ~Aug 2026. UC managed tables only (not external, not `hive_metastore`).
 
 ---
 
