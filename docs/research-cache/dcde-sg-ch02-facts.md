@@ -8,8 +8,8 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 |---|---|---|
 | Z-Order recommended for data skipping | **Liquid Clustering** is now the Databricks-recommended approach for all new tables | Databricks docs: "use liquid clustering instead of partitions, ZORDER, or other data layout approaches" |
 | UPDATE/DELETE copies files (immutability) | **Deletion Vectors** (default-enabled at workspace level for DBR 14.0+) mark stale rows as a bitmap without file copying | Book's NOTE already mentions the DBR 14 behavior change; row-level concurrency added in DBR 14.2 |
-| Book uses `hive_metastore` for demos | **Unity Catalog is the default** in all new 2026 workspaces; `DESCRIBE DETAIL` location shows `__unitystorage` | The book includes a WARNING about this; still valid to use `hive_metastore` for local practice |
-| `%fs ls dbfs:/user/hive/warehouse/<table>` | Doesn't work on UC-managed tables (restricted `__unitystorage`) | Use `hive_metastore` catalog when practicing file-level commands |
+| Book uses `hive_metastore` for demos | **Unity Catalog is the default** in all new 2026 workspaces; managed tables land in UC managed storage `s3://<bucket>/__unity_storage/catalogs/<catalog_id>/tables/<table_id>` (AWS) | Token is `__unity_storage` (underscore) on AWS; `__unitystorage` is the Azure container name. Organized by GUIDs, not table name. Still valid to use `hive_metastore` for local practice |
+| `%fs ls dbfs:/user/hive/warehouse/<table>` | Not the access model on UC managed tables — UC governs by full cloud-URI grants, not friendly-path browsing | Use `hive_metastore` catalog when practicing file-level commands; for ad-hoc files use UC volumes |
 | VACUUM default retention: 7 days | Still 7 days | Set via `delta.deletedFileRetentionDuration`; raise before enabling Predictive Optimization to keep longer time travel |
 | Manual `OPTIMIZE` / `VACUUM` / `ANALYZE` | **Predictive Optimization** auto-runs all three on UC managed tables (serverless, billed) | Default-on for accounts created ≥ 2024-11-11; existing-account rollout completing ~Aug 2026. PO's `OPTIMIZE` never runs `ZORDER` and ignores Z-ordered files |
 | Liquid Clustering "use it for new tables" | GA on **DBR 15.4 LTS+** (14.3 LTS = DataFrame/DeltaTable API only) | `CLUSTER BY AUTO` (GA 15.4 LTS+, UC managed only) lets predictive optimization pick + adapt keys; `ALTER TABLE … CLUSTER BY AUTO` on existing tables |
@@ -23,5 +23,7 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 - Deletion vectors: <https://docs.databricks.com/aws/en/delta/deletion-vectors>
 - Auto-enable deletion vectors (workspace setting): <https://docs.databricks.com/aws/en/admin/workspace-settings/deletion-vectors>
 - Row-level concurrency: <https://docs.databricks.com/aws/en/optimizations/isolation/row-level-concurrency>
+- UC managed storage path / `__unity_storage`: <https://docs.databricks.com/aws/en/data-governance/unity-catalog/storage-conflicts>
+- DBFS + Unity Catalog best practices: <https://docs.databricks.com/aws/en/dbfs/unity-catalog>
 - Predictive optimization: <https://docs.databricks.com/aws/en/optimizations/predictive-optimization>
 - Liquid clustering (incl. CLUSTER BY AUTO): <https://docs.databricks.com/aws/en/tables/clustering>
