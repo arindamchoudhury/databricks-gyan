@@ -14,6 +14,7 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 | Manual `OPTIMIZE` / `VACUUM` / `ANALYZE` | **Predictive Optimization** auto-runs all three on UC managed tables (serverless, billed) | Default-on for accounts created ≥ 2024-11-11; existing-account rollout completing ~Aug 2026. PO's `OPTIMIZE` never runs `ZORDER` and ignores Z-ordered files |
 | Liquid Clustering "use it for new tables" | GA on **DBR 15.4 LTS+** (14.3 LTS = DataFrame/DeltaTable API only) | `CLUSTER BY AUTO` (GA 15.4 LTS+, UC managed only) lets predictive optimization pick + adapt keys; `ALTER TABLE … CLUSTER BY AUTO` on existing tables |
 | Converting partitioned → liquid clustering | `ALTER TABLE … REPLACE PARTITIONED BY WITH CLUSTER BY [AUTO]` (DBR 18.1+) | Minimizes reader/writer downtime; external + managed tables |
+| HMS / DBFS available in new workspaces | **Accounts created after 2025-12-19 have legacy features OFF by default, no opt-out**: Hive Metastore, DBFS root + mounts, no-isolation shared clusters, DBR < 13.3 LTS | Earlier accounts use the "Disable legacy features" account setting; workspace admin can re-enable per-workspace. New 2026 account = UC-only out of the box |
 
 ## Sources
 
@@ -25,5 +26,7 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 - Row-level concurrency: <https://docs.databricks.com/aws/en/optimizations/isolation/row-level-concurrency>
 - UC managed storage path / `__unity_storage`: <https://docs.databricks.com/aws/en/data-governance/unity-catalog/storage-conflicts>
 - DBFS + Unity Catalog best practices: <https://docs.databricks.com/aws/en/dbfs/unity-catalog>
+- Disable legacy features in new workspaces (2025-12-19 cutoff): <https://docs.databricks.com/aws/en/admin/account-settings/legacy-features>
+- Work with legacy Hive metastore alongside UC: <https://docs.databricks.com/aws/en/data-governance/unity-catalog/hive-metastore>
 - Predictive optimization: <https://docs.databricks.com/aws/en/optimizations/predictive-optimization>
 - Liquid clustering (incl. CLUSTER BY AUTO): <https://docs.databricks.com/aws/en/tables/clustering>
