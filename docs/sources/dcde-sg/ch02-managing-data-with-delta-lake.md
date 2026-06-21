@@ -1,9 +1,13 @@
 # Ch 2 — Managing Data with Delta Lake
 
 > **Source:** Derar Alhussein, *Databricks Certified Data Engineer Associate Study Guide* (O'Reilly, 1st Ed., Feb 2025) — Chapter 2, PDF pp. 114–168.
+> 
 > **Companion notebook:** `Chapter 2 - Managing Data with Delta Lake/2.1 - Delta Lake.sql` — every cell maps 1:1 to the hands-on sections below (§5–§9).
+> 
 > **Added:** 2026-06-19
+>
 > **Tags:** delta-lake, transaction-log, acid, time-travel, optimize, vacuum, liquid-clustering, deletion-vectors, B5
+> 
 > **Type:** book
 
 > *Delta Lake from first principles: the transaction log architecture, the four ACID scenarios, hands-on table DDL, time travel + rollback, compaction with OPTIMIZE/Z-Order, and VACUUM for storage cleanup.*
@@ -21,6 +25,7 @@ Delta Lake is an **open-source storage layer** that sits *on top of* a data lake
 Why it exists: traditional data lakes lack ACID transactions → partially committed data, corrupted files, no consistent reads. Delta Lake fixes this.
 
 Three defining properties:
+
 - **ACID transactions** on cloud object storage.
 - **Open source** — source code on GitHub, not proprietary.
 - **Cloud-agnostic** — integrates with S3, ADLS, GCS.
@@ -29,21 +34,90 @@ Three defining properties:
 
 ---
 
-## 2. The Delta Transaction Log (Delta Log)
+## 2. How Data Is Stored in Delta Lake
 
-The transaction log is the heart of Delta Lake. Every Delta table has a `_delta_log/` subdirectory alongside its Parquet data files.
+A Delta table is **just a set of objects under one path prefix in a cloud storage bucket** (S3 / ADLS / GCS) — no proprietary database, no special storage engine. (Object storage has no real folders; the `/` in a key is just text, so the "directories" below are a convenient way to picture key prefixes.) Two kinds of objects share the prefix: **Parquet data files** (the rows) and the **`_delta_log/`** files (the transaction log that tracks which data files belong to the table). Understanding this layout explains everything else in the chapter — time travel, ACID, OPTIMIZE, VACUUM all operate on these files.
 
-**Structure:**
-- Each committed transaction → one JSON file in `_delta_log/` (e.g., `000.json`, `001.json`).
-- JSON file records: operation type, predicate/filters used, names of files **added**, names of files **removed** (soft-deleted).
-- Associated `.crc` checksum files verify each JSON's integrity.
+### 2.1 The table directory (anatomy)
 
-**Role:**
-- Source of truth for table state and history.
-- Every query hits the log *first* to determine which Parquet files are valid in the current version.
-- Enables ACID: a write only "commits" when its JSON log entry is written; an incomplete write produces a Parquet file that never appears in the log → queries never see it.
+```text
+<table-storage-location>/                   ← the table = a directory in object storage
+│                                             UC managed → under the catalog's storage root
+│                                             legacy hive_metastore → dbfs:/user/hive/warehouse/…
+├── part-00000-....snappy.parquet           ← data files (immutable Parquet)
+├── part-00001-....snappy.parquet
+├── part-00002-....snappy.parquet           ← written by a later UPDATE; old file kept until VACUUM
+└── _delta_log/                             ← the transaction log
+    ├── 00000000000000000000.json           ← one JSON per committed version
+    ├── 00000000000000000001.json
+    ├── 00000000000000000002.json
+    ├── ...
+    ├── 00000000000000000010.checkpoint.parquet   ← checkpoint every ~10 commits
+    └── _last_checkpoint                     ← pointer to newest checkpoint
+```
 
-**Checkpoint files:** at every 10 committed versions, Delta writes a `.checkpoint.parquet` that consolidates the log so Spark doesn't have to replay all JSON files from the beginning. (Book doesn't cover this; exam occasionally mentions it.)
+> **Partitioning vs. the flat layout above.** The tree shows an *unpartitioned* table. With `PARTITIONED BY (category)`, the `part-*.parquet` files instead sit under `category=Toys/`, `category=Kitchen/`, … subdirectories — a table is one or the other, never both. Liquid clustering (§7, the 2026 recommendation) uses no partition directories at all.
+>
+> Partitioning still works but is **discouraged for new tables**:
+> 
+> - Don't partition tables **< 1 TB**, and keep any partition **≥ 1 GB**. Since DBR 11.3 LTS unpartitioned tables already get **ingestion-time clustering** for free; use liquid clustering (§7) for everything else.
+> - **Managed Iceberg** tables can't be Hive-partitioned at all — `PARTITION BY` is reinterpreted as liquid-clustering keys.
+> - Convert an existing partitioned table: `ALTER TABLE … REPLACE PARTITIONED BY WITH CLUSTER BY` (DBR 18.1+).
+> - The `col=value/` dirs are **not part of the Delta protocol** — Delta finds files via the transaction log + per-file stats, not paths. Workloads must never depend on the directory layout (with column mapping enabled, the dir names even become random prefixes).
+
+Inspect it from a notebook:
+
+```sql
+DESCRIBE DETAIL product_info;   -- location, format=delta, numFiles, sizeInBytes
+```
+```python
+# Raw-file listing works on legacy hive_metastore tables (DBFS root); blocked on UC managed tables.
+%fs ls 'dbfs:/user/hive/warehouse/product_info'             # data files + _delta_log/
+%fs ls 'dbfs:/user/hive/warehouse/product_info/_delta_log'  # the JSON + checkpoint files
+```
+
+> ⚠️ **About the `dbfs:/user/hive/warehouse/...` paths.** That location is the **DBFS root**, and DBFS root (along with DBFS mounts) is **deprecated** — new 2026 accounts are provisioned without it. The book's paths only work because it uses `hive_metastore`; they're shown here to expose the raw file layout. On a real UC workspace, **managed tables** live under restricted `__unitystorage` (`%fs ls` blocked), and you store files in **Unity Catalog volumes** / external locations instead. Note the `dbfs:/` *scheme* itself is not deprecated — it's still a valid optional prefix for UC volume paths; only DBFS **root** and **mounts** are.
+
+> ⚠️ **`hive_metastore` is legacy too.** It still appears as a top-level catalog in the 3-level namespace (`hive_metastore.<schema>.<table>`) and UC runs *alongside* it, so the book's demos work. But the per-workspace Hive metastore is a **legacy feature**: its tables get no UC governance (audit, lineage, access control), the hosted metastore has connection limits, and Databricks recommends migrating tables to UC then **disabling** direct HMS access. Auto-enabled UC workspaces default to the *workspace* catalog, not `hive_metastore`. Treat the `hive_metastore` path tricks here as "legacy workspace / local-practice" only — new work goes in Unity Catalog.
+
+### 2.2 Data files — Parquet
+
+The rows live in **Parquet** files. Parquet is the storage *format*; Delta Lake is the *layer* that manages those files. Properties that matter here:
+
+- **Columnar** — values stored column-by-column, not row-by-row → reads touch only the columns a query needs, and per-column compression (snappy by default) beats row formats.
+- **Immutable** — a Parquet file is never edited in place. Every UPDATE / DELETE / MERGE writes *new* files and soft-deletes old ones in the log (see §3.2). This immutability is what makes time travel and ACID possible.
+- **Splittable + self-describing** — embeds its own schema and row-group layout, so Spark reads it in parallel with no separate metadata service.
+
+Each `INSERT` (or any write) produces one or more new Parquet files — never an append into an existing file. Many small writes → many small files, which is the problem `OPTIMIZE` solves (§7).
+
+### 2.3 The transaction log (`_delta_log/`)
+
+The log is the **source of truth** for what the table *is*. The Parquet files on disk are meaningless on their own — only files the log references are part of the table.
+
+- Each committed transaction → **one JSON file** (`...0000.json`, `...0001.json`, …). The number is the table **version**.
+- A JSON entry records: the operation (`commitInfo`: WRITE / UPDATE / DELETE / OPTIMIZE…), the predicate used, files **`add`**ed, and files **`remove`**d (soft-deleted, not erased from storage).
+- Each `add` entry also carries **per-file statistics** — row count plus min/max and null counts for the leading columns. The engine reads these and **skips** any Parquet file whose min/max range can't match a query predicate (*data skipping*) without opening the file. This is exactly what `OPTIMIZE … ZORDER` / liquid clustering tune (§7).
+- Optional `.crc` files (one per version, `{version}.crc` — the *Version Checksum*) record the table's state at that version so readers can validate integrity and detect non-compliant edits to the append-only log.
+
+```python
+%fs head 'dbfs:/.../product_info/_delta_log/00000000000000000003.json'
+# {"commitInfo":{"operation":"UPDATE", ...}}
+# {"remove":{"path":"part-...c000.snappy.parquet","deletionTimestamp":...}}
+# {"add":   {"path":"part-...c000.snappy.parquet","stats":"{\"numRecords\":..,\"minValues\":..}"}}
+```
+
+### 2.4 Checkpoints
+
+Replaying thousands of tiny JSON files would be slow. So **every 10 commits** Delta writes a **`.checkpoint.parquet`** that consolidates the full table state up to that version into one Parquet file, and updates `_last_checkpoint` to point at it. (Book doesn't cover this; exam occasionally mentions it.)
+
+### 2.5 How a read reconstructs the current state
+
+1. Read `_last_checkpoint` → jump to the newest `.checkpoint.parquet`.
+2. Replay the JSON commits *after* that checkpoint.
+3. Net the `add` minus `remove` entries → the exact set of valid Parquet files for the current (or a time-travelled) version.
+4. Use each file's min/max stats to skip files that can't match the query, then scan only the survivors.
+
+This is also why Delta gives **ACID**: a write only "commits" when its JSON entry lands. An interrupted write may leave a stray Parquet file on storage, but with no log entry it's invisible to every reader (covered scenario-by-scenario in §3).
 
 ---
 
