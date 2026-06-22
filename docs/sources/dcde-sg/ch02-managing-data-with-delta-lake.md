@@ -110,6 +110,17 @@ The log is the **source of truth** for what the table *is*. The Parquet files on
 
 Replaying thousands of tiny JSON files would be slow. So **every 10 commits** Delta writes a **`.checkpoint.parquet`** that consolidates the full table state up to that version into one Parquet file, and updates `_last_checkpoint` to point at it. (Book doesn't cover this; exam occasionally mentions it.)
 
+A checkpoint is **not a transaction** — it writes no new `.json` and does **not** increment the table version. It rides along *after* the commit that produced version N: `00...0N.json` (from the operation, e.g. an INSERT) and `00...0N.checkpoint.parquet` (the summary) share the same version N. Only real operations (INSERT, UPDATE, OPTIMIZE, RESTORE…) create JSON commits and bump the version; checkpointing is pure read-side bookkeeping.
+
+**What happens to the JSON commits?** Writing a checkpoint does **not** delete them — the checkpoint is only a *read shortcut*. The JSON files stay so you can still `DESCRIBE HISTORY` and time-travel to versions before the checkpoint. They're removed later, **automatically and asynchronously after a checkpoint**, once older than `delta.logRetentionDuration` (default **30 days**). Two retention windows act independently:
+
+| Property | Governs | Default |
+|---|---|---|
+| `delta.logRetentionDuration` | log files (JSON + checkpoints) → history/time-travel *metadata* | 30 days |
+| `delta.deletedFileRetentionDuration` | obsolete Parquet *data* files → what `VACUUM` removes (§8) | 7 days |
+
+Because VACUUM clears data files at 7 days but the log is kept 30, **actual time travel is usually bounded by VACUUM (7 days), not the log**. Time travel needs **both** the metadata (log/checkpoint says "version N = files X, Y, Z") *and* those data files still on storage. The checkpoint stores only file *references* + stats, never a copy of the rows — so once VACUUM deletes X/Y/Z, `SELECT … VERSION AS OF N` **fails** with a file-not-found error even though the checkpoint still knows about them. Surviving metadata ≠ surviving data. Also note Delta needs *all consecutive* JSON entries since the prior checkpoint — if early commits are cleaned, you can't time-travel to versions between them and that checkpoint. (DBR 18.0+: `logRetentionDuration` must be ≥ `deletedFileRetentionDuration`.)
+
 ### 2.5 How a read reconstructs the current state
 
 1. Read `_last_checkpoint` → jump to the newest `.checkpoint.parquet`.
@@ -118,6 +129,26 @@ Replaying thousands of tiny JSON files would be slow. So **every 10 commits** De
 4. Use each file's min/max stats to skip files that can't match the query, then scan only the survivors.
 
 This is also why Delta gives **ACID**: a write only "commits" when its JSON entry lands. An interrupted write may leave a stray Parquet file on storage, but with no log entry it's invisible to every reader (covered scenario-by-scenario in §3).
+
+### 2.6 Streaming inserts: commits, checkpoints, and the real bottleneck
+
+A streaming write commits **once per micro-batch, not per row**. Each trigger = one Delta transaction = **one JSON file = one version** — even if that micro-batch writes many Parquet data files. A 10-second trigger therefore produces ~8,640 JSON commits/day; high-frequency streaming *does* pile up log files fast.
+
+Checkpoints follow the same `checkpointInterval` rule (default **10 commits**) — one `.checkpoint.parquet` every 10 micro-batches. (As in §2.4, the checkpoint is not itself a commit: no new version/JSON.)
+
+**Why the log doesn't become the bottleneck:**
+
+- **Checkpoints cap replay cost.** A reader never replays all 8,640 files — it jumps to the newest checkpoint and replays only the ≤10 JSON commits since. State reconstruction is **O(checkpointInterval), not O(total commits)**: the commit count grows, planning cost doesn't.
+- **Log cleanup bounds the directory.** Old JSON + checkpoints are removed after `logRetentionDuration` (30 d), so `_delta_log/` doesn't grow without limit.
+- **Single writer, no contention.** One streaming query owns the log; appends don't conflict, so commits serialize cleanly with no retry storms.
+
+**The real bottleneck is small data files, not the log.** Each micro-batch writes small Parquet files → the *small-file problem*, which degrades reads. Mitigations:
+
+- **Optimized writes** (`delta.autoOptimize.optimizeWrite`) + **auto-compaction** (`delta.autoOptimize.autoCompact`) — Delta compacts small files as the stream runs.
+- **Predictive optimization** (UC managed tables) runs OPTIMIZE/VACUUM for you (§7–§8).
+- **Tune the trigger** — larger / less frequent batches (e.g. `Trigger.AvailableNow`, longer processing-time) → fewer commits and fewer small files.
+
+> 💡 Don't confuse the two "checkpoints": the **Delta log checkpoint** (`_delta_log/*.checkpoint.parquet`, a read shortcut for table state) is unrelated to the **Structured Streaming checkpoint** (a separate `_checkpoints/` dir holding stream *offsets* for exactly-once resume). VACUUM skips `_`-prefixed dirs, so the streaming checkpoint is safe.
 
 ---
 
