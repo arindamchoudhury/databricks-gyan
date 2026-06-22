@@ -84,11 +84,11 @@ DESCRIBE DETAIL product_info;   -- location, format=delta, numFiles, sizeInBytes
 
 The rows live in **Parquet** files. Parquet is the storage *format*; Delta Lake is the *layer* that manages those files. Properties that matter here:
 
-- **Columnar** — values stored column-by-column, not row-by-row → reads touch only the columns a query needs, and per-column compression (snappy by default) beats row formats.
+- **Columnar** — values are stored column-by-column, not row-by-row. A query reads only the columns it references (column pruning) and skips the rest; and because each column holds one type with similar values, per-column encoding + compression (snappy by default) reaches far higher ratios than a row format could.
 - **Immutable** — a Parquet file is never edited in place. Every UPDATE / DELETE / MERGE writes *new* files and soft-deletes old ones in the log (see §3.2). This immutability is what makes time travel and ACID possible.
-- **Splittable + self-describing** — embeds its own schema and row-group layout, so Spark reads it in parallel with no separate metadata service.
+- **Splittable + self-describing** — a Parquet file is divided into **row groups** (horizontal blocks of rows, ~128 MB), and the file footer records each row group's byte offset, length, and stats. Spark reads the footer, then hands each row group to a separate task → parallel scan of a single file, with no external metadata service. (Contrast a gzipped CSV: its compression spans the whole stream, so it's *not* splittable — one task must read it end-to-end. Parquet compresses per-column-chunk *inside* each row group, so every split decompresses independently.)
 
-Each `INSERT` (or any write) produces one or more new Parquet files — never an append into an existing file. Many small writes → many small files, which is the problem `OPTIMIZE` solves (§7).
+Each `INSERT` (or any write) produces one or more new Parquet files — it never appends to an existing one. Many small writes → many small files, which is the problem `OPTIMIZE` solves (§7).
 
 ### 2.3 The transaction log (`_delta_log/`)
 
