@@ -12,7 +12,7 @@
 
 > *Delta Lake from first principles: the transaction log architecture, the four ACID scenarios, hands-on table DDL, time travel + rollback, compaction with OPTIMIZE/Z-Order, and VACUUM for storage cleanup.*
 
-> 📌 **Notes adapted to the 2026 platform.** The book targets DBR 13.3 LTS. Key shifts for this chapter flagged with ⚠️: (1) **Liquid Clustering** is now the Databricks-recommended replacement for Z-Order/partitioning (GA on DBR 15.4 LTS+; `CLUSTER BY AUTO` lets the platform pick keys); (2) **Deletion Vectors** (default-enabled since DBR 14.0+) change how UPDATE/DELETE work under the hood; (3) the book uses `hive_metastore` but **Unity Catalog is the default** in all new 2026 workspaces — managed tables land in UC managed storage (e.g. `s3://<bucket>/__unity_storage/catalogs/<catalog_id>/tables/<table_id>`), not `dbfs:/user/hive/warehouse/`; (4) **Predictive Optimization** now runs `OPTIMIZE` / `VACUUM` / `ANALYZE` *automatically* on UC managed tables — the manual maintenance commands in §7–§8 are still valid but increasingly the platform's job, not yours. See [research-cache](../../research-cache/dcde-sg-ch02-facts.md).
+> 📌 **Notes adapted to the 2026 platform.** The book targets DBR 13.3 LTS. Key shifts for this chapter flagged with ⚠️: (1) **Liquid Clustering** is now the Databricks-recommended replacement for Z-Order/partitioning (GA on DBR 15.4 LTS+; `CLUSTER BY AUTO` lets the platform pick keys); (2) **Deletion Vectors** (merge-on-read; enabled per-table via `delta.enableDeletionVectors` or a region-dependent workspace auto-enable setting — *not* a blanket default) change how UPDATE/DELETE work under the hood; (3) the book uses `hive_metastore` but **Unity Catalog is the default** in all new 2026 workspaces — managed tables land in UC managed storage (e.g. `s3://<bucket>/__unity_storage/catalogs/<catalog_id>/tables/<table_id>`), not `dbfs:/user/hive/warehouse/`; (4) **Predictive Optimization** now runs `OPTIMIZE` / `VACUUM` / `ANALYZE` *automatically* on UC managed tables — the manual maintenance commands in §7–§8 are still valid but increasingly the platform's job, not yours. See [research-cache](../../research-cache/dcde-sg-ch02-facts.md).
 
 > 📎 **Overlaps:** personal book chapter [[ch05-delta-lake]] covers the same ground with deeper explanatory treatment.
 
@@ -94,6 +94,17 @@ Each `INSERT` (or any write) produces one or more new Parquet files — it never
 
 The log is the **source of truth** for what the table *is*. The Parquet files on disk are meaningless on their own — only files the log references are part of the table.
 
+**File-naming convention inside `_delta_log/`** — every file is keyed by the **version number, zero-padded to 20 digits**:
+
+| File | Meaning |
+|---|---|
+| `00000000000000000007.json` | the commit for version 7 |
+| `00000000000000000007.crc` | optional Version Checksum for version 7 |
+| `00000000000000000010.checkpoint.parquet` | checkpoint summarizing state through version 10 (large checkpoints may be split: `…010.checkpoint.<part>.<total>.parquet`) |
+| `_last_checkpoint` | tiny pointer file (overwritten in place) naming the newest checkpoint's version + size |
+
+The 20-digit padding makes the files **sort lexicographically in version order**, so a single prefix listing returns them already ordered. Files are never renamed or moved — written once under this name, then deleted in place when aged out (§2.4).
+
 - Each committed transaction → **one JSON file** (`...0000.json`, `...0001.json`, …). The number is the table **version**.
 - A JSON entry records: the operation (`commitInfo`: WRITE / UPDATE / DELETE / OPTIMIZE…), the predicate used, files **`add`**ed, and files **`remove`**d (soft-deleted, not erased from storage).
 - Each `add` entry also carries **per-file statistics** — row count plus min/max and null counts for the leading columns. The engine reads these and **skips** any Parquet file whose min/max range can't match a query predicate (*data skipping*) without opening the file. This is exactly what `OPTIMIZE … ZORDER` / liquid clustering tune (§7).
@@ -108,7 +119,7 @@ The log is the **source of truth** for what the table *is*. The Parquet files on
 
 ### 2.4 Checkpoints
 
-Replaying thousands of tiny JSON files would be slow. So **every 10 commits** Delta writes a **`.checkpoint.parquet`** that consolidates the full table state up to that version into one Parquet file, and updates `_last_checkpoint` to point at it. (Book doesn't cover this; exam occasionally mentions it.)
+Replaying thousands of tiny JSON files would be slow. So **every 10 commits** Delta writes a checkpoint named for that version — e.g. at version 10, **`00000000000000000010.checkpoint.parquet`** — consolidating the full table state through version 10 into one Parquet file, and overwrites `_last_checkpoint` to point at it. (Book doesn't cover this; exam occasionally mentions it.)
 
 A checkpoint is **not a transaction** — it writes no new `.json` and does **not** increment the table version. It rides along *after* the commit that produced version N: `00...0N.json` (from the operation, e.g. an INSERT) and `00...0N.checkpoint.parquet` (the summary) share the same version N. Only real operations (INSERT, UPDATE, OPTIMIZE, RESTORE…) create JSON commits and bump the version; checkpointing is pure read-side bookkeeping.
 
@@ -152,9 +163,9 @@ Checkpoints follow the same `checkpointInterval` rule (default **10 commits**) �
 
 **The real bottleneck is small data files, not the log.** Each micro-batch writes small Parquet files → the *small-file problem*, which degrades reads. Mitigations:
 
-- **Optimized writes** (`delta.autoOptimize.optimizeWrite`) + **auto-compaction** (`delta.autoOptimize.autoCompact`) — Delta compacts small files as the stream runs.
+- **Optimized writes + auto-compaction** — compact small files as the stream runs. On **UC managed tables (the 2026 default) this is automatic** — background auto-compaction triggers for all UC managed tables (SQL warehouse / DBR 11.3 LTS+), nothing to set. Both are also *always* on for `MERGE`/`UPDATE`/`DELETE`. Only on **external / legacy** tables must you opt in via the table properties `delta.autoOptimize.optimizeWrite` / `delta.autoOptimize.autoCompact`. When **migrating a legacy table to UC managed**, *unset* any leftover `delta.autoOptimize.autoCompact` property (`ALTER TABLE … UNSET TBLPROPERTIES`) and drop the `spark.databricks.delta.autoCompact.enabled` config — once those legacy settings are gone, background auto-compaction takes over automatically. (Nothing to unset on a UC managed table that never had them.)
 - **Predictive optimization** (UC managed tables) runs OPTIMIZE/VACUUM for you (§7–§8).
-- **Tune the trigger** — larger / less frequent batches (e.g. `Trigger.AvailableNow`, longer processing-time) → fewer commits and fewer small files.
+- **Tune the trigger** — larger / less frequent batches → fewer commits and fewer small files. Raise the interval with `Trigger.ProcessingTime("N seconds")` (PySpark `processingTime="N seconds"`), or use `Trigger.AvailableNow()` to drain all data in one run instead of an always-on stream.
 
 > 💡 Don't confuse the two "checkpoints": the **Delta log checkpoint** (`_delta_log/*.checkpoint.parquet`, a read shortcut for table state) is unrelated to the **Structured Streaming checkpoint** (a separate `_checkpoints/` dir holding stream *offsets* for exactly-once resume). VACUUM skips `_`-prefixed dirs, so the streaming checkpoint is safe.
 
@@ -175,6 +186,7 @@ The book walks through Alice (producer) and Bob (consumer) on the same table acr
 Parquet files are **immutable** — Delta never edits an existing file.
 
 Update flow:
+
 1. Alice updates a record in `part1.parquet`.
 2. Delta copies the relevant rows from `part1` → applies the change → writes `part3.parquet`.
 3. Delta writes `001.json`: marks `part1` as **removed**, marks `part3` as **added**.
@@ -182,13 +194,32 @@ Update flow:
 
 `part1` remains on storage as an obsolete file until `VACUUM` cleans it up. This is what enables **time travel**.
 
-> ⚠️ **2026 update — Deletion Vectors:** Starting DBR 14.0, UPDATE and DELETE no longer copy files by default. Instead, Delta writes a **deletion vector** — a bitmap file that marks which rows in the original Parquet file are stale. Reads merge the Parquet file with its deletion vector on the fly. This eliminates write amplification for point updates/deletes and enables **row-level concurrency** (DBR 14.2+). The book's file-copy model is correct for the pre-DV world; the *logical result* is identical, only the physical mechanism differs.
+> ⚠️ **2026 update — Deletion Vectors (merge-on-read).** On tables with DVs enabled, UPDATE no longer rewrites whole files. Instead:
+>
+> 1. The **old** versions of the matched rows are marked stale in a **deletion vector** — a bitmap (RoaringBitmap) of row *positions* attached to the existing data file. The big Parquet file is **not** rewritten.
+> 2. The **updated** row values are written to a **new, small Parquet file** (just the changed rows).
+> 3. The commit references the original file **+ its deletion vector** + the new file.
+>
+> A read then does **merge-on-read**: scan the original file, skip the DV-flagged positions, union with the new file's rows. So UPDATE-with-DV ≈ *soft-delete old rows (bitmap) + insert new values (small file)* — no whole-file copy. This kills write amplification for point updates and enables **row-level concurrency** (DBR 14.2+); it also powers **predictive I/O** on Photon. The book's file-copy model is the pre-DV world; the *logical result* is identical, only the physical mechanism differs.
+>
+> **Soft-deletes are deferred.** The DV-marked rows are physically dropped only when files are rewritten — `OPTIMIZE`, auto-compaction, or `REORG TABLE … APPLY (PURGE)` (rewrites all DV-marked files, drops the DVs); then `VACUUM` removes the old files (set retention to the purge timestamp to fully erase, e.g. for GDPR).
+>
+> **Enablement (corrected):** not a blanket "on since DBR 14.0." For **Delta** tables you enable them explicitly with `delta.enableDeletionVectors = true`, *or* via a **workspace setting that auto-enables DVs on new tables** (SQL warehouse / DBR 14.3 LTS+) whose **default varies by region**. Apache **Iceberg v3** tables include DVs by default; MVs / streaming tables in `hive_metastore` do **not**. Read DV tables on DBR 12.2 LTS+; write on 14.3 LTS+ for all optimizations.
 
 ### 3.3 Concurrent Write + Read (Isolation)
 
 While Alice is writing `part4.parquet` (not yet committed), Bob queries. The log only references `part2` + `part3` — Bob reads those. No deadlock, no wait. Bob gets a **consistent snapshot** of the committed state.
 
 Once Alice's write finishes, Delta appends `002.json` marking `part4` as added.
+
+> **Delta's isolation levels.** Delta does **not** expose the classic SQL knobs (Read Uncommitted / Read Committed / Repeatable Read). What Bob sees above is **snapshot isolation**, and the two sides work differently:
+>
+> - **Reads → snapshot isolation, always.** A query pins the table version at its start; writes committed afterward (and any in-flight write) are invisible. Comparable to SQL Server `SNAPSHOT` / PostgreSQL `REPEATABLE READ`, which are also snapshot-based.
+> - **Writes → optimistic concurrency control**, with the level set by the `delta.isolationLevel` table property:
+>     - **`WriteSerializable`** *(default)* — only *write* operations are serializable. Higher concurrency, but a reader can momentarily observe a table state that "never existed" in the linear history (e.g. a blind append reordered relative to another write).
+>     - **`Serializable`** *(strongest)* — writes *and* reads conform to one serial history; a reader never sees a state absent from the log.
+>
+> So §3.3 is the **read side** (snapshot isolation); the table's default end-to-end guarantee is **snapshot-isolation reads + write-serializable writes**. Writers don't block readers and readers don't block writers — conflicts between concurrent *writers* are caught at commit by optimistic concurrency (the loser retries or fails), and **deletion vectors enable row-level concurrency** so non-overlapping row changes don't conflict (DBR 14.2+, §3.2).
 
 ### 3.4 Failed Write (Consistency)
 

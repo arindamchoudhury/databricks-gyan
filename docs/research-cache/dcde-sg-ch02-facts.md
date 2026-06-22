@@ -7,7 +7,7 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 | Book claim (2025) | Current value (2026) | Notes |
 |---|---|---|
 | Z-Order recommended for data skipping | **Liquid Clustering** is now the Databricks-recommended approach for all new tables | Databricks docs: "use liquid clustering instead of partitions, ZORDER, or other data layout approaches" |
-| UPDATE/DELETE copies files (immutability) | **Deletion Vectors** (default-enabled at workspace level for DBR 14.0+) mark stale rows as a bitmap without file copying | Book's NOTE already mentions the DBR 14 behavior change; row-level concurrency added in DBR 14.2 |
+| UPDATE/DELETE copies files (immutability) | **Deletion Vectors** (merge-on-read): mark old rows stale in a bitmap (RoaringBitmap) on the existing file, write changed rows to a new small file; reads merge. UPDATE ≈ soft-delete + insert | NOT a blanket default: enable per-table `delta.enableDeletionVectors` or region-dependent workspace auto-enable (SQL warehouse / DBR 14.3 LTS+). Iceberg v3 = on by default; MV/streaming in HMS = off. Row-level concurrency DBR 14.2+. Soft-deletes physical only via OPTIMIZE / auto-compact / REORG…APPLY(PURGE), then VACUUM |
 | Book uses `hive_metastore` for demos | **Unity Catalog is the default** in all new 2026 workspaces; managed tables land in UC managed storage `s3://<bucket>/__unity_storage/catalogs/<catalog_id>/tables/<table_id>` (AWS) | Token is `__unity_storage` (underscore) on AWS; `__unitystorage` is the Azure container name. Organized by GUIDs, not table name. Still valid to use `hive_metastore` for local practice |
 | `%fs ls dbfs:/user/hive/warehouse/<table>` | Not the access model on UC managed tables — UC governs by full cloud-URI grants, not friendly-path browsing | Use `hive_metastore` catalog when practicing file-level commands; for ad-hoc files use UC volumes |
 | VACUUM default retention: 7 days | Still 7 days | Set via `delta.deletedFileRetentionDuration`; raise before enabling Predictive Optimization to keep longer time travel |
@@ -21,7 +21,7 @@ Working file for Chapter 2 of Derar Alhussein's *DCDE-SG* (O'Reilly, 1st Ed., Fe
 - Liquid Clustering GA: <https://www.databricks.com/blog/announcing-general-availability-liquid-clustering>
 - Liquid Clustering docs: <https://docs.databricks.com/aws/en/tables/clustering>
 - OPTIMIZE docs: <https://docs.databricks.com/aws/en/sql/language-manual/delta-optimize>
-- Deletion vectors: <https://docs.databricks.com/aws/en/delta/deletion-vectors>
+- Deletion vectors (merge-on-read, enablement, REORG PURGE): <https://docs.databricks.com/aws/en/delta/deletion-vectors>
 - Auto-enable deletion vectors (workspace setting): <https://docs.databricks.com/aws/en/admin/workspace-settings/deletion-vectors>
 - Row-level concurrency: <https://docs.databricks.com/aws/en/optimizations/isolation/row-level-concurrency>
 - UC managed storage path / `__unity_storage`: <https://docs.databricks.com/aws/en/data-governance/unity-catalog/storage-conflicts>
