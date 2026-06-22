@@ -119,7 +119,15 @@ A checkpoint is **not a transaction** — it writes no new `.json` and does **no
 | `delta.logRetentionDuration` | log files (JSON + checkpoints) → history/time-travel *metadata* | 30 days |
 | `delta.deletedFileRetentionDuration` | obsolete Parquet *data* files → what `VACUUM` removes (§8) | 7 days |
 
-Because VACUUM clears data files at 7 days but the log is kept 30, **actual time travel is usually bounded by VACUUM (7 days), not the log**. Time travel needs **both** the metadata (log/checkpoint says "version N = files X, Y, Z") *and* those data files still on storage. The checkpoint stores only file *references* + stats, never a copy of the rows — so once VACUUM deletes X/Y/Z, `SELECT … VERSION AS OF N` **fails** with a file-not-found error even though the checkpoint still knows about them. Surviving metadata ≠ surviving data. Also note Delta needs *all consecutive* JSON entries since the prior checkpoint — if early commits are cleaned, you can't time-travel to versions between them and that checkpoint. (DBR 18.0+: `logRetentionDuration` must be ≥ `deletedFileRetentionDuration`.)
+Because VACUUM clears data files at 7 days but the log is kept 30, **actual time travel is usually bounded by VACUUM (7 days), not the log**. Time travel needs **both** the metadata (log/checkpoint says "version N = files X, Y, Z") *and* those data files still on storage. The checkpoint stores only file *references* + stats, never a copy of the rows — so once VACUUM deletes X/Y/Z, `SELECT … VERSION AS OF N` **fails** with a file-not-found error even though the checkpoint still knows about them. Surviving metadata ≠ surviving data. Also note Delta needs *all consecutive* JSON entries since the prior checkpoint — if early commits are cleaned, you can't time-travel to versions between them and that checkpoint.
+
+**Why log retention ≥ data retention (and when to widen the gap).** The default split (30 vs 7) is deliberate, and **log must never be shorter than data** — DBR 18.0+ enforces `logRetentionDuration ≥ deletedFileRetentionDuration`. Reason: the log is the source of truth for which files are garbage, and `deletedFileRetentionDuration` is counted *from the commit that removed a file* — that timestamp lives in the log. Clean the log faster than the data and VACUUM loses the record of when files became obsolete → orphaned files / unreadable recent versions. Metadata must outlive the data it describes.
+
+Tuning the two windows:
+
+- **Keep log ≫ data** when you want a **cheap long audit trail** (who/what/when/predicate for 30–90 d) without paying to retain heavy data files, or to protect **lagging streaming / CDF consumers** that track the table by version (set `logRetentionDuration` ≥ worst-case consumer downtime, see §2.6).
+- **Raise data toward log** only when you need longer *real* rollback (`RESTORE` / `VERSION AS OF`). For N-day time travel set **both** to N — and pay storage for all the obsolete files that now linger.
+- Rules of thumb: long audit + modest recovery → leave defaults; N-day rollback → both = N; lagging streams → `logRetentionDuration` ≥ max lag.
 
 ### 2.5 How a read reconstructs the current state
 
