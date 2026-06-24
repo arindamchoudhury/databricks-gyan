@@ -45,6 +45,9 @@ DATE_PATTERNS = [
 
 URL_RE      = re.compile(r'\*\*Source:\*\*\s*\[[^\]]*\]\((https?://[^)]+)\)')
 CAPTURED_RE = re.compile(r'\*\*Source updated:\*\*\s*(\d{4}-\d{2}-\d{2})')
+# Explicit author marker: page carries no machine-readable date (e.g. marketing
+# /discover pages). Honour it so the note is not flagged MISSING-DATE forever.
+NODATE_RE   = re.compile(r'\*\*Source updated:\*\*\s*\(no date on page\)', re.IGNORECASE)
 
 SKIP_NAMES  = {"index.md", "page-map.md"}
 
@@ -58,6 +61,7 @@ RESET  = "\033[0m"
 STATUS_COLOR = {
     "STALE":          RED,
     "MISSING-DATE":   YELLOW,
+    "NO-PAGE-DATE":   DARK,
     "FETCH-ERROR":    YELLOW,
     "NO-PLAYWRIGHT":  CYAN,
     "UNKNOWN":        DARK,
@@ -170,13 +174,16 @@ def scan(sources_dir: Path, course: str, skip_fetch: bool) -> list[dict]:
         date_m = CAPTURED_RE.search(text)
         url      = url_m.group(1)  if url_m  else None
         captured = date_m.group(1) if date_m else None
+        no_date  = bool(NODATE_RE.search(text))
 
         if not url:
             continue  # not a source note with a URL
 
         live = get_live_date(url) if not skip_fetch else None
 
-        if not captured:
+        if no_date:
+            status = "NO-PAGE-DATE"
+        elif not captured:
             status = "MISSING-DATE"
         elif skip_fetch:
             status = "SKIPPED"
