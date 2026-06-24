@@ -21,6 +21,12 @@ Zensical static site. Content in `docs/` as Markdown. `zensical.toml` holds all 
 
 Book chapters live in `docs/book/`. One chapter per learning-path topic. The book skill (`databricks-book`) writes these.
 
+Reading notes from doc-site pages live in `docs/sources/databricks-docs/`. The `research-notes` skill writes these; nav is grouped by each page's own breadcrumb (see research-notes "Documentation-site sources" rule).
+
+## Doc-coverage requests
+
+When a docs URL is shared with a coverage question ("do we have this in the learning path?", "is X covered?"), run **research-notes flavor 5**: classify coverage (absent / name-dropped / covered), and unless already fully covered, fetch (`scripts/fetch_page.py`, not WebFetch) → write the note → wire in by breadcrumb → fold into `docs/learning-path.md` (learning-path Phase 5: add reference, callout if new distinction, bump the header changelog) → validate TOML + commit. **Do not stop at reporting coverage — "name-dropped in a feature list" counts as a gap, not coverage.** Adding a note ≠ topic completion; leave the topic's ⬜/✅ status unless a chapter was written.
+
 ## Current stable version
 
 Databricks Runtime 18 (released 2026-06-10) — Apache Spark 4.1.0.
