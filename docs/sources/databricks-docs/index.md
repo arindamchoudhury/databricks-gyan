@@ -84,6 +84,7 @@ Grouped by topic. Nav mirrors these groups.
 | [Databricks tables concepts](tables-concepts.md) | 2026-06-22 | tables, unity-catalog, managed, external, foreign, temporary, delta, iceberg, permissions, B4 |
 | [Unity Catalog managed tables](managed-tables.md) | 2026-06-23 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, catalog-commits, undrop, recovery-period, B4 |
 | [Unity Catalog external tables](external-tables.md) | 2026-06-24 | tables, unity-catalog, external, delta, external-location, storage-credential, drop-table, repair-table, B4 |
+| [Partition discovery for external tables](external-partition-discovery.md) | 2026-06-24 | tables, unity-catalog, external, partitioning, partition-metadata, msck-repair, hive-style, B4 |
 | [Convert an external Delta table to managed](convert-external-managed.md) | 2026-06-23 | tables, unity-catalog, managed, external, set-managed, migration, uniform, path-based-redirect, streaming, B4 |
 | [Specify a managed storage location in Unity Catalog](managed-storage.md) | 2026-06-23 | unity-catalog, managed-storage, storage-location, external-location, catalog, schema, metastore, volumes, B1, B4 |
 | [Catalog commits](catalog-commits.md) | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, catalog-commits, transactions, external-access, streaming, B4 |

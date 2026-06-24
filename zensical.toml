@@ -110,7 +110,10 @@ nav = [
                         { "Predictive table optimization" = "sources/databricks-docs/predictive-optimization.md" },
                         { "Automatic upgrades" = "sources/databricks-docs/automatic-upgrades.md" },
                     ]},
-                    { "External tables" = "sources/databricks-docs/external-tables.md" },
+                    { "External tables" = [
+                        { "Overview" = "sources/databricks-docs/external-tables.md" },
+                        { "Partition discovery" = "sources/databricks-docs/external-partition-discovery.md" },
+                    ]},
                 ]},
                 { "Table functionality" = [
                     { "Catalog commits" = "sources/databricks-docs/catalog-commits.md" },
