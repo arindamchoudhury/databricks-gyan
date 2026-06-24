@@ -103,3 +103,10 @@ Course notebooks and external sources captured as structured notes.
 | [Predictive optimization](databricks-docs/predictive-optimization.md) | documentation | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, optimize, vacuum, analyze, serverless, system-tables, B4, B5 |
 | [Use liquid clustering for tables](databricks-docs/liquid-clustering.md) | documentation | 2026-06-24 | tables, delta, iceberg, liquid-clustering, cluster-by, optimize, zorder, partitioning, automatic-clustering, A2, I5 |
 | [Access Databricks data using external systems](databricks-docs/external-access.md) | documentation | 2026-06-24 | unity-catalog, external-access, iceberg-rest-catalog, unity-rest-api, credential-vending, compatibility-mode, opensharing, A7, I8, B4 |
+| [Optimization recommendations (hub)](databricks-docs/optimization-recommendations.md) | documentation | 2026-06-24 | optimization, performance, databricks-runtime, hub, A1 |
+| [Disk caching (Delta/DBIO cache)](databricks-docs/disk-cache.md) | documentation | 2026-06-24 | optimization, disk-cache, delta-cache, ssd, caching, A1 |
+| [Dynamic file pruning](databricks-docs/dynamic-file-pruning.md) | documentation | 2026-06-24 | optimization, dynamic-file-pruning, dfp, join, photon, A1 |
+| [Low shuffle merge](databricks-docs/low-shuffle-merge.md) | documentation | 2026-06-24 | optimization, merge, low-shuffle-merge, shuffle, delta, A1, I5 |
+| [Cost-based optimizer (CBO)](databricks-docs/cost-based-optimizer.md) | documentation | 2026-06-24 | optimization, cbo, statistics, analyze-table, joins, A1 |
+| [Range join optimization](databricks-docs/range-join.md) | documentation | 2026-06-24 | optimization, range-join, join, bin-size, interval, A1 |
+| [Isolation levels and write conflicts](databricks-docs/isolation-levels.md) | documentation | 2026-06-24 | optimization, delta, isolation, write-serializable, concurrency, A1, B4 |

@@ -65,6 +65,18 @@ Grouped by topic. Nav mirrors these groups.
 | [SQL Hints: Join, Partition, and Skew](sql-join-hints.md) | 2026-06-18 | spark, sql, join-hints, broadcast, shuffle, partitioning, performance, optimization, B2, B8 |
 | [Adaptive Query Execution (AQE)](aqe.md) | 2026-06-18 | spark, aqe, performance, optimization, broadcast, skew, shuffle, partitioning, B2, B8, B16 |
 
+### Optimization & Performance (platform knobs)
+
+| Page | Added | Tags |
+|---|---|---|
+| [Optimization recommendations (hub)](optimization-recommendations.md) | 2026-06-24 | optimization, performance, databricks-runtime, hub, A1 |
+| [Disk caching (Delta/DBIO cache)](disk-cache.md) | 2026-06-24 | optimization, disk-cache, delta-cache, ssd, caching, spark-cache, A1 |
+| [Dynamic file pruning](dynamic-file-pruning.md) | 2026-06-24 | optimization, dynamic-file-pruning, dfp, join, photon, data-skipping, A1 |
+| [Low shuffle merge](low-shuffle-merge.md) | 2026-06-24 | optimization, merge, low-shuffle-merge, shuffle, delta, A1, I5 |
+| [Cost-based optimizer (CBO)](cost-based-optimizer.md) | 2026-06-24 | optimization, cbo, statistics, analyze-table, joins, explain, A1 |
+| [Range join optimization](range-join.md) | 2026-06-24 | optimization, range-join, join, bin-size, timestamp, interval, A1 |
+| [Isolation levels and write conflicts](isolation-levels.md) | 2026-06-24 | optimization, delta, isolation, write-serializable, concurrency, A1, B4 |
+
 ### Tables & SQL
 
 | Page | Added | Tags |

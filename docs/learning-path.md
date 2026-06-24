@@ -1,6 +1,6 @@
 # Learning Path: Databricks Data Engineering
 
-> **Last updated:** 2026-06-22 (Phase 5: reconciled B4 against this session's new material — DCDE-SG Ch 3 reading notes + the captured [tables-concepts](sources/databricks-docs/tables-concepts.md) docs note. Reframed "What it is" from Hive-metastore-centric to UC three-level namespace; added a 2026-deltas callout (UC-only workspaces have no HMS/DBFS, three table types incl. foreign + Iceberg, managed-recommended default, global temp views unsupported on serverless); added tables-concepts as a B4 reference. Reviewed full B4 topic vs actual Ch 3 scope — expanded "What it is" + Milestone to cover CTAS, constraints, deep/shallow clone, and the three view types (were missing); extended the deltas callout with UC informational PK/FK and shallow-clone caveats. B4 still ⬜ — reading note ≠ topic completion.) · **2026-06-23** (Phase 5: added the [managed-tables](sources/databricks-docs/managed-tables.md) docs note as B4 reference #6; added `UNDROP TABLE` + configurable recovery period to the B4 milestone. B4 still ⬜.) · **2026-06-23** (Phase 5: added the [convert-external-managed](sources/databricks-docs/convert-external-managed.md) docs note as B4 reference #7; added `SET MANAGED`/`UNSET MANAGED` external→managed conversion + 14-day rollback to the B4 milestone. B4 still ⬜.) · **2026-06-23** (Phase 5: added the [managed-storage](sources/databricks-docs/managed-storage.md) docs note as B4 reference #8 — managed storage location hierarchy. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [catalog-commits](sources/databricks-docs/catalog-commits.md) docs note as B4 reference #9 — catalog commits feature (`delta.feature.catalogManaged`). No version/rename corrections needed. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [transactions](sources/databricks-docs/transactions.md) docs note as B4 reference #10 — multi-statement ACID transactions, the capability catalog commits unlocks. No version/rename corrections needed. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [predictive-optimization](sources/databricks-docs/predictive-optimization.md) docs note as A2 reference #5 — deep dive behind the existing PO callout (3 ops, ZORDER skip, inheritance model + ALTER syntax, VACUUM retention trap, serverless billing, system table, exclusions). PO facts already current in A2/I5 — no version corrections. A2 still ⬜.) · **2026-06-24** (Phase 5: added the [liquid-clustering](sources/databricks-docs/liquid-clustering.md) docs note as A2 reference #5 (PO note bumped to #6). **Version fix:** corrected "DBR 14+" → LC is GA for Delta on **DBR 15.4 LTS+** (Iceberg PP 16.4 LTS+, v3 features 18.0+) in both A2 "Why" and the I5 Z-order callout; updated A2 DB-DOCS link to the moved `/tables/clustering` URL. A2 still ⬜.) · **2026-06-24** (Phase 5 — **gap fill:** external access was uncovered (only a passing "credential vending" token in B4). Renamed A7 "Lakehouse Federation & OpenSharing" → "Lakehouse Federation, External Access & OpenSharing"; reframed it as three interop directions (Federation inbound / external-engine reads / OpenSharing cross-org); added Unity REST API + Iceberg REST catalog + credential vending + compatibility mode to "What it is"; added the [external-access](sources/databricks-docs/external-access.md) docs note as ref #5 + the DB-DOCS external-access link; extended the interactive + milestone. A7 still ⬜.)
+> **Last updated:** 2026-06-22 (Phase 5: reconciled B4 against this session's new material — DCDE-SG Ch 3 reading notes + the captured [tables-concepts](sources/databricks-docs/tables-concepts.md) docs note. Reframed "What it is" from Hive-metastore-centric to UC three-level namespace; added a 2026-deltas callout (UC-only workspaces have no HMS/DBFS, three table types incl. foreign + Iceberg, managed-recommended default, global temp views unsupported on serverless); added tables-concepts as a B4 reference. Reviewed full B4 topic vs actual Ch 3 scope — expanded "What it is" + Milestone to cover CTAS, constraints, deep/shallow clone, and the three view types (were missing); extended the deltas callout with UC informational PK/FK and shallow-clone caveats. B4 still ⬜ — reading note ≠ topic completion.) · **2026-06-23** (Phase 5: added the [managed-tables](sources/databricks-docs/managed-tables.md) docs note as B4 reference #6; added `UNDROP TABLE` + configurable recovery period to the B4 milestone. B4 still ⬜.) · **2026-06-23** (Phase 5: added the [convert-external-managed](sources/databricks-docs/convert-external-managed.md) docs note as B4 reference #7; added `SET MANAGED`/`UNSET MANAGED` external→managed conversion + 14-day rollback to the B4 milestone. B4 still ⬜.) · **2026-06-23** (Phase 5: added the [managed-storage](sources/databricks-docs/managed-storage.md) docs note as B4 reference #8 — managed storage location hierarchy. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [catalog-commits](sources/databricks-docs/catalog-commits.md) docs note as B4 reference #9 — catalog commits feature (`delta.feature.catalogManaged`). No version/rename corrections needed. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [transactions](sources/databricks-docs/transactions.md) docs note as B4 reference #10 — multi-statement ACID transactions, the capability catalog commits unlocks. No version/rename corrections needed. B4 still ⬜.) · **2026-06-24** (Phase 5: added the [predictive-optimization](sources/databricks-docs/predictive-optimization.md) docs note as A2 reference #5 — deep dive behind the existing PO callout (3 ops, ZORDER skip, inheritance model + ALTER syntax, VACUUM retention trap, serverless billing, system table, exclusions). PO facts already current in A2/I5 — no version corrections. A2 still ⬜.) · **2026-06-24** (Phase 5: added the [liquid-clustering](sources/databricks-docs/liquid-clustering.md) docs note as A2 reference #5 (PO note bumped to #6). **Version fix:** corrected "DBR 14+" → LC is GA for Delta on **DBR 15.4 LTS+** (Iceberg PP 16.4 LTS+, v3 features 18.0+) in both A2 "Why" and the I5 Z-order callout; updated A2 DB-DOCS link to the moved `/tables/clustering` URL. A2 still ⬜.) · **2026-06-24** (Phase 5 — **gap fill:** external access was uncovered (only a passing "credential vending" token in B4). Renamed A7 "Lakehouse Federation & OpenSharing" → "Lakehouse Federation, External Access & OpenSharing"; reframed it as three interop directions (Federation inbound / external-engine reads / OpenSharing cross-org); added Unity REST API + Iceberg REST catalog + credential vending + compatibility mode to "What it is"; added the [external-access](sources/databricks-docs/external-access.md) docs note as ref #5 + the DB-DOCS external-access link; extended the interactive + milestone. A7 still ⬜.) · **2026-06-24** (Phase 5 — **gap fill:** the [Optimization recommendations](https://docs.databricks.com/aws/en/optimizations) hub listed 6 perf features the path never named. Added a new "Platform optimization knobs" subsection under A1 with full lessons (what / when-to-use / how-to-learn / milestone) for **disk caching, dynamic file pruning, low shuffle merge, cost-based optimizer, range join optimization, and Delta isolation levels**, plus a deprecated-bloom-filter skip note. Expanded A1 "What it is"/"Why". Facts verified against the six DB-DOCS subpages. A1 still ⬜.) · **2026-06-24** (captured 7 research notes for the A1 knobs — [optimization-recommendations](sources/databricks-docs/optimization-recommendations.md) hub + disk-cache, dynamic-file-pruning, low-shuffle-merge, cost-based-optimizer (3 EXPLAIN screenshots), range-join, isolation-levels — and credited each in its A1 lesson reference; added 6 glossary terms. A1 still ⬜.)
 > **Prior:** 2026-06-21 (research pass: synced B5/B6/B7 completion; verified certs/runtime/catalog against official sources; added DBR 19 Beta, Lakeflow Designer GA, DCDEA section rename, Predictive Optimization to A2/I5, Genie ZeroOps to A6. Confirmed DA-DE and DA-ADE module structures unchanged — DA-ADE Data Privacy module still present. Replaced retired DA-MGUC course (I7) with "Get Started with Data Governance on Databricks"; confirmed DA-DIUC and DA-SQL links live.)
 > **Current stable version:** Databricks Runtime 18 (released 2026-06-10) · Apache Spark 4.1.0
 > **LTS version:** DBR 17.3 LTS (released 2025-10-22) · Apache Spark 4.0.0
@@ -378,9 +378,9 @@ You are ready to advance when you can:
 
 ### ⬜ A1 — Spark Performance Tuning & the Spark UI
 
-**What it is:** Reading the Spark UI (DAG, stages, tasks, executor metrics), diagnosing shuffle, skew, and spill, and applying fixes: broadcast joins, AQE, repartition strategies, and serialization.
+**What it is:** Reading the Spark UI (DAG, stages, tasks, executor metrics), diagnosing shuffle, skew, and spill, and applying fixes: broadcast joins, AQE, repartition strategies, and serialization. Plus the **platform optimization knobs** the Databricks Runtime exposes on top of open-source Spark — disk caching, dynamic file pruning, low shuffle merge, the cost-based optimizer, range join optimization, and Delta isolation-level tuning (see the "Platform optimization knobs" lessons below).
 
-**Why you need it:** Production pipelines hit performance walls; knowing how to diagnose and fix them in the Spark UI is the most high-ROI advanced skill.
+**Why you need it:** Production pipelines hit performance walls; knowing how to diagnose and fix them in the Spark UI is the most high-ROI advanced skill. Most Databricks Runtime optimizations are auto-on, but knowing *which* exist, *when* each fires, and *which* you can still tune by hand is what separates "the platform is slow" from a concrete fix.
 
 **How to learn it:**
 
@@ -391,6 +391,90 @@ You are ready to advance when you can:
 5. **Reference — DB-DOCS: [Spark UI guide](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide.html)** and **[AQE](https://docs.databricks.com/aws/en/optimizations/aqe.html)**
 
 **Milestone:** You can open a Spark UI, identify a shuffle-heavy stage, apply a broadcast join hint, and explain what AQE's `coalescePartitions` and `skewJoin` do.
+
+#### Platform optimization knobs
+
+The Databricks Runtime layers its own optimizations on top of Apache Spark. Most are **enabled by default in DBR 10.4 LTS+** — you get them for free — but you must know which exist, when each helps, and which still take manual tuning. Source: the [Optimization recommendations](https://docs.databricks.com/aws/en/optimizations) hub ([captured notes](sources/databricks-docs/optimization-recommendations.md)). These six are the gaps the rest of the path doesn't already teach (AQE → above; liquid clustering / predictive optimization → A2; Photon → E1).
+
+##### Lesson 1 — Disk caching (formerly Delta / DBIO cache)
+
+**What it is:** Databricks caches remote Parquet files (incl. Delta) onto worker **local SSDs** in a fast intermediate format, automatically on first read; successive reads of the same data are served locally. Distinct from Spark cache (`.cache()`/`.persist()`, in-memory, manual, any DataFrame/RDD). Disk cache auto-invalidates on file change — no manual cache busting. `CACHE SELECT` is ignored on SQL warehouses and DBR 14.2+ (an enhanced algorithm runs instead).
+
+**When to use it:** Repeated reads of the same Parquet/Delta data — BI dashboards, ad-hoc/interactive analytics, iterative notebook development. The easy path is to pick an **SSD-backed (cache-accelerated) worker type** — those auto-enable and size it (uses ≤ half the local SSD). *Pitfall:* with autoscaling, a decommissioned worker loses its cache → re-reads from source.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Disk caching](https://docs.databricks.com/aws/en/optimizations/disk-cache)** ([captured notes](sources/databricks-docs/disk-cache.md)) — config flags (`spark.databricks.io.cache.enabled`, `.maxDiskUsage`, `.compression.enabled`) and the disk-vs-Spark-cache comparison table.
+2. **Hands-on** (~30 min) — On an SSD-backed cluster, run a heavy scan-and-filter query twice; compare second-run time and check the Storage tab. Toggle `spark.conf.get("spark.databricks.io.cache.enabled")` and re-test.
+
+**Milestone:** You can explain disk cache vs Spark cache (local SSD + automatic vs in-memory + manual), pick a cache-accelerated worker type, and predict the autoscaling cache-loss effect.
+
+##### Lesson 2 — Dynamic file pruning (DFP)
+
+**What it is:** A runtime optimization that pushes a join filter from a small (dimension) table into the scan of a large (fact) table, skipping data files that can't match — *before* reading them. Default-on (`spark.databricks.optimizer.dynamicFilePruning = true`). For `MERGE`/`UPDATE`/`DELETE`, DFP **requires Photon**; for `SELECT`, Photon makes it broader/more reliable (without Photon it may still apply depending on plan shape).
+
+**When to use it:** Automatic — but it only triggers when the probe-side Delta table is **≥ 10 GB** (`deltaTableSizeThreshold`) and **≥ 10 files** (`deltaTableFilesThreshold`). Most effective on **non-partitioned tables / joins on non-partitioned columns**, and the benefit tracks how well-clustered the data is → **pair with liquid clustering** (A2). Star-schema fact×dim joins are the canonical win.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Dynamic file pruning](https://docs.databricks.com/aws/en/optimizations/dynamic-file-pruning)** ([captured notes](sources/databricks-docs/dynamic-file-pruning.md)) — the three config thresholds and the Photon requirement.
+2. **Hands-on** (~30 min) — Join a >10 GB fact table to a filtered small dim; in the Spark UI scan node, read "files pruned" / bytes scanned. Cluster the fact table (A2) and re-measure.
+
+**Milestone:** You can explain what DFP pushes down and when, name the size/file thresholds, state that MERGE/UPDATE/DELETE DFP needs Photon, and explain why liquid clustering amplifies it.
+
+##### Lesson 3 — Low shuffle merge
+
+**What it is:** An optimized `MERGE` implementation (GA, default-on **DBR 10.4 LTS+**) that processes **unmodified** rows in a streamlined, shuffle-free path instead of pushing them through the same shuffles as modified rows. Cuts shuffled data sharply, and **preserves existing data layout** (incl. liquid clustering / Z-order) on unmodified rows on a best-effort basis — reducing the need to re-`OPTIMIZE` after a `MERGE`.
+
+**When to use it:** Automatic on DBR 10.4+ (the `spark.databricks.delta.merge.enableLowShuffle` flag is a no-op there). Nothing to enable — this lesson is about *reasoning*: MERGE rewrites whole files even to change a few rows, so low shuffle merge matters for any frequent-MERGE / CDC / SCD workload. *Caveat:* newly inserted/updated rows still may not be optimally laid out → periodic `OPTIMIZE` on clustered tables is still warranted.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Low shuffle merge](https://docs.databricks.com/aws/en/optimizations/low-shuffle-merge)** ([captured notes](sources/databricks-docs/low-shuffle-merge.md)) — the unmodified-row processing model and layout-preservation caveat.
+2. **Tie-in** — Revisit your I4 CDC / I5 `MERGE INTO` work and explain why repeated merges degrade layout more slowly now.
+
+**Milestone:** You can explain why MERGE rewrites unmodified rows at all, what low shuffle merge changes, and why you might still run `OPTIMIZE` after merges.
+
+##### Lesson 4 — Cost-based optimizer (CBO)
+
+**What it is:** Spark SQL's CBO uses **table + column statistics** to choose better plans — especially join order and strategy — for multi-join queries. Default-on (`spark.sql.cbo.enabled = true`). It's only as good as the stats: collect them with `ANALYZE TABLE … COMPUTE STATISTICS [FOR ALL COLUMNS]`, and refresh after writes. **Predictive optimization runs `ANALYZE` automatically** on UC managed tables (A2) — so on managed tables this is largely handled for you.
+
+**When to use it:** Complex analytical queries with **multiple joins**. Diagnose via `EXPLAIN` — missing `rowCount` means absent stats; **DBR 16.0+** `EXPLAIN` prints a per-table `missing / partial / full` stats summary with a corrective `ANALYZE` command. The Spark SQL UI shows `est:` vs actual rows and the estimation-error factor.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Cost-based optimizer](https://docs.databricks.com/aws/en/optimizations/cbo)** ([captured notes](sources/databricks-docs/cost-based-optimizer.md), with annotated EXPLAIN-plan screenshots) — `ANALYZE`, reading `EXPLAIN` stats, the Spark SQL UI estimate lines.
+2. **Hands-on** (~45 min) — Run a 3-table join with no stats, `EXPLAIN` it (note `est: N/A`), run `ANALYZE TABLE … COMPUTE STATISTICS FOR ALL COLUMNS`, re-`EXPLAIN`, and compare the estimation-error factor in the Spark SQL UI.
+
+**Milestone:** You can collect table/column stats, read an `EXPLAIN` plan to spot missing stats, explain why `rowCount` drives multi-join plans, and state how predictive optimization keeps managed-table stats fresh.
+
+##### Lesson 5 — Range join optimization
+
+**What it is:** Speeds joins whose condition is a **point-in-interval** (`p BETWEEN start AND end`, inequalities) or **interval-overlap** join — otherwise executed as a slow nested loop. It splits the value domain into equal **bins** so only candidates in the same bin are compared. In **Databricks SQL it's automatic** (the optimal bin size is derived by sampling); elsewhere you tune it with a `/*+ RANGE_JOIN(relation, binSize) */` hint or `spark.databricks.optimizer.rangeJoin.binSize`. Applies to numeric/`DATE`/`TIMESTAMP` columns of the same type, `INNER` (or specific `OUTER`) joins.
+
+**When to use it:** Slow joins on time windows, IP/number ranges, point-in-polygon/geo bucketing, "event falls within interval" lookups. *Pitfall:* if a numeric **equality** key sits alongside the range condition, the optimizer may bin it and hurt performance — **cast equality keys to `STRING`** to exclude them. For `DATE`, bin size = days; for `TIMESTAMP`, = seconds (fractions allowed). Choose bin size from the interval-length distribution (`APPROX_PERCENTILE`), starting near the 90th percentile.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Range join optimization](https://docs.databricks.com/aws/en/optimizations/range-join)** ([captured notes](sources/databricks-docs/range-join.md)) — the hint/session syntax, the `APPROX_PERCENTILE` bin-size method, and the numeric-equality-key pitfall.
+2. **Hands-on** (~1 hr) — Join an events table to a time-windows table with a `BETWEEN`; measure runtime, add `/*+ RANGE_JOIN(windows, 60) */`, re-measure, then tune bin size via the percentile query.
+
+**Milestone:** You can recognize a range join, add a `RANGE_JOIN` hint with a sensible bin size, explain how binning prunes candidates, and apply the cast-equality-key-to-`STRING` fix.
+
+##### Lesson 6 — Delta isolation levels (opt-in write-serializable tuning)
+
+**What it is:** Delta gives ACID guarantees with two isolation levels — **`WriteSerializable` (default)** and **`Serializable` (stricter)**. WriteSerializable allows slightly more concurrency; Serializable guarantees read-serializability at the cost of throughput on concurrent writes. Set per table: `ALTER TABLE … SET TBLPROPERTIES ('delta.isolationLevel' = 'Serializable')`. **Row-level concurrency** (tied to deletion vectors + row tracking, see [[liquid-clustering]]) reduces conflicts independently of the level.
+
+**When to use it:** Stick with the default `WriteSerializable` for almost everything — only raise to `Serializable` when an application genuinely needs read-serializability. *Pitfall:* metadata changes (protocol, table properties, schema) make **all concurrent writes fail** and **break streaming reads** until restarted — relevant whenever you flip this property on a live table.
+
+**How to learn it:**
+
+1. **Reference — DB-DOCS: [Isolation levels and write conflicts](https://docs.databricks.com/aws/en/optimizations/isolation-level)** ([captured notes](sources/databricks-docs/isolation-levels.md)) plus the captured [transactions](sources/databricks-docs/transactions.md) note for the broader concurrency/conflict model.
+2. **Tie-in** — Connect to B4/I5: explain why a multi-writer pipeline rarely needs `Serializable` and what conflict it would actually prevent.
+
+**Milestone:** You can explain `WriteSerializable` vs `Serializable`, set the table property, predict the concurrent-write/streaming impact of the metadata change, and state when row-level concurrency makes the level moot.
+
+> ⚠️ **Deprecated — skip:** **Bloom filter indexes** are deprecated on Databricks. The docs say use **predictive I/O** (SQL warehouse Pro/Serverless, see [[sql-warehouse-types]]) or **liquid clustering** (A2) instead. Know the name only so you recognize it in old material; don't build new tables around it.
 
 ---
 

@@ -98,6 +98,15 @@ nav = [
                 { "SQL Hints: Join, Partition, Skew" = "sources/databricks-docs/sql-join-hints.md" },
                 { "Adaptive Query Execution (AQE)" = "sources/databricks-docs/aqe.md" },
             ]},
+            { "Optimization & Performance" = [
+                { "Optimization recommendations (hub)" = "sources/databricks-docs/optimization-recommendations.md" },
+                { "Disk caching" = "sources/databricks-docs/disk-cache.md" },
+                { "Dynamic file pruning" = "sources/databricks-docs/dynamic-file-pruning.md" },
+                { "Low shuffle merge" = "sources/databricks-docs/low-shuffle-merge.md" },
+                { "Cost-based optimizer (CBO)" = "sources/databricks-docs/cost-based-optimizer.md" },
+                { "Range join optimization" = "sources/databricks-docs/range-join.md" },
+                { "Isolation levels & write conflicts" = "sources/databricks-docs/isolation-levels.md" },
+            ]},
             { "Tables & SQL" = [
                 { "Tables concepts" = "sources/databricks-docs/tables-concepts.md" },
                 { "Unity Catalog managed tables" = "sources/databricks-docs/managed-tables.md" },
