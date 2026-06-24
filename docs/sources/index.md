@@ -96,6 +96,7 @@ Course notebooks and external sources captured as structured notes.
 | [Adaptive Query Execution (AQE)](databricks-docs/aqe.md) | documentation | 2026-06-18 | spark, aqe, performance, optimization, broadcast, skew, shuffle, partitioning, B2, B8, B16 |
 | [Databricks tables concepts](databricks-docs/tables-concepts.md) | documentation | 2026-06-22 | tables, unity-catalog, managed, external, foreign, temporary, delta, iceberg, permissions, B4 |
 | [Unity Catalog managed tables](databricks-docs/managed-tables.md) | documentation | 2026-06-23 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, catalog-commits, undrop, recovery-period, B4 |
+| [Unity Catalog external tables](databricks-docs/external-tables.md) | documentation | 2026-06-24 | tables, unity-catalog, external, delta, external-location, storage-credential, drop-table, repair-table, B4 |
 | [Convert an external Delta table to managed](databricks-docs/convert-external-managed.md) | documentation | 2026-06-23 | tables, unity-catalog, managed, external, set-managed, migration, uniform, path-based-redirect, streaming, B4 |
 | [Specify a managed storage location in Unity Catalog](databricks-docs/managed-storage.md) | documentation | 2026-06-23 | unity-catalog, managed-storage, storage-location, external-location, catalog, schema, metastore, volumes, B1, B4 |
 | [Catalog commits](databricks-docs/catalog-commits.md) | documentation | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, catalog-commits, transactions, external-access, streaming, B4 |
@@ -103,6 +104,7 @@ Course notebooks and external sources captured as structured notes.
 | [Predictive optimization](databricks-docs/predictive-optimization.md) | documentation | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, optimize, vacuum, analyze, serverless, system-tables, B4, B5 |
 | [Use liquid clustering for tables](databricks-docs/liquid-clustering.md) | documentation | 2026-06-24 | tables, delta, iceberg, liquid-clustering, cluster-by, optimize, zorder, partitioning, automatic-clustering, A2, I5 |
 | [Access Databricks data using external systems](databricks-docs/external-access.md) | documentation | 2026-06-24 | unity-catalog, external-access, iceberg-rest-catalog, unity-rest-api, credential-vending, compatibility-mode, opensharing, A7, I8, B4 |
+| [Data governance with Databricks (UC hub)](databricks-docs/data-governance-hub.md) | documentation | 2026-06-24 | data-governance, unity-catalog, access-control, abac, lineage, data-quality-monitoring, opensharing, clean-rooms, marketplace, audit, system-tables, I7, E2, A6, A7 |
 | [Optimization recommendations (hub)](databricks-docs/optimization-recommendations.md) | documentation | 2026-06-24 | optimization, performance, databricks-runtime, hub, A1 |
 | [Disk caching (Delta/DBIO cache)](databricks-docs/disk-cache.md) | documentation | 2026-06-24 | optimization, disk-cache, delta-cache, ssd, caching, A1 |
 | [Dynamic file pruning](databricks-docs/dynamic-file-pruning.md) | documentation | 2026-06-24 | optimization, dynamic-file-pruning, dfp, join, photon, A1 |

@@ -110,6 +110,7 @@ nav = [
             { "Tables & SQL" = [
                 { "Tables concepts" = "sources/databricks-docs/tables-concepts.md" },
                 { "Unity Catalog managed tables" = "sources/databricks-docs/managed-tables.md" },
+                { "Unity Catalog external tables" = "sources/databricks-docs/external-tables.md" },
                 { "Convert external table to managed" = "sources/databricks-docs/convert-external-managed.md" },
                 { "Managed storage location in UC" = "sources/databricks-docs/managed-storage.md" },
                 { "Catalog commits" = "sources/databricks-docs/catalog-commits.md" },
@@ -117,6 +118,7 @@ nav = [
                 { "Predictive optimization" = "sources/databricks-docs/predictive-optimization.md" },
                 { "Liquid clustering" = "sources/databricks-docs/liquid-clustering.md" },
                 { "External access from outside systems" = "sources/databricks-docs/external-access.md" },
+                { "Data governance (UC hub)" = "sources/databricks-docs/data-governance-hub.md" },
             ]},
         ]},
         { "Databricks Blog" = [
