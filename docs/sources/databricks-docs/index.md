@@ -95,5 +95,6 @@ Grouped by topic. Nav mirrors these groups.
 | [Automatic upgrades for managed tables](automatic-upgrades.md) | 2026-06-24 | tables, unity-catalog, managed, automatic-upgrades, table-features, observation-window, verified-workloads, row-tracking, catalog-commits, checkpoint-v2, column-mapping, change-data-feed, B4, A2 |
 | [Change data feed (CDF)](change-data-feed.md) | 2026-06-24 | tables, delta, iceberg, change-data-feed, cdf, table_changes, readChangeFeed, row-tracking, structured-streaming, incremental-etl, cdc, gdpr, I5, I4, A4 |
 | [Column mapping (rename & drop columns)](column-mapping.md) | 2026-06-24 | tables, delta, column-mapping, rename-column, drop-column, schema-evolution, delta-protocol, streaming, schema-tracking-location, uniform, I5, A4 |
+| [Row tracking](row-tracking.md) | 2026-06-24 | tables, delta, iceberg, row-tracking, row-id, row-commit-version, row-lineage, delta-protocol, materialized-views, change-data-feed, I5 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*
