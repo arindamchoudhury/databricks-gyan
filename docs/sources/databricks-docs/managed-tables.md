@@ -76,8 +76,14 @@ USING iceberg;
 
 - **`USING iceberg` is required** for Iceberg — default is Delta.
 - For managed Iceberg, Databricks periodically runs **serverless** metadata-optimization jobs; that compute gets `MODIFY` scoped to the table only for the job duration and only writes metadata.
-- Other create patterns: `CREATE TABLE [USING]`, `CREATE TABLE LIKE`, file upload, CTAS / DataFrame writes.
 - **Clone**: managed Delta supports deep + shallow clone; managed Iceberg supports **deep only**.
+
+You can also create managed tables from query results or DataFrame write operations. Patterns the docs cross-link (each is its own article):
+
+- **[`CREATE TABLE [USING]`](https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-ddl-create-table-using)** — explicit DDL with column spec / `USING` format (above).
+- **[`CREATE TABLE LIKE`](https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-ddl-create-table-like)** — copy another table's schema (and clustering config) without data.
+- **[Create or modify a table using file upload](https://docs.databricks.com/aws/en/ingestion/create-or-modify-table)** — UI-driven create from an uploaded CSV/TSV/JSON/Avro/Parquet file.
+- **CTAS / DataFrame writes** — `CREATE TABLE … AS SELECT`, or `df.write.saveAsTable(...)` / `.writeTo(...)`.
 
 ### Drop a managed table
 
