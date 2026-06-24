@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/compute/use-compute](https://docs.databricks.com/aws/en/compute/use-compute)
 > **Added:** 2026-06-16
-> **Source updated:** 2026-06-15
+> **Source updated:** 2026-03-25
 > **Tags:** compute, classic-compute, access-modes, permissions, clusters, B1
 > **Type:** documentation
 

@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-rewriting-data](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/spark-rewriting-data)
 > **Added:** 2026-06-17
-> **Source updated:** (not shown on page)
+> **Source updated:** 2024-04-15
 > **Tags:** spark, spark-ui, debugging, delta, merge, delete, update, rewriting, B2, B12, B16
 > **Type:** documentation
 

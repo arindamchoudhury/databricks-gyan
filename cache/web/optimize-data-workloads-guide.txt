@@ -1,7 +1,6 @@
 EBOOK
 
 Comprehensive Guide to Optimize Databricks, Spark and Delta Lake Workloads
-Skip to main content
 Introduction
 Delta Lake — The Lakehouse Format
 Underlying Data Layout

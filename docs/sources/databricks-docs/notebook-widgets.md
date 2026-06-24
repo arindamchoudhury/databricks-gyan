@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/widgets](https://docs.databricks.com/aws/en/notebooks/widgets)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, widgets, parameters, sql, python, scala, R, dashboards, B1
 > **Type:** documentation
 

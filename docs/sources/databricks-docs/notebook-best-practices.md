@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/best-practices](https://docs.databricks.com/aws/en/notebooks/best-practices)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, best-practices, git, testing, CI-CD, modularization, jobs, B1
 > **Type:** documentation
 

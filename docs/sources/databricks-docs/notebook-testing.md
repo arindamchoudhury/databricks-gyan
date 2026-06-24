@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/testing](https://docs.databricks.com/aws/en/notebooks/testing)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2025-01-21
 > **Tags:** notebooks, testing, pytest, testthat, scalatest, sql, CI-CD, B1
 > **Type:** documentation
 

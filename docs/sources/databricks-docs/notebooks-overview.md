@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/](https://docs.databricks.com/aws/en/notebooks/)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, python, sql, scala, R, EDA, ML, collaboration, B1
 > **Type:** documentation
 

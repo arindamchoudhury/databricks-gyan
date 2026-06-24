@@ -1,5 +1,5 @@
 Data engineeringLakeflow Spark Declarative PipelinesConfigure pipelinesComputeServerless
-Last updated on Jun 15, 2026
+Last updated on Jun 22, 2026
 Configure a serverless pipeline
 
 Serverless pipelines run Lakeflow Spark Declarative Pipelines on Databricks-managed compute, removing most infrastructure configuration.
@@ -8,7 +8,7 @@ Databricks recommends developing new pipelines using serverless. Some workloads 
 
 NOTE
 Serverless pipelines always use Unity Catalog. See Use Unity Catalog with pipelines.
-For serverless compute limitations, see Serverless compute limitations.
+For serverless compute limitations, see Serverless compute limitations. The Structured Streaming trigger limitations described there do not apply to Lakeflow Spark Declarative Pipelines pipeline modes. Serverless pipelines support triggered, continuous, and real-time modes. See Triggered vs. continuous pipeline mode.
 You cannot manually add compute settings in a clusters object in the JSON configuration for a serverless pipeline. Attempting to do so results in an error.
 If you need to use an AWS PrivateLink connection with your serverless Lakeflow Spark Declarative Pipelines, contact your Databricks representative.
 Requirements​

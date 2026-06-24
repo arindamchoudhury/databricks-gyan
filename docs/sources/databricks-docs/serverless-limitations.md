@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/compute/serverless/limitations](https://docs.databricks.com/aws/en/compute/serverless/limitations)
 > **Added:** 2026-06-16
-> **Source updated:** 2026-05-20
+> **Source updated:** 2026-06-18
 > **Tags:** serverless, limitations, streaming, caching, udfs, notebooks, jobs, pipelines, B1, I5, I6
 > **Type:** documentation
 
@@ -20,6 +20,7 @@ Central reference for all serverless compute limitations across notebooks, jobs,
 - **No Maven coordinates, no global temp views, no Databricks Container Services.**
 - **No compute policies, no init scripts, no instance pools, no environment variables.**
 - ANSI SQL is on by default; opt out with `spark.sql.ansi.enabled = false`.
+- **Max runtime 7 days** — serverless compute terminates runs past 7 days with no retry; split long workloads or use classic compute.
 
 ## Notes
 
@@ -71,7 +72,7 @@ Only two triggers supported:
 
 > ⚠️ Default Spark behavior uses `Trigger.ProcessingTime("0 seconds")` — **must be overridden** on serverless. Use `Trigger.AvailableNow()` instead. For continuous workloads: use triggered pipeline mode or `AvailableNow` with continuous job execution.
 
-All standard access mode streaming limitations also apply.
+For continuous workloads the page now points to a decision guide ("Streaming on serverless compute") mapping use cases to the right serverless product. All standard access mode streaming limitations also apply.
 
 ### Notebooks
 
@@ -92,6 +93,7 @@ All standard access mode streaming limitations also apply.
   spark.conf.set("spark.databricks.execution.timeout", <seconds>)
   ```
   (Compare: serverless *notebooks* default to 2.5 hr timeout — see [[serverless-notebooks]].)
+- **Maximum runtime 7 days** — runs exceeding 7 days are terminated by the platform and **not retried**. Break long workloads into smaller runs or use classic compute. *(New as of 2026-06-18.)*
 
 ### Compute
 

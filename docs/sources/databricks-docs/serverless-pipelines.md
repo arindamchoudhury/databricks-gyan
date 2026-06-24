@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/ldp/serverless](https://docs.databricks.com/aws/en/ldp/serverless)
 > **Added:** 2026-06-16
-> **Source updated:** 2026-06-15
+> **Source updated:** 2026-06-22
 > **Tags:** serverless, pipelines, lakeflow, ldp, dlt, compute, performance-modes, I5
 > **Type:** documentation
 
@@ -15,7 +15,8 @@ Serverless pipelines run Lakeflow Spark Declarative Pipelines (formerly Delta Li
 - **Prerequisite:** Unity Catalog enabled workspace; no cluster creation permission required.
 - Databricks recommends serverless for all **new** pipeline development. Exception: some workloads require classic compute or the legacy Hive metastore.
 - **Existing cluster config is wiped** when serverless is enabled — cannot add compute via `clusters` in JSON.
-- Two performance modes for triggered pipelines: **Standard** (lower DBU, 4–6 min startup) and **Performance Optimized** (faster, higher DBU).
+- Pipeline modes: **triggered, continuous, and real-time** — all supported on serverless. The Structured Streaming *trigger* limitations from [[serverless-limitations]] (AvailableNow/Once only) **do not apply** to pipeline modes.
+- Two performance modes for triggered pipelines: **Standard** (lower DBU, 4–6 min startup) and **Performance Optimized** (faster, higher DBU). Standard mode on *continuous* pipelines requires contacting your Databricks account team.
 - Three exclusive serverless features: **incremental refresh** (with full-refresh fallback), **stream pipelining** (concurrent microbatches, on by default), **vertical autoscaling** (adds to horizontal autoscaling).
 - AWS PrivateLink requires contacting Databricks.
 
@@ -32,7 +33,7 @@ Serverless pipelines run Lakeflow Spark Declarative Pipelines (formerly Delta Li
 
 Serverless pipelines support these settings:
 
-- **Pipeline mode** — Continuous (for production) or Triggered.
+- **Pipeline mode** — Triggered, Continuous (for production), or Real-time. Unlike serverless notebooks/jobs, the Structured Streaming trigger restrictions in [[serverless-limitations]] do **not** apply to these pipeline modes.
 - **Notifications** — email alerts on pipeline success/failure.
 - **Configuration field** — key-value pairs; referenceable in source code and usable for Spark configuration.
 - **Preview channel** — test against pending runtime changes before they reach GA.
@@ -48,7 +49,7 @@ Serverless pipelines support these settings:
 4. Check **Serverless**.
 5. Click **Save**.
 
-> ⚠️ "When you enable serverless, any compute settings you have configured for a pipeline are removed." Any `clusters` config in the pipeline JSON is discarded.
+> ⚠️ "When you enable serverless, any compute settings you have configured for a pipeline are removed." Any `clusters` config in the pipeline JSON is discarded. If you later switch back to non-serverless, you must reconfigure the compute settings from scratch.
 
 ### Performance modes (triggered pipelines only)
 
@@ -59,7 +60,7 @@ Identical SKU for both modes; difference is startup latency and DBU consumption:
 | **Standard** | 4–6 min | Lower | Cost-sensitive, latency-tolerant pipelines |
 | **Performance Optimized** | Fast | Higher | Time-sensitive, SLA-bound pipelines |
 
-> 💡 Same two modes as [[serverless-jobs]] — identical names, identical trade-off, same SKU. Continuous pipelines don't have a startup-latency concern, so mode selection is more relevant for triggered pipelines.
+> 💡 Same two modes as [[serverless-jobs]] — identical names, identical trade-off, same SKU. Performance mode is selected per *triggered* pipeline via the **Performance optimized** toggle in the scheduler (off = standard). To use **standard** mode on *continuous* pipelines you must reach out to your Databricks account team.
 
 ### Serverless-exclusive features
 
@@ -75,7 +76,7 @@ Query the **billable usage system table** to track serverless pipeline DBU consu
 
 ## Open questions
 
-- ❓ Can Performance Optimized mode be set for continuous pipelines, or only triggered?
+- ✅ *(Resolved 2026-06-22)* Performance mode is selected via the **Performance optimized** toggle on *triggered* pipelines. Continuous pipelines default to performance-optimized; using **standard** mode on continuous pipelines requires contacting the Databricks account team.
 - ❓ What Python dependency installation mechanism is supported if `restartPython()` is unavailable? (Page links to environment settings but doesn't detail it.)
 - ❓ Which regions support serverless compute for pipelines?
 

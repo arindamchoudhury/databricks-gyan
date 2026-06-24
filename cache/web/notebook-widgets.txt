@@ -213,6 +213,10 @@ Configure widget settings
 Databricks widgets in dashboards
 Use Databricks widgets with %run
 Limitations
+Was this page helpful?
+Yes
+No
+Send feedback
 
 
 

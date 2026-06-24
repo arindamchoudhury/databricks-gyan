@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/ipywidgets](https://docs.databricks.com/aws/en/notebooks/ipywidgets)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2024-06-27
 > **Tags:** notebooks, ipywidgets, python, interactive, visualization, B1
 > **Type:** documentation
 

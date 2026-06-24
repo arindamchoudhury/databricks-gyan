@@ -2,7 +2,7 @@
 
 > **Source:** [https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-qry-select-hints](https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-qry-select-hints)
 > **Added:** 2026-06-18
-> **Source updated:** (date not shown on page)
+> **Source updated:** 2026-06-18
 > **Tags:** spark, sql, join-hints, broadcast, shuffle, partitioning, performance, optimization, B2, B8
 > **Type:** documentation
 

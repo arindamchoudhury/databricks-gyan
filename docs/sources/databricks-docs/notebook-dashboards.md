@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/dashboards](https://docs.databricks.com/aws/en/notebooks/dashboards)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, dashboards, visualization, AI-BI, scheduling, sharing, B1
 > **Type:** documentation
 

@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/debugger](https://docs.databricks.com/aws/en/notebooks/debugger)
 > **Added:** 2026-06-14
-> **Source updated:** 2026-04-13
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, debugging, variable-explorer, python, B1
 > **Type:** documentation
 
@@ -49,7 +49,8 @@ Three ways to start, plus a post-error path:
 ### Debugging actions
 
 - **Breakpoints:** click the **cell gutter** to add/remove. Execution pauses *before* the breakpointed line.
-- Toolbar lets you set/remove breakpoints, view variable values, **step through** code, and **step into / out of** a function.
+- Toolbar lets you set/remove breakpoints, view variable values, **step through** code, **step into / out of** a function, and locate the line where execution is stopped.
+- Stepping through a function shows its local variables in the variable pane, marked **`[local]`**.
 
 [![Adding and removing breakpoints in the cell gutter](assets/notebook-debugger/01-breakpoints.gif)](assets/notebook-debugger/01-breakpoints.gif)
 
@@ -62,12 +63,15 @@ Three ways to start, plus a post-error path:
 
 > ⚠️ **Limitation:** "The debugger can only step into functions defined in files in the workspace. Stepping into Python libraries or other notebooks is not yet supported."
 
+> 💡 **Stale-module gotcha (new 2026-06-16):** if you edit an external file after it's imported, the session may keep using the old module. Use **autoreload** for Python modules on **DBR 18.0+** or **serverless environment version 4+** so edits to imported modules take effect during debugging.
+
 ### Debug console
 
 - Appears automatically at the bottom when paused; runs Python in the current frame.
 - **Enter** = run single-line code; **Shift + Enter** = multi-line.
 - **15-second timeout** on console execution.
-- Does **not** support the `display` command.
+- Does **not** support the `display` command — to view sample data use `df.show()` (PySpark) or `df.head()` (Pandas).
+- Code in the **main notebook does not run** during a debug session; only console code executes.
 
 [![Debug console running code in the current frame while paused at a breakpoint](assets/notebook-debugger/03-debug-console.gif)](assets/notebook-debugger/03-debug-console.gif)
 

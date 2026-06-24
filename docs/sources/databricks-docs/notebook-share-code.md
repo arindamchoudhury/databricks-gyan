@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/notebooks/share-code](https://docs.databricks.com/aws/en/notebooks/share-code)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-06-17
+> **Source updated:** 2026-06-16
 > **Tags:** notebooks, workspace-files, modularization, python, git, B1
 > **Type:** documentation
 

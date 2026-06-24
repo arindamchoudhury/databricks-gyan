@@ -10,11 +10,6 @@ If you're doing a Delete or Update operation, look at the amount of data being w
 
 If you're doing a merge, the merge node has explicit statistics about how much data it's rewriting.
 
-Was this page helpful?
-Yes
-No
-Send feedback
-
 === Images ===
 
 ![](https://docs.databricks.com/aws/en/assets/images/stage-to-sql-f7ba3852d36180fe8773828781cc1a1d.png)

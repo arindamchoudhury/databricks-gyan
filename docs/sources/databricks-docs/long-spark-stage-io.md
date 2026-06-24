@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-io](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-io)
 > **Added:** 2026-06-17
-> **Source updated:** (not shown on page)
+> **Source updated:** 2026-06-11
 > **Tags:** spark, spark-ui, performance, debugging, I/O, shuffle, delta-cache, photon, liquid-clustering, deletion-vectors, B2, B16
 > **Type:** documentation
 

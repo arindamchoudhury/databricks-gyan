@@ -120,7 +120,11 @@ def probe_url(url: str) -> None:
 
 def get_live_date(url: str) -> str | None:
     """Return ISO date from live page, None if not found, or 'ERROR: ...'."""
-    # 1. Static HTTP — fast, works for plain-HTML sites
+    # 1. Static HTTP — fast, works for plain-HTML sites.
+    # A failure here (e.g. SSL cert rewritten by a local AV/proxy such as
+    # Norton) must NOT abort: fall through to the Playwright path, which uses
+    # the browser's own trust store. Remember the error only as a last resort.
+    static_err = None
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as resp:
@@ -129,11 +133,11 @@ def get_live_date(url: str) -> str | None:
         if date:
             return date
     except Exception as exc:
-        return f"ERROR: {str(exc)[:70]}"
+        static_err = f"ERROR: {str(exc)[:70]}"
 
     # 2. Playwright — for JS-rendered pages (e.g. Databricks docs / Next.js)
     if not PLAYWRIGHT_AVAILABLE:
-        return None  # caller will set status NO-PLAYWRIGHT
+        return static_err  # surface the static error if we can't fall back
     try:
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=True)

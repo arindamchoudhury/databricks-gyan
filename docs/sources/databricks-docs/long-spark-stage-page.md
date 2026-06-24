@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-page](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/long-spark-stage-page)
 > **Added:** 2026-06-17
-> **Source updated:** (not shown on page)
+> **Source updated:** 2024-04-19
 > **Tags:** spark, spark-ui, performance, debugging, skew, spill, memory, shuffle, B2, B16
 > **Type:** documentation
 

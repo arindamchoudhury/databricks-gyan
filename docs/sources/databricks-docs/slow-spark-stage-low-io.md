@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/slow-spark-stage-low-io)
 > **Added:** 2026-06-17
-> **Source updated:** (not shown on page)
+> **Source updated:** 2026-03-06
 > **Tags:** spark, spark-ui, performance, debugging, small-files, UDF, cartesian-join, explode, DAG, B2, B16
 > **Type:** documentation
 

@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide)
 > **Added:** 2026-06-17
-> **Source updated:** 2026-03-06
+> **Source updated:** 2024-04-19
 > **Tags:** spark, spark-ui, performance, optimization, debugging, skew, spill, stages, tasks, B2, B16
 > **Type:** documentation
 

@@ -32,6 +32,10 @@ On this page
 Using this guide
 How to open the Spark UI
 Next step
+Was this page helpful?
+Yes
+No
+Send feedback
 
 === Images ===
 

@@ -2,7 +2,7 @@
 
 > **Source:** [docs.databricks.com/aws/en/optimizations/spark-ui-guide/failing-spark-jobs](https://docs.databricks.com/aws/en/optimizations/spark-ui-guide/failing-spark-jobs)
 > **Added:** 2026-06-17
-> **Source updated:** (not shown on page)
+> **Source updated:** 2026-03-06
 > **Tags:** spark, spark-ui, debugging, executors, memory, spot-instances, autoscaling, B2, B16
 > **Type:** documentation
 

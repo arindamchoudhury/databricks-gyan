@@ -181,3 +181,7 @@ Join hint types
 Examples
 Skew hints
 Related statements
+Was this page helpful?
+Yes
+No
+Send feedback

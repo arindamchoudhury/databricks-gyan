@@ -72,6 +72,10 @@ Writing a lot of small files
 Slow UDFs
 Cartesian join
 Exploding join or explode
+Was this page helpful?
+Yes
+No
+Send feedback
 
 === Images ===
 

@@ -262,10 +262,6 @@ pytest
 testthat
 ScalaTest
 SQL
-Was this page helpful?
-Yes
-No
-Send feedback
 
 
 
