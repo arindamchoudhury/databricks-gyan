@@ -7,10 +7,18 @@ Notes captured from individual Databricks official documentation pages. One file
 
 ## Pages captured
 
+Grouped by topic. Nav mirrors these groups.
+
+### Platform & Architecture
+
 | Page | Added | Tags |
 |---|---|---|
 | [High-level architecture](high-level-architecture.md) | 2026-06-20 | architecture, control-plane, compute-plane, account, workspace, unity-catalog, serverless, classic, B1 |
-| [Debug notebooks (interactive debugger)](notebook-debugger.md) | 2026-06-14 | notebooks, debugging, variable-explorer, B1 |
+
+### Compute
+
+| Page | Added | Tags |
+|---|---|---|
 | [Serverless compute for notebooks](serverless-notebooks.md) | 2026-06-15 | serverless, notebooks, query-insights, B1 |
 | [Serverless compute for Lakeflow Jobs](serverless-jobs.md) | 2026-06-15 | serverless, jobs, lakeflow, workflows, I6 |
 | [Serverless compute for Lakeflow Pipelines](serverless-pipelines.md) | 2026-06-16 | serverless, pipelines, lakeflow, ldp, dlt, I5 |
@@ -24,6 +32,12 @@ Notes captured from individual Databricks official documentation pages. One file
 | [SQL warehouse types](sql-warehouse-types.md) | 2026-06-16 | compute, sql-warehouse, serverless, photon, predictive-io, IWM, B1 |
 | [Photon](photon.md) | 2026-06-16 | compute, photon, performance, vectorized, sql-warehouse, B1 |
 | [Lakeguard](lakeguard.md) | 2026-06-16 | compute, lakeguard, security, isolation, standard-compute, spark-connect, B1 |
+
+### Notebooks
+
+| Page | Added | Tags |
+|---|---|---|
+| [Debug notebooks (interactive debugger)](notebook-debugger.md) | 2026-06-14 | notebooks, debugging, variable-explorer, B1 |
 | [Notebooks Overview](notebooks-overview.md) | 2026-06-17 | notebooks, python, sql, scala, R, EDA, ML, collaboration, B1 |
 | [Dashboards in Notebooks](notebook-dashboards.md) | 2026-06-17 | notebooks, dashboards, visualization, AI-BI, scheduling, sharing, B1 |
 | [Unit Testing in Notebooks](notebook-testing.md) | 2026-06-17 | notebooks, testing, pytest, testthat, scalatest, sql, CI-CD, B1 |
@@ -32,6 +46,11 @@ Notes captured from individual Databricks official documentation pages. One file
 | [ipywidgets in Notebooks](notebook-ipywidgets.md) | 2026-06-17 | notebooks, ipywidgets, python, interactive, visualization, B1 |
 | [Share Code Between Notebooks (Workspace Files)](notebook-share-code.md) | 2026-06-17 | notebooks, workspace-files, modularization, python, git, B1 |
 | [Notebook Best Practices (Software Engineering)](notebook-best-practices.md) | 2026-06-17 | notebooks, best-practices, git, testing, CI-CD, modularization, jobs, B1 |
+
+### Performance & Spark UI
+
+| Page | Added | Tags |
+|---|---|---|
 | [Spark UI Guide (diagnose cost and performance)](spark-ui-guide.md) | 2026-06-17 | spark, spark-ui, performance, optimization, debugging, skew, spill, stages, tasks, B2, B16 |
 | [Optimize Databricks, Spark and Delta Lake Workloads (guide)](optimize-data-workloads-guide.md) | 2026-06-17 | spark, performance, optimization, delta-lake, shuffle, skew, spill, merge, vacuum, caching, photon, B2, B5, B12, B16, B17 |
 | [Failing Jobs or Executors Removed](failing-spark-jobs.md) | 2026-06-17 | spark, spark-ui, debugging, executors, memory, spot-instances, autoscaling, B2, B16 |
@@ -45,5 +64,16 @@ Notes captured from individual Databricks official documentation pages. One file
 | [Losing Spot Instances](losing-spot-instances.md) | 2026-06-17 | spark, spark-ui, debugging, spot-instances, AWS, executors, B2, B16 |
 | [SQL Hints: Join, Partition, and Skew](sql-join-hints.md) | 2026-06-18 | spark, sql, join-hints, broadcast, shuffle, partitioning, performance, optimization, B2, B8 |
 | [Adaptive Query Execution (AQE)](aqe.md) | 2026-06-18 | spark, aqe, performance, optimization, broadcast, skew, shuffle, partitioning, B2, B8, B16 |
+
+### Tables & SQL
+
+| Page | Added | Tags |
+|---|---|---|
+| [Databricks tables concepts](tables-concepts.md) | 2026-06-22 | tables, unity-catalog, managed, external, foreign, temporary, delta, iceberg, permissions, B4 |
+| [Unity Catalog managed tables](managed-tables.md) | 2026-06-23 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, catalog-commits, undrop, recovery-period, B4 |
+| [Convert an external Delta table to managed](convert-external-managed.md) | 2026-06-23 | tables, unity-catalog, managed, external, set-managed, migration, uniform, path-based-redirect, streaming, B4 |
+| [Specify a managed storage location in Unity Catalog](managed-storage.md) | 2026-06-23 | unity-catalog, managed-storage, storage-location, external-location, catalog, schema, metastore, volumes, B1, B4 |
+| [Catalog commits](catalog-commits.md) | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, catalog-commits, transactions, external-access, streaming, B4 |
+| [Transactions](transactions.md) | 2026-06-24 | tables, unity-catalog, transactions, acid, catalog-commits, isolation, concurrency, atomic, rollback, B4 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*

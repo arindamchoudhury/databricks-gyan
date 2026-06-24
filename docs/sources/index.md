@@ -94,3 +94,9 @@ Course notebooks and external sources captured as structured notes.
 | [Losing Spot Instances](databricks-docs/losing-spot-instances.md) | documentation | 2026-06-17 | spark, spark-ui, debugging, spot-instances, AWS, executors, B2, B16 |
 | [SQL Hints: Join, Partition, and Skew](databricks-docs/sql-join-hints.md) | documentation | 2026-06-18 | spark, sql, join-hints, broadcast, shuffle, partitioning, performance, optimization, B2, B8 |
 | [Adaptive Query Execution (AQE)](databricks-docs/aqe.md) | documentation | 2026-06-18 | spark, aqe, performance, optimization, broadcast, skew, shuffle, partitioning, B2, B8, B16 |
+| [Databricks tables concepts](databricks-docs/tables-concepts.md) | documentation | 2026-06-22 | tables, unity-catalog, managed, external, foreign, temporary, delta, iceberg, permissions, B4 |
+| [Unity Catalog managed tables](databricks-docs/managed-tables.md) | documentation | 2026-06-23 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, catalog-commits, undrop, recovery-period, B4 |
+| [Convert an external Delta table to managed](databricks-docs/convert-external-managed.md) | documentation | 2026-06-23 | tables, unity-catalog, managed, external, set-managed, migration, uniform, path-based-redirect, streaming, B4 |
+| [Specify a managed storage location in Unity Catalog](databricks-docs/managed-storage.md) | documentation | 2026-06-23 | unity-catalog, managed-storage, storage-location, external-location, catalog, schema, metastore, volumes, B1, B4 |
+| [Catalog commits](databricks-docs/catalog-commits.md) | documentation | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, catalog-commits, transactions, external-access, streaming, B4 |
+| [Transactions](databricks-docs/transactions.md) | documentation | 2026-06-24 | tables, unity-catalog, transactions, acid, catalog-commits, isolation, concurrency, atomic, rollback, B4 |

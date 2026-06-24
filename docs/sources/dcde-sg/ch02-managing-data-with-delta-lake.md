@@ -216,8 +216,21 @@ Once Alice's write finishes, Delta appends `002.json` marking `part4` as added.
 >
 > - **Reads → snapshot isolation, always.** A query pins the table version at its start; writes committed afterward (and any in-flight write) are invisible. Comparable to SQL Server `SNAPSHOT` / PostgreSQL `REPEATABLE READ`, which are also snapshot-based.
 > - **Writes → optimistic concurrency control**, with the level set by the `delta.isolationLevel` table property:
->     - **`WriteSerializable`** *(default)* — only *write* operations are serializable. Higher concurrency, but a reader can momentarily observe a table state that "never existed" in the linear history (e.g. a blind append reordered relative to another write).
+>     - **`WriteSerializable`** *(default)* — only *write* operations are serializable. Higher concurrency, but a reader can observe a table state that "doesn't exist in the log" — the *logical* order may differ from the *history* order.
 >     - **`Serializable`** *(strongest)* — writes *and* reads conform to one serial history; a reader never sees a state absent from the log.
+>
+> **Canonical example — concurrent DELETE + INSERT, both start at v0:**
+> ```
+> t0: deleteTxn_START
+> t1: insertTxn_START
+> t2: insertTxn_COMMIT(v1)
+> t3: deleteTxn_COMMIT(v2)
+> ```
+> deleteTxn began before the insert committed, so it never saw (never deleted) the inserted rows.
+> - **Serializable** → deleteTxn is **rejected** (conflict): no single serial order of {delete, insert} matches the history.
+> - **WriteSerializable** → deleteTxn **commits**. Result is *as if insert ran after delete* (inserted rows survive), yet the history records the physical order (insert @v1, then delete @v2). Logical order (delete→insert) ≠ history order → the "state not in the log."
+>
+> Why blind appends get this freedom: an `INSERT`/append **doesn't read the table** (no subquery/conditional referencing the target), so Delta can reorder it without a read-conflict. `MERGE` — or `INSERT` with a target-referencing condition — *does* read, so it follows the stricter conflict rules.
 >
 > So §3.3 is the **read side** (snapshot isolation); the table's default end-to-end guarantee is **snapshot-isolation reads + write-serializable writes**. Writers don't block readers and readers don't block writers — conflicts between concurrent *writers* are caught at commit by optimistic concurrency (the loser retries or fails), and **deletion vectors enable row-level concurrency** so non-overlapping row changes don't conflict (DBR 14.2+, §3.2).
 
@@ -253,7 +266,7 @@ CREATE TABLE product_info (
 USING DELTA;
 ```
 
-> ⚠️ **2026 — Unity Catalog default:** The book uses `USE CATALOG hive_metastore` to simplify the demo. In real 2026 workspaces, Unity Catalog is the default; tables land in `__unitystorage` (managed by UC) rather than `dbfs:/user/hive/warehouse/`. The `%fs ls` and `DESCRIBE DETAIL` paths shown in the book won't work against UC-managed tables without extra permissions. Use UC catalog/schema for new work; the `hive_metastore` shortcut is fine for local practice.
+> ⚠️ **2026 — Unity Catalog default:** The book uses `USE CATALOG hive_metastore` to simplify the demo. In real 2026 workspaces, Unity Catalog is the default; managed tables land in UC managed storage (`…/__unity_storage/catalogs/<catalog_id>/tables/<table_id>`, addressed by GUIDs) rather than `dbfs:/user/hive/warehouse/`. `DESCRIBE DETAIL` still works (it reads table metadata), but the `%fs ls` raw-path tricks don't — UC governs managed storage via full cloud-URI grants, not friendly-path browsing (see §2.1). Use UC catalog/schema for new work; the `hive_metastore` shortcut is fine only on older / legacy-enabled workspaces.
 
 ### 5.2 Inserting Data
 
@@ -393,7 +406,24 @@ OPTIMIZE product_info ZORDER BY product_id
 >
 > **Auto liquid clustering** (`CLUSTER BY AUTO`, GA DBR 15.4 LTS+): predictive optimization picks and adapts clustering keys from observed query patterns; UC managed tables only. `ALTER TABLE t CLUSTER BY AUTO` enables it on an existing table.
 >
-> Z-Order remains valid for existing tables and the DCDEA exam still tests it, but note **predictive optimization's `OPTIMIZE` never runs `ZORDER`** and ignores Z-ordered files — another reason Z-Order is legacy. Use Liquid Clustering for any new table; GA is **DBR 15.4 LTS+** (14.3 LTS supported it via DataFrame/DeltaTable API only).
+> **Explicit keys and `AUTO` are mutually exclusive** — the grammar is `CLUSTER BY { (cols) | AUTO | NONE }`, one choice. `AUTO` *supersedes* manual keys when you switch. But you can **seed AUTO with hint columns**:
+> ```sql
+> -- SQL: two statements (no single-statement combined form)
+> ALTER TABLE t CLUSTER BY (c1, c2);   -- 1. set hint keys
+> ALTER TABLE t CLUSTER BY AUTO;       -- 2. AUTO uses them as starting hints, then adapts
+>
+> ALTER TABLE t CLUSTER BY NONE;       -- turn clustering off
+> ```
+> ```python
+> # Python: hints in ONE operation (DBR 16.4+, create/replace only — use SQL to toggle AUTO on an existing table)
+> (df.write.format("delta")
+>    .clusterBy("c1", "c2")            # initial hint columns
+>    .option("clusterByAuto", "true")  # enable AUTO in the same write
+>    .saveAsTable("t"))
+> ```
+> Inspect with `DESCRIBE TABLE` / `SHOW TBLPROPERTIES`: `clusterByAuto = true` and `clusteringColumns` shows the currently selected keys.
+>
+> Z-Order is **supported but discouraged for new tables** (same status as partitioning in §2.1 — not deprecated, not "legacy"). It remains fully valid on existing tables. Note **predictive optimization's `OPTIMIZE` never runs `ZORDER`** and ignores Z-ordered files — one more reason to prefer clustering on new tables. Use Liquid Clustering for any new table; GA is **DBR 15.4 LTS+** (14.3 LTS supported it via DataFrame/DeltaTable API only). (Z-Order may still appear on the DCDEA exam, which trails the platform — confirm against the current exam guide.)
 
 ---
 
@@ -407,6 +437,7 @@ VACUUM product_info RETAIN 168 HOURS -- explicit 7-day retention
 ```
 
 **The retention trade-off:**
+
 - Files deleted by VACUUM cannot be recovered.
 - Time travel only works for versions whose underlying files still exist.
 - Vacuuming past a version means you can no longer `SELECT … VERSION AS OF <that-version>`.
