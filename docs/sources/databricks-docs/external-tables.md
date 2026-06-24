@@ -38,6 +38,8 @@ Otherwise, use managed tables for automatic optimization, faster queries, lower 
 
 `DELTA` · `CSV` · `JSON` · `AVRO` · `PARQUET` · `ORC` · `TEXT`
 
+> 💡 **Clarification (not on page) — `DELTA` is a *table* format, not a flat file format.** The list is really the set of `USING <format>` values for `CREATE TABLE … LOCATION …`. `CSV/JSON/AVRO/PARQUET/ORC/TEXT` are raw file formats — an external table over them is a UC metadata pointer over dumb files: no transaction log, no ACID/time-travel. `DELTA` sits a layer above (Parquet data files **+** a `_delta_log/` JSON transaction log), so an external **Delta** table gets full ACID/time-travel. That's why Databricks recommends external tables mainly for the **non-Delta** formats UC managed tables can't hold (JSON, Avro); for Delta you'd usually prefer a **managed** table.
+
 ### Create an external table
 
 **Before you begin** — you must first configure an **external location** granting access to your cloud storage. Databricks recommends the **AWS CloudFormation Quickstart** template, which configures both the storage credential and external location in one step.
@@ -62,6 +64,22 @@ LOCATION 's3://<bucket-path>/<table-directory>';
 ```
 
 See CREATE TABLE for full parameters.
+
+> 💡 **Clarification (not on page) — "the table will be created" = create *new* empty table, not register existing.** The example above (with `<column-specification>`) defines a **brand-new, empty** external table: you declare the schema, and `LOCATION` is where its data files **will** live in your cloud storage. Data is **not** there yet — it lands when you `INSERT`/write (hence "use a **unique** directory per table" — fresh, non-colliding). Creating the table makes the **table object + storage directory** (for Delta, a `_delta_log/` is written there); `DROP TABLE` later removes metadata, leaves whatever you wrote.
+>
+> The other pattern — **registering existing data** — points `LOCATION` at a path that **already has** data files, with **no column spec** (schema inferred):
+>
+> ```sql
+> CREATE TABLE <catalog>.<schema>.<table-name>
+> USING DELTA
+> LOCATION 's3://<bucket-path>/<existing-data-dir>';   -- no columns; read from files
+> ```
+>
+> | | Create new (example above) | Register existing |
+> |---|---|---|
+> | Column spec | yes, you define it | no, inferred from files |
+> | Data at `LOCATION` | empty → written later | already present |
+> | What "create" does | table object + storage dir | metadata pointer over existing files |
 
 **DataFrame write operations** — you can also create external tables from query results or DataFrame writes. Use the `LOCATION` clause to set the external path. These SQL forms work with DataFrame ops:
 
