@@ -117,6 +117,7 @@ nav = [
                     { "Transactions" = "sources/databricks-docs/transactions.md" },
                     { "Liquid clustering" = "sources/databricks-docs/liquid-clustering.md" },
                     { "Change data feed" = "sources/databricks-docs/change-data-feed.md" },
+                    { "Column mapping" = "sources/databricks-docs/column-mapping.md" },
                 ]},
                 { "Optimization & performance" = [
                     { "Recommendations (hub)" = "sources/databricks-docs/optimization-recommendations.md" },
