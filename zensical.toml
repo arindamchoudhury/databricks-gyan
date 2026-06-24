@@ -105,6 +105,9 @@ nav = [
                 { "Managed storage location in UC" = "sources/databricks-docs/managed-storage.md" },
                 { "Catalog commits" = "sources/databricks-docs/catalog-commits.md" },
                 { "Transactions" = "sources/databricks-docs/transactions.md" },
+                { "Predictive optimization" = "sources/databricks-docs/predictive-optimization.md" },
+                { "Liquid clustering" = "sources/databricks-docs/liquid-clustering.md" },
+                { "External access from outside systems" = "sources/databricks-docs/external-access.md" },
             ]},
         ]},
         { "Databricks Blog" = [

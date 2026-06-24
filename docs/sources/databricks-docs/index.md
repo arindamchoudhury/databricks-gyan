@@ -75,5 +75,8 @@ Grouped by topic. Nav mirrors these groups.
 | [Specify a managed storage location in Unity Catalog](managed-storage.md) | 2026-06-23 | unity-catalog, managed-storage, storage-location, external-location, catalog, schema, metastore, volumes, B1, B4 |
 | [Catalog commits](catalog-commits.md) | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, catalog-commits, transactions, external-access, streaming, B4 |
 | [Transactions](transactions.md) | 2026-06-24 | tables, unity-catalog, transactions, acid, catalog-commits, isolation, concurrency, atomic, rollback, B4 |
+| [Predictive optimization](predictive-optimization.md) | 2026-06-24 | tables, unity-catalog, managed, delta, iceberg, predictive-optimization, optimize, vacuum, analyze, liquid-clustering, serverless, system-tables, B4, B5 |
+| [Use liquid clustering for tables](liquid-clustering.md) | 2026-06-24 | tables, delta, iceberg, liquid-clustering, cluster-by, optimize, zorder, partitioning, predictive-optimization, automatic-clustering, data-skipping, A2, I5 |
+| [Access Databricks data using external systems](external-access.md) | 2026-06-24 | unity-catalog, external-access, iceberg-rest-catalog, unity-rest-api, credential-vending, compatibility-mode, opensharing, external-tables, external-volumes, A7, I8, B4 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*
