@@ -108,6 +108,7 @@ nav = [
                         { "Overview" = "sources/databricks-docs/managed-tables.md" },
                         { "Convert external tables to managed" = "sources/databricks-docs/convert-external-managed.md" },
                         { "Predictive table optimization" = "sources/databricks-docs/predictive-optimization.md" },
+                        { "Automatic upgrades" = "sources/databricks-docs/automatic-upgrades.md" },
                     ]},
                     { "External tables" = "sources/databricks-docs/external-tables.md" },
                 ]},

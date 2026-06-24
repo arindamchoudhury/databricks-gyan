@@ -105,6 +105,7 @@ Course notebooks and external sources captured as structured notes.
 | [Use liquid clustering for tables](databricks-docs/liquid-clustering.md) | documentation | 2026-06-24 | tables, delta, iceberg, liquid-clustering, cluster-by, optimize, zorder, partitioning, automatic-clustering, A2, I5 |
 | [Access Databricks data using external systems](databricks-docs/external-access.md) | documentation | 2026-06-24 | unity-catalog, external-access, iceberg-rest-catalog, unity-rest-api, credential-vending, compatibility-mode, opensharing, A7, I8, B4 |
 | [Data governance with Databricks (UC hub)](databricks-docs/data-governance-hub.md) | documentation | 2026-06-24 | data-governance, unity-catalog, access-control, abac, lineage, data-quality-monitoring, opensharing, clean-rooms, marketplace, audit, system-tables, I7, E2, A6, A7 |
+| [Automatic upgrades for managed tables](databricks-docs/automatic-upgrades.md) | documentation | 2026-06-24 | tables, unity-catalog, managed, automatic-upgrades, table-features, observation-window, verified-workloads, B4, A2 |
 | [Optimization recommendations (hub)](databricks-docs/optimization-recommendations.md) | documentation | 2026-06-24 | optimization, performance, databricks-runtime, hub, A1 |
 | [Disk caching (Delta/DBIO cache)](databricks-docs/disk-cache.md) | documentation | 2026-06-24 | optimization, disk-cache, delta-cache, ssd, caching, A1 |
 | [Dynamic file pruning](databricks-docs/dynamic-file-pruning.md) | documentation | 2026-06-24 | optimization, dynamic-file-pruning, dfp, join, photon, A1 |

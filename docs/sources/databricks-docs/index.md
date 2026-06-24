@@ -92,5 +92,6 @@ Grouped by topic. Nav mirrors these groups.
 | [Use liquid clustering for tables](liquid-clustering.md) | 2026-06-24 | tables, delta, iceberg, liquid-clustering, cluster-by, optimize, zorder, partitioning, predictive-optimization, automatic-clustering, data-skipping, A2, I5 |
 | [Access Databricks data using external systems](external-access.md) | 2026-06-24 | unity-catalog, external-access, iceberg-rest-catalog, unity-rest-api, credential-vending, compatibility-mode, opensharing, external-tables, external-volumes, A7, I8, B4 |
 | [Data governance with Databricks (UC hub)](data-governance-hub.md) | 2026-06-24 | data-governance, unity-catalog, access-control, abac, lineage, data-quality-monitoring, opensharing, clean-rooms, marketplace, audit, system-tables, I7, E2, A6, A7 |
+| [Automatic upgrades for managed tables](automatic-upgrades.md) | 2026-06-24 | tables, unity-catalog, managed, automatic-upgrades, table-features, observation-window, verified-workloads, row-tracking, catalog-commits, checkpoint-v2, column-mapping, change-data-feed, B4, A2 |
 
 To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*
