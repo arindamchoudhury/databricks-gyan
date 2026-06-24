@@ -5,19 +5,28 @@ from livereload import Server
 import zensical.config as _zc
 
 
+# slug -> "/rel/path/" index, rebuilt once per build() via _refresh_slug_index().
+# Avoids a recursive glob per wikilink (was O(links x tree) every build).
+_slug_index = {}
+
+
+def _refresh_slug_index(docs_dir):
+    index = {}
+    for path in _glob.glob(os.path.join(docs_dir, "**", "*.md"), recursive=True):
+        slug = os.path.splitext(os.path.basename(path))[0].lower()
+        rel = os.path.relpath(path, docs_dir).replace("\\", "/")
+        # First match wins, matching the previous glob[0] behaviour.
+        index.setdefault(slug, "/" + rel[:-3] + "/")
+    _slug_index.clear()
+    _slug_index.update(index)
+
+
 def _make_wikilink_resolver(docs_dir):
-    # Resolve [[slug]] by scanning docs/ recursively for <slug>.md.
-    # Allows notes to live in course subdirectories without breaking
-    # cross-references when files are reorganised.
+    # Resolve [[slug]] via the prebuilt slug index so notes can live in
+    # course subdirectories without breaking cross-references on reorg.
     def build_url(label, base, end):
         slug = label.strip().replace(" ", "-").lower()
-        matches = _glob.glob(
-            os.path.join(docs_dir, "**", f"{slug}.md"), recursive=True
-        )
-        if matches:
-            rel = os.path.relpath(matches[0], docs_dir).replace("\\", "/")
-            return "/" + rel[:-3] + "/"
-        return f"/sources/{slug}/"
+        return _slug_index.get(slug, f"/sources/{slug}/")
     return build_url
 
 
@@ -44,6 +53,7 @@ _CONFIG_FILE = os.path.abspath("zensical.toml")
 
 
 def build():
+    _refresh_slug_index(_docs_dir)
     _zensical_build(_CONFIG_FILE, {"clean": False, "strict": False})
 
 
