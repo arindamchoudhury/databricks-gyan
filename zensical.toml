@@ -117,6 +117,7 @@ nav = [
                     { "Transactions" = "sources/databricks-docs/transactions.md" },
                     { "Liquid clustering" = "sources/databricks-docs/liquid-clustering.md" },
                     { "Change data feed" = "sources/databricks-docs/change-data-feed.md" },
+                    { "Checkpoint V2" = "sources/databricks-docs/checkpoint-v2.md" },
                     { "Column mapping" = "sources/databricks-docs/column-mapping.md" },
                     { "Row tracking" = "sources/databricks-docs/row-tracking.md" },
                 ]},
