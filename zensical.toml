@@ -114,6 +114,7 @@ nav = [
                         { "Overview" = "sources/databricks-docs/external-tables.md" },
                         { "Partition discovery" = "sources/databricks-docs/external-partition-discovery.md" },
                     ]},
+                    { "Foreign tables" = "sources/databricks-docs/foreign-tables.md" },
                 ]},
                 { "Table functionality" = [
                     { "Catalog commits" = "sources/databricks-docs/catalog-commits.md" },
