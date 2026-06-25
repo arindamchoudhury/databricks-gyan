@@ -150,6 +150,7 @@ nav = [
                 { "Data governance (UC hub)" = "sources/databricks-docs/data-governance-hub.md" },
             ]},
             { "Data engineering" = [
+                { "Overview (Lakeflow hub)" = "sources/databricks-docs/data-engineering-hub.md" },
                 { "Lakeflow Jobs: Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
                 { "Lakeflow Pipelines: Serverless Compute" = "sources/databricks-docs/serverless-pipelines.md" },
                 { "Materialized views (standalone + serverless)" = "sources/databricks-docs/materialized-views.md" },
