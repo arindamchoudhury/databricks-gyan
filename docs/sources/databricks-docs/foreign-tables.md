@@ -16,14 +16,14 @@ The third Unity Catalog **table type** alongside [[managed-tables]] and [[extern
 - **Read-only by default.** External federated Hive metastore and *all* foreign tables accessed through Lakehouse Federation are read-only. The lone write exception: an **internal federated Hive metastore** (with sufficient privileges) lets you create/write foreign tables backed by it.
 - **No UC transactional guarantees.** A foreign table may be backed by an ACID format (Delta, Iceberg), but UC doesn't manage its metadata/data/semantics, so you don't get managed-table transactional guarantees.
 - **Most optimizations require UC.** Query-perf, enhanced write speed, data skipping, and metadata-only queries need a UC managed table — foreign tables miss them. Databricks recommends benchmarking foreign vs managed on the latest DBR.
-- **Positioned as temporary.** Quick direct access without migration or ETL refactoring; migrate frequently-queried / production datasets to [[managed-tables]] (see `convert-foreign-managed`).
+- **Positioned as temporary.** Quick direct access without migration or ETL refactoring; migrate frequently-queried / production datasets to [[managed-tables]] (see [[convert-foreign-managed]]).
 - **Hive-metastore back-compat:** foreign tables in a federated HMS return HMS metadata, including whether the table is a Hive *managed* or *external* table — for legacy Spark/Databricks workloads.
 
 ## Notes
 
 ### Why use a foreign table?
 
-Flexibility when integrating with existing data systems or migrating off legacy ones. Many foreign tables are a **temporary** solution: direct access to data not managed by Databricks, with no data migration or upstream-ETL code refactoring required. Databricks recommends migrating datasets that drive production workloads or are queried frequently to **UC managed tables** for the performance and built-in optimizations (see `convert-foreign-managed`).
+Flexibility when integrating with existing data systems or migrating off legacy ones. Many foreign tables are a **temporary** solution: direct access to data not managed by Databricks, with no data migration or upstream-ETL code refactoring required. Databricks recommends migrating datasets that drive production workloads or are queried frequently to **UC managed tables** for the performance and built-in optimizations (see [[convert-foreign-managed]]).
 
 Query federation is also **complementary to Lakeflow Connect** — use it to load from external systems Lakeflow Connect doesn't support, and Databricks recommends **materialized views to replicate** a foreign table into UC (see query-federation `#load`).
 
@@ -44,7 +44,7 @@ Query federation is also **complementary to Lakeflow Connect** — use it to loa
 
 ## Open questions
 
-- The page references a `convert-foreign-managed` migration path and a query-federation `#load` materialized-view pattern but doesn't detail them here — separate pages, not yet captured.
+- The page references a [[convert-foreign-managed]] migration path and a query-federation `#load` materialized-view pattern but doesn't detail them here — both now captured ([[convert-foreign-managed]], [[materialized-views]]).
 - "Internal" vs "external" federated Hive metastore is the line between writable and read-only, but the page doesn't define internal-federated-HMS setup on this page.
 
 ## Related sources
