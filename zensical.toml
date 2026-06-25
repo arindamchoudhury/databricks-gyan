@@ -117,6 +117,7 @@ nav = [
                     { "Foreign tables" = [
                         { "Overview" = "sources/databricks-docs/foreign-tables.md" },
                         { "Convert foreign tables to managed" = "sources/databricks-docs/convert-foreign-managed.md" },
+                        { "Convert foreign tables to external" = "sources/databricks-docs/convert-foreign-external.md" },
                     ]},
                 ]},
                 { "Table functionality" = [
