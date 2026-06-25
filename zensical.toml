@@ -119,6 +119,7 @@ nav = [
                         { "Convert foreign tables to managed" = "sources/databricks-docs/convert-foreign-managed.md" },
                         { "Convert foreign tables to external" = "sources/databricks-docs/convert-foreign-external.md" },
                     ]},
+                    { "Temporary tables" = "sources/databricks-docs/temporary-tables.md" },
                 ]},
                 { "Table functionality" = [
                     { "Catalog commits" = "sources/databricks-docs/catalog-commits.md" },
@@ -199,5 +200,5 @@ end_url = ""
 
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
-  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
 ]
