@@ -151,6 +151,7 @@ nav = [
             ]},
             { "Data engineering" = [
                 { "Overview (Lakeflow hub)" = "sources/databricks-docs/data-engineering-hub.md" },
+                { "Concepts: Procedural vs. declarative" = "sources/databricks-docs/procedural-vs-declarative.md" },
                 { "Lakeflow Jobs: Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
                 { "Lakeflow Pipelines: Serverless Compute" = "sources/databricks-docs/serverless-pipelines.md" },
                 { "Materialized views (standalone + serverless)" = "sources/databricks-docs/materialized-views.md" },
