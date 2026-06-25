@@ -30,8 +30,7 @@ Query federation is also **complementary to Lakeflow Connect** — use it to loa
 ### Create or write to foreign tables
 
 - **Writable only via internal federated Hive metastore.** With sufficient privileges and a workspace configured with an internal federated HMS, you can create/write foreign tables backed by it.
-- **Everything else is read-only:** external federated HMS + all Lakehouse-Federation-accessed foreign tables.
-- **"Updated by" quirk:** even though read-only, the **Updated by** field shows the user who triggered the most recent **metadata refresh**. UC auto-refreshes foreign-table metadata during queries when it detects stale metadata, so the field shows the `session_user` who *ran the query* — not someone who changed underlying data.
+- **Everything else is read-only:** external federated HMS + all Lakehouse-Federation-accessed foreign tables. (Minor gotcha: Catalog Explorer's **Updated by** reflects the last *metadata refresh* — the `session_user` who ran a query — not a data change.)
 - **No transactional guarantees / fewer optimizations** (see Key points). Benchmark read+write latency and cost against a UC managed table.
 
 > ⚠️ A foreign table can sit on top of Delta or Iceberg and still **not** behave like a UC table: UC doesn't own the metadata/data/semantics, so ACID + time-travel guarantees and most engine optimizations don't apply. Treat "backed by Delta" ≠ "managed Delta table."
