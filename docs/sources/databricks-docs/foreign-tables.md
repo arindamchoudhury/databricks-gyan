@@ -8,7 +8,7 @@
 
 ## Summary
 
-The third Unity Catalog **table type** alongside [[managed-tables]] and [[external-tables]]. A **foreign table** (a.k.a. **federated table**) is registered in UC as part of a **foreign catalog**; its data *and* metadata are managed by an **external system**, with UC layering on data governance so you can query it. It's the inbound half of Lakehouse Federation: you reach into someone else's system without moving the data. Almost always **read-only**, and it gives up UC's transactional guarantees and most performance optimizations — Databricks frames it as a migration/integration stopgap, not a destination.
+The third Unity Catalog **table type** alongside [[managed-tables]] and [[external-tables]]. A **foreign table** (also called a **federated table**) belongs to a **foreign catalog** in Unity Catalog, but its data and metadata stay in an external system. Unity Catalog adds a governance layer on top, so you can query that external data through UC. It's the inbound half of Lakehouse Federation: you reach into someone else's system without moving the data. Almost always **read-only**, and it gives up UC's transactional guarantees and most performance optimizations — Databricks frames it as a migration/integration stopgap, not a destination.
 
 ## Key points
 
