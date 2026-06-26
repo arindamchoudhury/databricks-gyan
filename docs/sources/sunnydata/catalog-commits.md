@@ -17,6 +17,9 @@ A practitioner deep-dive on **catalog commits** (the `delta.feature.catalogManag
 - **Enable:** `TBLPROPERTIES ('delta.feature.catalogManaged' = 'supported')` on a UC **managed** Delta table.
 - **The value compounds** with multi-table transactions, concurrent writers from multiple engines/teams, and external clients reading/writing UC-managed tables under fine-grained access rules. For a single Databricks writer the difference looks small.
 
+![Unity Catalog commits — what changes (coordination moves to UC; data stays in open Delta on storage)](assets/catalog-commits/01.png)
+*Unity Catalog commits — what changes (coordination moves to UC; data stays in open Delta on storage).*
+
 ## Notes
 
 ### The staged-commits write sequence (the core mechanic)
@@ -30,7 +33,13 @@ A catalog-commit-enabled write is a **four-step** sequence:
 
 This sequence is what gives catalog commits strict **concurrency control**, **security control**, and **schema control** — note the schema is now primarily managed by **UC, not Delta**.
 
+![The four-step catalog-commit write process (stage → propose → UC returns winning commit → publish)](assets/catalog-commits/04.png)
+*The four-step catalog-commit write process: stage → propose → UC returns winning commit → publish.*
+
 > The `_delta_log/_staged_commits/` folder is visible on storage. It's part of commit coordination and is especially useful when **multiple clients (including external engines)** write to the same Delta table. Staged commits are the same machinery behind multi-statement, multi-table transactions ([[transactions]]).
+
+![The _delta_log/_staged_commits folder on storage](assets/catalog-commits/03.png)
+*The `_delta_log/_staged_commits` folder on storage — commits coordinated by the catalog.*
 
 ### Inspecting catalog commits (REST)
 
@@ -38,11 +47,17 @@ This sequence is what gives catalog commits strict **concurrency control**, **se
 - For a **standard managed table** (no `catalogManaged` feature), the endpoint returns **nothing** — a quick way to confirm the feature is actually on.
 - ⚠️ The post flags this as a **preview** endpoint that "**will soon change**" — treat the exact path as unstable.
 
+![Validating catalog commits via the Unity Catalog REST API /commits endpoint](assets/catalog-commits/02.png)
+*Validating catalog commits via the Unity Catalog REST API `/commits` endpoint.*
+
 ### Why this exists — UC replaces the DynamoDB log store
 
 - Historically on **AWS**, guaranteeing Delta **ACID on S3** with multiple writers required an external log store — **DynamoDB** — to coordinate commits (the classic `delta.enableMultiClusterWrites` / S3 commit-coordination setup).
 - Catalog commits move that coordination **into Unity Catalog**: UC now acts as the database/cache that holds the authoritative commit log. The DynamoDB dependency goes away.
 - Mental model: **UC behaves like a database in front of the table** — serving table state to engines directly instead of every engine fetching individual JSON files from `_delta_log`.
+
+![UC as commit coordinator — replacing the AWS DynamoDB log store used for Delta ACID on S3](assets/catalog-commits/06.png)
+*UC as commit coordinator — replacing the AWS DynamoDB log store used for Delta ACID on S3.*
 
 ### Read performance (observed)
 
@@ -50,11 +65,17 @@ This sequence is what gives catalog commits strict **concurrency control**, **se
 - Reason: table information is stored in UC's database and can be **served to engines directly**, rather than reconstructing state by reading many small `_delta_log` JSONs from storage.
 - Framing: catalog commits "lay the **foundation** for stronger performance" — it's an enabler, not a one-shot speed switch.
 
+![Smaller read size for a catalog-managed-commits table](assets/catalog-commits/05.png)
+*Smaller read size for a catalog-managed-commits table.*
+
 ### External access & ABAC (the governance extension)
 
 - When multiple engines write to UC-managed tables, they need a **shared coordination point**. Instead of each engine writing to storage independently, an external engine should **first coordinate with the catalog** and check whether it's allowed to commit — making UC the **control point for external writes** and avoiding ungoverned writes, silent metadata drift, and inconsistent table state.
 - The same model improves **external reads**: catalog commits let external engines integrate with UC policies, enabling fine-grained **row- and column-level ABAC** enforcement when UC-managed tables are read from external engines.
 - Demo in the post: open-source Unity Catalog running locally, reading from a Databricks Unity Catalog.
+
+![External access: open-source Unity Catalog reading from Databricks Unity Catalog](assets/catalog-commits/07.png)
+*External access: open-source Unity Catalog (local) reading from a Databricks Unity Catalog.*
 
 ## Quotes worth keeping
 
