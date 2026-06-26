@@ -104,4 +104,4 @@ DBR 18.0+ only. Use drop-table-feature + protocol downgrade.
 ## References
 
 - [Catalog commits](https://docs.databricks.com/aws/en/tables/features/catalog-commits) — this page
-- Learning 
+- Learning path: **B4 — Spark SQL & Relational Entities**

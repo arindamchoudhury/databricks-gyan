@@ -874,4 +874,18 @@ Expert (E1–E9)        → ~50 hrs  →  Architect-level mastery
 
 ## Sources consulted
 
-- https://www.databri
+- https://www.databricks.com/learn/certification/data-engineer-associate
+- https://www.databricks.com/learn/certification/data-engineer-professional
+- https://www.databricks.com/training/catalog/data-engineering-with-databricks-911
+- https://www.databricks.com/training/catalog/advanced-data-engineering-with-databricks-971
+- https://www.databricks.com/training/catalog/get-started-with-databricks-for-data-engineering-1511
+- https://www.databricks.com/training/catalog/get-started-with-data-governance-on-databricks-4678
+- https://www.databricks.com/training/catalog/data-interoperability-with-unity-catalog-4557
+- https://www.databricks.com/training/catalog/sql-analytics-on-databricks-3928
+- https://www.databricks.com/learn/training/data-engineering-courses
+- https://www.oreilly.com/library/view/databricks-certified-data/9781098166823/
+- https://docs.databricks.com/aws/en/release-notes/runtime
+- https://www.amazon.com/dp/8196994788
+- https://www.databricks.com/resources/ebook/big-book-of-data-engineering
+- https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical
+- https://www.databricks.com/company/newsroom/press-releases/databricks-launches-lakehousert-bring-real-time-analytics-directly

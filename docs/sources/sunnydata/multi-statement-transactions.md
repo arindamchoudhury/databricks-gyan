@@ -94,4 +94,4 @@ MSTs are a **reliability** feature, not a flashy one: they close a gap that forc
 ## References
 
 - [The Lakehouse Finally Has Real Transactions — SunnyData / Hubert Dudek & Benjamin Mathew](https://www.sunnydata.ai/blog/databricks-multi-statement-transactions) — this post
-- Learning path: *
+- Learning path: **B4 — Spark SQL & Relational Entities** (reference #10, transactions)
