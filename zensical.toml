@@ -152,6 +152,7 @@ nav = [
             { "Data engineering" = [
                 { "Overview (Lakeflow hub)" = "sources/databricks-docs/data-engineering-hub.md" },
                 { "Concepts" = [
+                    { "Batch vs. streaming" = "sources/databricks-docs/batch-vs-streaming.md" },
                     { "Procedural vs. declarative" = "sources/databricks-docs/procedural-vs-declarative.md" },
                 ]},
                 { "Lakeflow Jobs" = [
@@ -203,12 +204,4 @@ nav = [
     ]},
     { "Reference" = [
         { "Glossary" = "reference/glossary.md" },
-        { "Resources" = "reference/resources.md" },
-    ]},
-]
-
-[project.markdown_extensions.wikilinks]
-base_url = ""
-end_url = ""
-
-[project
+        { "Resources" = "reference/resourc
