@@ -89,11 +89,12 @@ This sequence is what gives catalog commits strict **concurrency control**, **se
 
 - [[catalog-commits]] — the **docs note** (requirements, DBR versions, preview gates, limitations, enable/disable/check SQL). This SunnyData note is the *mechanics* companion to it.
 - [[transactions]] — multi-statement, multi-table transactions; staged commits are the substrate that makes them atomic across tables.
+- [[multi-statement-transactions]] — the SunnyData companion post on MSTs: the `BEGIN ATOMIC` SQL surface and the `.mst.json` success/rollback walkthrough that ride on the staged-commits machinery described here.
 - [[managed-tables]] — catalog commits is a managed-table-only feature.
 - [[external-access]] — external-engine reads/writes that catalog commits govern (and where ABAC enforcement applies).
 
 ## References
 
 - [Unity Catalog commits — SunnyData / Hubert Dudek](https://www.sunnydata.ai/blog/unity-catalog-catalog-commits-databricks) — this post
-- Related SunnyData post referenced inline: "The Lakehouse Finally Has Real Transactions" (multi-statement transactions)
+- Related SunnyData post: [[multi-statement-transactions]] — "The Lakehouse Finally Has Real Transactions"
 - Learning path: **B4 — Spark SQL & Relational Entities** (reference #9, catalog commits)

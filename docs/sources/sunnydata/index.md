@@ -11,3 +11,4 @@ Notes captured from individual SunnyData blog posts. These are point-in-time pra
 | Post | Added | Tags |
 |---|---|---|
 | [Unity Catalog commits — write mechanics, staged commits, ABAC](catalog-commits.md) | 2026-06-26 | unity-catalog, catalog-commits, staged-commits, dynamodb, abac, external-access, B4 |
+| [Multi-statement transactions (MSTs) — atomic SQL across Delta tables](multi-statement-transactions.md) | 2026-06-26 | unity-catalog, transactions, multi-statement, begin-atomic, catalog-commits, delta, iceberg, lakebase, B4 |

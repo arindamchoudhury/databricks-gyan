@@ -171,6 +171,7 @@ nav = [
         { "SunnyData" = [
             { "Overview" = "sources/sunnydata/index.md" },
             { "Unity Catalog commits — write mechanics" = "sources/sunnydata/catalog-commits.md" },
+            { "Multi-statement transactions (MSTs)" = "sources/sunnydata/multi-statement-transactions.md" },
         ]},
     ]},
     { "Release Notes" = [
@@ -200,4 +201,11 @@ nav = [
     ]},
 ]
 
-[project.markdown_extensions.wikil
+[project.markdown_extensions.wikilinks]
+base_url = ""
+end_url = ""
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]

@@ -151,8 +151,4 @@ Each successful transaction = **one Delta log entry** regardless of statement co
 - [[catalog-commits]] — the enabling feature; every transaction write-target needs `catalogManaged`. This page is the capability that page's multi-table benefit pointed to.
 - [[managed-tables]] — lists multi-statement transactions in the managed-only feature set; this is the full spec.
 - [[ch02-managing-data-with-delta-lake]] — Delta transaction-log + isolation-level (WriteSerializable/Serializable, optimistic concurrency) foundations this builds on.
-
-## References
-
-- [Transactions](https://docs.databricks.com/aws/en/transactions/) — this page
-- Learning path: **B4 — Spark SQL & Relational Entities**
+- [[multi-statement-transactions]] — practitioner companion (SunnyData/Hubert Dudek): the `BEGIN ATOMIC` SQL surface, the `.mst.json` staged-commit file, t

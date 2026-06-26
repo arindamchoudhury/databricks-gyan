@@ -22,6 +22,7 @@ ASSETS_DIR = NOTES_DIR / "assets"
 # assets land next to that note under assets/<note-name>/.
 EXTRA_NOTES = {
     "sunnydata-catalog-commits": "sunnydata/catalog-commits",
+    "sunnydata-multi-statement-transactions": "sunnydata/multi-statement-transactions",
 }
 SOURCES_DIR = REPO / "docs" / "sources"
 
@@ -123,11 +124,15 @@ def process_slug(slug: str) -> None:
         return
 
     note_text = note_file.read_text(encoding="utf-8")
-    if note_has_images_section(note_text):
-        print(f"[{slug}] images section already present — skip")
-        return
+    # If the note already references the images (inline embeds) or already has a
+    # trailing gallery, still download the files but don't append a gallery —
+    # this keeps inline-embedded notes (e.g. the SunnyData notes) from growing a
+    # duplicate "## Images" block on re-runs.
+    rel_prefix = f"assets/{rel_slug}/"
+    skip_gallery = note_has_images_section(note_text) or (rel_prefix in note_text)
 
-    print(f"[{slug}] {len(images)} image(s) to embed")
+    print(f"[{slug}] {len(images)} image(s) to download"
+          + ("" if not skip_gallery else " (already referenced — download only)"))
 
     asset_dir.mkdir(parents=True, exist_ok=True)
 
@@ -138,4 +143,35 @@ def process_slug(slug: str) -> None:
         ext = Path(url_path).suffix or ".png"
         local_name = f"{i:02d}{ext}"
         local_path = asset_dir / local_name
-        rel_
+        rel_path = f"assets/{rel_slug}/{local_name}"
+
+        ok = download_image(img["url"], local_path)
+        if not ok:
+            continue
+
+        alt = img["alt"] or f"diagram {i}"
+        cap = img["caption"]
+        lines.append(f"[![{alt}]({rel_path})]({rel_path})")
+        if cap:
+            lines.append(f"*{cap}*\n")
+
+    if skip_gallery:
+        print(f"[{slug}] downloaded {len(images)} image(s); gallery not appended")
+        return
+
+    if len(lines) <= 1:
+        print(f"[{slug}] all downloads failed — note not updated")
+        return
+
+    note_file.write_text(note_text.rstrip() + "\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    print(f"[{slug}] note updated")
+
+
+def main():
+    slugs = sys.argv[1:] if len(sys.argv) > 1 else SLUGS_WITH_IMAGES
+    for slug in slugs:
+        process_slug(slug)
+
+
+if __name__ == "__main__":
+    main()
