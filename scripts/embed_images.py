@@ -16,6 +16,15 @@ CACHE_DIR = REPO / "cache" / "web"
 NOTES_DIR = REPO / "docs" / "sources" / "databricks-docs"
 ASSETS_DIR = NOTES_DIR / "assets"
 
+# Notes that live outside databricks-docs.
+# Maps a cache slug (cache/web/<slug>.txt) -> note path relative to docs/sources
+# (without the .md). Lets a single cache file feed a note in any source folder;
+# assets land next to that note under assets/<note-name>/.
+EXTRA_NOTES = {
+    "sunnydata-catalog-commits": "sunnydata/catalog-commits",
+}
+SOURCES_DIR = REPO / "docs" / "sources"
+
 SLUGS_WITH_IMAGES = [
     "notebook-debugger",
     "serverless-notebooks",
@@ -91,7 +100,15 @@ def note_has_images_section(note_text: str) -> bool:
 
 def process_slug(slug: str) -> None:
     cache_file = CACHE_DIR / f"{slug}.txt"
-    note_file = NOTES_DIR / f"{slug}.md"
+    if slug in EXTRA_NOTES:
+        note_rel = EXTRA_NOTES[slug]                     # e.g. "sunnydata/catalog-commits"
+        note_file = SOURCES_DIR / f"{note_rel}.md"
+        rel_slug = Path(note_rel).name                   # "catalog-commits"
+        asset_dir = note_file.parent / "assets" / rel_slug
+    else:
+        note_file = NOTES_DIR / f"{slug}.md"
+        rel_slug = slug
+        asset_dir = ASSETS_DIR / slug
 
     if not cache_file.exists():
         print(f"[{slug}] no cache file — skip")
@@ -112,7 +129,6 @@ def process_slug(slug: str) -> None:
 
     print(f"[{slug}] {len(images)} image(s) to embed")
 
-    asset_dir = ASSETS_DIR / slug
     asset_dir.mkdir(parents=True, exist_ok=True)
 
     lines = ["\n\n## Images\n"]
@@ -122,31 +138,4 @@ def process_slug(slug: str) -> None:
         ext = Path(url_path).suffix or ".png"
         local_name = f"{i:02d}{ext}"
         local_path = asset_dir / local_name
-        rel_path = f"assets/{slug}/{local_name}"
-
-        ok = download_image(img["url"], local_path)
-        if not ok:
-            continue
-
-        alt = img["alt"] or f"diagram {i}"
-        cap = img["caption"]
-        lines.append(f"[![{alt}]({rel_path})]({rel_path})")
-        if cap:
-            lines.append(f"*{cap}*\n")
-
-    if len(lines) <= 1:
-        print(f"[{slug}] all downloads failed — note not updated")
-        return
-
-    note_file.write_text(note_text.rstrip() + "\n" + "\n".join(lines) + "\n", encoding="utf-8")
-    print(f"[{slug}] note updated")
-
-
-def main():
-    slugs = sys.argv[1:] if len(sys.argv) > 1 else SLUGS_WITH_IMAGES
-    for slug in slugs:
-        process_slug(slug)
-
-
-if __name__ == "__main__":
-    main()
+        rel_
