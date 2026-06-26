@@ -6,56 +6,21 @@
 > **Tags:** compute, classic-compute, access-modes, standard, lakeguard, multi-user, B1
 > **Type:** documentation
 
-## Summary
+> "Standard compute is compute configured with standard access mode. Standard compute resources can be used by any user given permission to do so."
 
-High-level overview of standard access mode compute. Standard compute is the multi-user shared compute mode — recommended for most workloads. Secured by Databricks Lakeguard. R is not supported; Scala requires DBR 13.3 LTS+ with Unity Catalog. A separate linked page covers the full requirements and limitations.
+Standard is the **multi-user shared** access mode — any number of permissioned users can attach and concurrently execute workloads on the same resource, for cost savings and simpler compute management (contrast Dedicated, which is single-user or group-assigned). It's **recommended for most workloads** and secured by **Databricks Lakeguard**. Use **Dedicated instead** when you need RDD APIs, distributed ML requiring privileged machine access, GPUs, or **R** (R is not supported on standard; Scala needs DBR 13.3 LTS+ with Unity Catalog).
 
-## Key points
+## Access mode selection
 
-- Standard compute = standard access mode; any permissioned user can attach and run concurrently.
-- **Recommended for most workloads**: DE/ETL pipelines, collaborative data science, interactive exploration, cost optimization.
-- **Use Dedicated instead** for: RDD APIs, distributed ML requiring privileged access, GPUs, or R.
-- **R not supported** on standard compute.
-- **Scala**: supported on DBR 13.3 LTS+ with Unity Catalog only.
-- **Auto mode default**: resolves to Standard unless ML runtime or DBR < 14.3 is selected (then Dedicated).
-- Security isolation provided by **Lakeguard** — separates user code from underlying Spark infrastructure.
+Configured in the **Advanced** section of the compute creation UI; the API field is `data_security_mode`. Default is **Auto**: resolves to **Standard** unless an ML runtime or DBR < 14.3 is selected (then **Dedicated**). See [[classic-compute-configure]] for full config and [[classic-compute-overview]] for permission levels.
 
-## Notes
+## When to use standard vs dedicated
 
-### What is standard compute
+**Standard** — general-purpose shared compute: data engineering / ETL pipelines, collaborative data science, interactive exploration, cost optimization (multiple users share one resource).
 
-"Standard compute is compute configured with standard access mode. Standard compute resources can be used by any user given permission to do so."
+**Dedicated** — when you need RDD APIs, distributed ML frameworks requiring privileged machine access, GPU workloads, or R.
 
-Any number of users can attach and concurrently execute workloads on the same compute resource, enabling cost savings and simplified compute management. Contrast with Dedicated, which is single-user or group-assigned.
-
-### Access mode selection
-
-Configured in **Advanced** section of the compute creation UI. API field: `data_security_mode`.
-
-Default is **Auto**:
-
-- → Standard (unless ML runtime or DBR < 14.3 is selected)
-- → Dedicated (if ML runtime or DBR < 14.3)
-
-See [[classic-compute-configure]] for the full access mode configuration details and [[classic-compute-overview]] for permission levels.
-
-### When to use standard vs dedicated
-
-**Standard** — general-purpose shared compute:
-
-- Data engineering and ETL pipelines
-- Collaborative data science
-- Interactive data exploration
-- Cost optimization (multiple users share one resource)
-
-**Dedicated** — when you need:
-
-- RDD APIs
-- Distributed ML frameworks requiring privileged machine access
-- GPU workloads
-- R language
-
-### Language and runtime support
+## Language and runtime support
 
 | Language | Support |
 |---|---|
@@ -64,16 +29,8 @@ See [[classic-compute-configure]] for the full access mode configuration details
 | Scala | DBR 13.3 LTS+ with Unity Catalog only |
 | R | **Not supported** |
 
-### Lakeguard
+## Lakeguard
 
-Standard compute uses **Databricks Lakeguard** for user isolation and data governance. Lakeguard applies advanced code isolation techniques that separate each user's code from the underlying Spark infrastructure, enabling safe multi-user sharing.
+Standard compute uses **Databricks Lakeguard** for user isolation and data governance — advanced code-isolation techniques that separate each user's code from the underlying Spark infrastructure, enabling safe multi-user sharing. See [[lakeguard]].
 
-## Open questions
-
-- ❓ What are the full requirements and limitations of standard compute? (Separate page linked from source — not yet captured.)
-
-## Related sources
-
-- [[classic-compute-overview]] — permission levels (CAN ATTACH TO etc.) that control who can use standard compute.
-- [[classic-compute-configure]] — how to set access mode to Standard in the UI and via API (`data_security_mode`).
-- [[serverless-limitations]] — limitations when not using classic compute at all; useful contrast.
+Related: [[classic-compute-overview]], [[classic-compute-configure]], [[dedicated-compute-overview]], [[lakeguard]], [[serverless-limitations]].
