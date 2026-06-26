@@ -99,6 +99,7 @@ DBR 18.0+ only. Use drop-table-feature + protocol downgrade.
 - [[managed-tables]] — lists catalog commits in the unique-to-managed feature table and raises the open question (catalog commits vs multi-statement transactions) that **this page answers**: catalog commits is the coordination substrate; multi-statement transactions are the capability it enables.
 - [[tables-concepts]] — defines the UC managed table type that catalog commits requires.
 - [[convert-external-managed]] — external→managed conversion is a prerequisite path to even qualify for catalog commits (managed-only feature).
+- [[sunnydata-catalog-commits]] — practitioner walkthrough (SunnyData/Hubert Dudek) of the **write mechanics** this docs page leaves implicit: the staged-commits 4-step sequence, the `_delta_log/_staged_commits/` folder on storage, the REST inspection endpoint, the DynamoDB→UC framing, and ABAC enforcement on external reads.
 
 ## References
 

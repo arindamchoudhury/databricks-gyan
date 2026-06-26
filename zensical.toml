@@ -168,6 +168,10 @@ nav = [
             { "Overview" = "sources/databricks-papers/index.md" },
             { "Lakehouse (CIDR 2021)" = "sources/databricks-papers/lakehouse-cidr-2021.md" },
         ]},
+        { "SunnyData" = [
+            { "Overview" = "sources/sunnydata/index.md" },
+            { "Unity Catalog commits — write mechanics" = "sources/sunnydata/catalog-commits.md" },
+        ]},
     ]},
     { "Release Notes" = [
         { "Overview & LP Flags" = "release-notes/index.md" },
@@ -196,11 +200,4 @@ nav = [
     ]},
 ]
 
-[project.markdown_extensions.wikilinks]
-base_url = ""
-end_url = ""
-
-[project.markdown_extensions.pymdownx.superfences]
-custom_fences = [
-  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
-]
+[project.markdown_extensions.wikil

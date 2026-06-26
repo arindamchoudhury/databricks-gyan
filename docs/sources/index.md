@@ -48,6 +48,13 @@ Course notebooks and external sources captured as structured notes.
 |---|---|---|---|
 | [What Is a Data Lakehouse?](databricks-blog/what-is-a-lakehouse.md) | blog | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
 
+## SunnyData — practitioner blog (Hubert Dudek)
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [Source overview](sunnydata/index.md) | blog | 2026-06-26 | sunnydata, practitioner, hubert-dudek |
+| [Unity Catalog commits — write mechanics, staged commits, ABAC](sunnydata/catalog-commits.md) | blog | 2026-06-26 | unity-catalog, catalog-commits, staged-commits, dynamodb, abac, external-access, B4 |
+
 ## Databricks Papers — research papers & whitepapers
 
 | Title | Type | Added | Tags |
@@ -115,6 +122,4 @@ Course notebooks and external sources captured as structured notes.
 | [Disk caching (Delta/DBIO cache)](databricks-docs/disk-cache.md) | documentation | 2026-06-24 | optimization, disk-cache, delta-cache, ssd, caching, A1 |
 | [Dynamic file pruning](databricks-docs/dynamic-file-pruning.md) | documentation | 2026-06-24 | optimization, dynamic-file-pruning, dfp, join, photon, A1 |
 | [Low shuffle merge](databricks-docs/low-shuffle-merge.md) | documentation | 2026-06-24 | optimization, merge, low-shuffle-merge, shuffle, delta, A1, I5 |
-| [Cost-based optimizer (CBO)](databricks-docs/cost-based-optimizer.md) | documentation | 2026-06-24 | optimization, cbo, statistics, analyze-table, joins, A1 |
-| [Range join optimization](databricks-docs/range-join.md) | documentation | 2026-06-24 | optimization, range-join, join, bin-size, interval, A1 |
-| [Isolation levels and write conflicts](databricks-docs/isolation-levels.md) | documentation | 2026-06-24 | optimization, delta, isolation, write-serializable, concurrency, A1, B4 |
+| [Cost-based optimizer (CBO)](databricks-docs/cost-based-optimizer.md) | documen
