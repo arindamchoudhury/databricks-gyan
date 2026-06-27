@@ -6,64 +6,26 @@
 > **Tags:** spark, spark-ui, debugging, delta, merge, delete, update, rewriting, B2, B12, B16
 > **Type:** documentation
 
-## Summary
+A detection-only sub-page of the Spark UI Guide series, linked from the high-output branch of Step 4. It explains how to use the SQL DAG to confirm whether a write stage is rewriting more data than expected. No remediation here — fixes are in [[long-spark-stage-io]] (high-output section) and [[optimize-data-workloads-guide]] (merge optimizations).
 
-Detection-only sub-page of the Spark UI Guide series, linked from the high-output branch of Step 4. Explains how to use the SQL DAG to confirm whether a write stage is rewriting more data than expected. No remediation here — fixes are in [[long-spark-stage-io]] (high output section) and [[optimize-data-workloads-guide]] (merge optimizations).
-
-## Key points
-
-- Navigate: job page → **Associated SQL Query** → SQL DAG.
-- For Delete/Update: compare writer's output volume against expectation — more than expected = rewriting.
-- For Merge: merge node shows explicit rewrite statistics.
-- No numeric threshold defined — judgment against expectation only.
-
-## Notes
-
-### Navigate to the SQL DAG
+## Navigate to the SQL DAG
 
 From the job page, scroll to the top and click **Associated SQL Query**.
 
-[![Stage to SQL](assets/spark-ui-guide/14-stage-to-sql.png)](assets/spark-ui-guide/14-stage-to-sql.png)
+[![Stage to SQL link](assets/spark-rewriting-data/01.png)](assets/spark-rewriting-data/01.png)
 
-[![SQL DAG](assets/spark-ui-guide/15-sql-dag.png)](assets/spark-ui-guide/15-sql-dag.png)
+[![SQL DAG](assets/spark-rewriting-data/02.png)](assets/spark-rewriting-data/02.png)
 
 > "You should now see the DAG. If not, scroll around a bit and you should see it."
 
-### Check write statistics
+## Check write statistics
 
-[![Write Stats](assets/spark-rewriting-data/01-write-stats.png)](assets/spark-rewriting-data/01-write-stats.png)
-*Write node statistics — compare bytes written against what the operation should produce.*
+[![Write node statistics](assets/spark-rewriting-data/03.png)](assets/spark-rewriting-data/03.png)
+*Compare bytes written against what the operation should produce.*
 
-**Delete or Update:**
+- **Delete or Update:** "Look at the amount of data being written by the writer versus what you expect. If you're seeing a lot more data being written than you expect, you're probably rewriting data."
+- **Merge:** "the merge node has explicit statistics about how much data it's rewriting."
 
-> "Look at the amount of data being written by the writer versus what you expect. If you're seeing a lot more data being written than you expect, you're probably rewriting data."
+There's no numeric threshold — judge against expectation. When rewriting is confirmed, remediate via [[long-spark-stage-io]] (high output: optimize merges, deletion vectors, Photon) and [[optimize-data-workloads-guide]] (small target files 16–64 MB, low-shuffle merge, partition filter in the `ON` clause, broadcast small source).
 
-**Merge:**
-
-> "If you're doing a merge, the merge node has explicit statistics about how much data it's rewriting."
-
-### What to do when rewriting is confirmed
-
-This page covers detection only. For remediation:
-
-- See [[long-spark-stage-io]] → High output section (optimize merges, deletion vectors, Photon)
-- See [[optimize-data-workloads-guide]] → Delta Merge optimizations (small file sizes 16–64 MB, low-shuffle merge, partition filter in ON clause, broadcast small source)
-
-## Related sources
-
-- [[spark-ui-guide]] — parent guide
-- [[long-spark-stage-io]] — Step 4; links here from high-output branch
-- [[optimize-data-workloads-guide]] — merge internals and optimizations
-
-
-## Images
-
-[![Stage to SQL](assets/spark-rewriting-data/01.png)](assets/spark-rewriting-data/01.png)
-*Stage to SQL (1428×482)*
-
-[![SQL DAG](assets/spark-rewriting-data/02.png)](assets/spark-rewriting-data/02.png)
-*SQL DAG (1546×1324)*
-
-[![Write Stats](assets/spark-rewriting-data/03.png)](assets/spark-rewriting-data/03.png)
-*Write Stats (1094×686)*
-
+Related: [[spark-ui-guide]], [[long-spark-stage-io]], [[optimize-data-workloads-guide]].

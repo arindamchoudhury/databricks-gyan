@@ -6,30 +6,25 @@
 > **Tags:** optimization, performance, cbo, cost-based-optimizer, statistics, analyze-table, joins, explain, predictive-optimization, A1
 > **Type:** documentation
 
-## Summary
-Spark SQL's cost-based optimizer (CBO) improves query plans — especially join order/strategy — using **table and column statistics**. Default-on (`spark.sql.cbo.enabled = true`). Critically dependent on fresh stats: collect with `ANALYZE TABLE … COMPUTE STATISTICS`, refresh after writes. On UC managed tables, **predictive optimization runs `ANALYZE` automatically**, so stats stay fresh without manual work.
+Spark SQL's cost-based optimizer (CBO) improves query plans — especially join order/strategy — using **table and column statistics**. Default-on (`spark.sql.cbo.enabled = true`), and it's especially valuable for queries with **multiple joins** (`rowCount` drives join planning).
 
-## Key points
+> "For this to work it is critical to collect table and column statistics and keep them up to date."
 
-- Especially valuable for queries with **multiple joins** — `rowCount` drives join planning.
-- Needs **both** column stats and table stats; missing stats → suboptimal plans.
-- Default-on; disable via `spark.sql.cbo.enabled = false`.
-- Predictive optimization auto-runs `ANALYZE` on UC managed tables.
-- DBR 16.0+: `EXPLAIN` prints a per-table `missing / partial / full` stats summary + corrective command.
+On UC managed tables, **predictive optimization runs `ANALYZE` automatically**, so stats stay fresh without manual work ([[predictive-optimization]]).
 
-## Notes
-
-### Collect statistics
+## Collect statistics
 
 ```sql
 ANALYZE TABLE <table-name> COMPUTE STATISTICS FOR ALL COLUMNS
 ```
 
-Run `ANALYZE TABLE` after writing to a table to keep stats current. On managed tables, predictive optimization handles this (see [[predictive-optimization]]).
+Run it after writing to a table to keep stats current.
 
-### Verify query plans — `EXPLAIN`
+## Verify query plans — `EXPLAIN`
 
-`EXPLAIN` shows whether the plan uses stats. Each operator carries `Statistics(sizeInBytes=…, rowCount=…)`. **Missing `rowCount`** means insufficient column stats — bad for multi-join queries.
+`EXPLAIN` shows whether the plan uses stats. Each operator carries `Statistics(sizeInBytes=…, rowCount=…)`.
+
+> "The rowCount statistic is especially important for queries with multiple joins. If rowCount is missing, it means there is not enough information to calculate it…"
 
 [![Missing estimate — no stats](assets/cost-based-optimizer/01-missing-estimate.png)](assets/cost-based-optimizer/01-missing-estimate.png)
 *Missing estimate: operator has no stats available.*
@@ -51,28 +46,12 @@ Corrective actions: consider running the following command on all tables with mi
   ANALYZE TABLE <table-name> COMPUTE STATISTICS FOR ALL COLUMNS
 ```
 
-### Spark SQL UI
+In the Spark SQL UI, each operator shows estimate accuracy: `est: N/A` (no stats), `est: 1616404 (1X)` (good, error factor 1), or an estimate off by ~1000× (bad).
 
-The Spark SQL UI shows estimate accuracy per operator:
-
-- `rows output: 2,451,005 est: N/A` → ~2M rows produced, **no stats**.
-- `rows output: 2,451,005 est: 1616404 (1X)` → estimate ~1.6M, error factor 1 (good).
-- `rows output: 2,451,005 est: 2626656323` → estimate ~2.6B, error factor ~1000 (bad).
-
-### Disable
+## Disable
 
 ```scala
 spark.conf.set("spark.sql.cbo.enabled", false)
 ```
 
-## Quotes worth keeping
-
-> "For this to work it is critical to collect table and column statistics and keep them up to date." (intro)
-
-> "The rowCount statistic is especially important for queries with multiple joins. If rowCount is missing, it means there is not enough information to calculate it…" (EXPLAIN)
-
-## Related sources
-
-- [[predictive-optimization]] — auto-runs `ANALYZE` on managed tables, keeping CBO stats fresh.
-- [[aqe]] — AQE re-optimizes at runtime using actual stats; CBO plans ahead from collected stats. Complementary.
-- [[optimization-recommendations]] — parent hub (lists CBO under recommendations).
+Related: [[predictive-optimization]], [[aqe]], [[optimization-recommendations]].

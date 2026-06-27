@@ -6,104 +6,37 @@
 > **Tags:** spark, spark-ui, debugging, executors, memory, spot-instances, autoscaling, B2, B16
 > **Type:** documentation
 
-## Summary
+A sub-page of the Spark UI Guide series covering the three causes of executor removal, with step-by-step navigation for diagnosing failing jobs and failing executors. The terminal escalation: if no other cause applies, assume a memory issue.
 
-Sub-page of the Spark UI Guide series. Covers the three causes of executor removal and provides step-by-step navigation for diagnosing failing jobs and failing executors. Final escalation path: if none of the other causes apply, assume a memory issue.
-
-## Key points
-
-- Three causes of executor removal: autoscaling (expected), spot instance reclaim (cloud), OOM.
-- Failing job: drill from job → failed stage → stage description → individual task failures.
-- Failing executor: check cluster Event log first; if no answer, check Spark UI Executors tab for executor logs.
-- Terminal diagnosis: if you can't find another cause, the issue is almost certainly memory.
-
-## Notes
-
-### Three causes of executor removal
+## Three causes of executor removal
 
 | Cause | Is it an error? | Next step |
 |---|---|---|
 | **Autoscaling** | No — expected | Nothing needed |
-| **Spot instance reclaim** | No — cloud provider taking VMs back | See losing-spot-instances guide |
-| **OOM (out of memory)** | Yes | See spark-memory-issues guide |
+| **Spot instance reclaim** | No — cloud provider taking VMs back | → [[losing-spot-instances]] |
+| **OOM (out of memory)** | Yes | → [[spark-memory-issues]] |
 
-### Diagnosing failing jobs
+## Diagnosing failing jobs
 
-[![Failing Jobs](assets/failing-spark-jobs/01-failing-jobs.png)](assets/failing-spark-jobs/01-failing-jobs.png)
-*Jobs list with red/failed entries — click the failed job to start diagnosis.*
+Click the failing job → job detail, then scroll to the failed stage and read the **failure reason**; click the stage-description link for more detail, then scroll further for per-task failure reasons.
 
-1. Click the failing job → job detail page.
-2. Scroll down to the failed stage — read the **failure reason**.
+[![Jobs list with failed entries](assets/failing-spark-jobs/01-failing-jobs.png)](assets/failing-spark-jobs/01-failing-jobs.png)
+[![Failure reason below the stage timeline](assets/failing-spark-jobs/02-failed-stage-reason.png)](assets/failing-spark-jobs/02-failed-stage-reason.png)
+[![Stage description link expands error context](assets/failing-spark-jobs/03-failed-stage-description.png)](assets/failing-spark-jobs/03-failed-stage-description.png)
+[![Per-task failure reasons](assets/failing-spark-jobs/04-failed-tasks.png)](assets/failing-spark-jobs/04-failed-tasks.png)
 
-[![Failed Stage Reason](assets/failing-spark-jobs/02-failed-stage-reason.png)](assets/failing-spark-jobs/02-failed-stage-reason.png)
-*Failure reason shown below the stage timeline.*
+## Diagnosing failing executors
 
-3. Click the **link in the stage description** for more detail (if reason is generic).
+Check the compute's **Event log** first — spot reclaim → [[losing-spot-instances]]; autoscaling resize → expected. If there's no explanation, go to **Spark UI → Executors tab** and get logs from the failed executors (stderr/stdout often has the root cause).
 
-[![Failed Stage Description](assets/failing-spark-jobs/03-failed-stage-description.png)](assets/failing-spark-jobs/03-failed-stage-description.png)
-*Stage description link expands additional error context.*
+[![Cluster Event log](assets/failing-spark-jobs/05-event-log.png)](assets/failing-spark-jobs/05-event-log.png)
+[![Executors tab](assets/failing-spark-jobs/06-executors-tab.png)](assets/failing-spark-jobs/06-executors-tab.png)
+[![Failed executors with log links](assets/failing-spark-jobs/07-failed-executors.png)](assets/failing-spark-jobs/07-failed-executors.png)
 
-4. Scroll further to see **why each task failed**.
-
-[![Failed Tasks](assets/failing-spark-jobs/04-failed-tasks.png)](assets/failing-spark-jobs/04-failed-tasks.png)
-*Per-task failure reasons — most specific level of diagnosis.*
-
-### Diagnosing failing executors
-
-1. Check the compute's **Event log** first.
-
-[![Event Log](assets/failing-spark-jobs/05-event-log.png)](assets/failing-spark-jobs/05-event-log.png)
-*Cluster Event log shows resizing events and spot instance losses — check here before going to Spark UI.*
-
-2. If spot reclaim visible → see losing-spot-instances guide.
-3. If autoscaling resize → expected, nothing to fix.
-4. If no explanation: go to **Spark UI → Executors tab**.
-
-[![Executors Tab](assets/failing-spark-jobs/06-executors-tab.png)](assets/failing-spark-jobs/06-executors-tab.png)
-*The Executors tab in Spark UI.*
-
-5. Get logs from the failed executors.
-
-[![Failed Executors](assets/failing-spark-jobs/07-failed-executors.png)](assets/failing-spark-jobs/07-failed-executors.png)
-*Failed executors shown with log links — executor stderr/stdout often has the root cause.*
-
-### Escalation
+## Escalation
 
 > "If you've gotten this far, the likeliest explanation is a memory issue."
 
-→ See `spark-memory-issues` (not yet captured).
+→ See [[spark-memory-issues]].
 
-## Open questions
-
-- `losing-spot-instances` page — not yet captured (`/aws/en/optimizations/spark-ui-guide/losing-spot-instances`)
-- `spark-memory-issues` page — not yet captured (`/aws/en/optimizations/spark-ui-guide/spark-memory-issues`)
-
-## Related sources
-
-- [[spark-ui-guide]] — parent guide; this page is part of the Jobs Timeline diagnostic branch
-- [[optimize-data-workloads-guide]] — broader optimization context (memory, spill, cluster config)
-
-
-## Images
-
-[![Failing Jobs](assets/failing-spark-jobs/01.png)](assets/failing-spark-jobs/01.png)
-*Failing Jobs (1024×481)*
-
-[![Failure Reason](assets/failing-spark-jobs/02.png)](assets/failing-spark-jobs/02.png)
-*Failure Reason (2990×676)*
-
-[![Failure Description](assets/failing-spark-jobs/03.png)](assets/failing-spark-jobs/03.png)
-*Failure Description (2990×643)*
-
-[![Failed Tasks](assets/failing-spark-jobs/04.png)](assets/failing-spark-jobs/04.png)
-*Failed Tasks (2990×580)*
-
-[![Event Log](assets/failing-spark-jobs/05.png)](assets/failing-spark-jobs/05.png)
-*Event Log (1798×218)*
-
-[![Executors tab](assets/failing-spark-jobs/06.png)](assets/failing-spark-jobs/06.png)
-*Executors tab (1926×366)*
-
-[![Example of failed executors](assets/failing-spark-jobs/07.png)](assets/failing-spark-jobs/07.png)
-*Example of failed executors (2990×784)*
-
+Related: [[spark-ui-guide]], [[losing-spot-instances]], [[spark-memory-issues]], [[optimize-data-workloads-guide]].
