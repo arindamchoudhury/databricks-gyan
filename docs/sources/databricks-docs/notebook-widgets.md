@@ -6,23 +6,9 @@
 > **Tags:** notebooks, widgets, parameters, sql, python, scala, R, dashboards, B1
 > **Type:** documentation
 
-## Summary
+Widgets add interactive **input parameters** to notebooks and dashboards. Four types exist (text, dropdown, combobox, multiselect), created via the UI, the `dbutils.widgets` API (Python/Scala/R), or `CREATE WIDGET` DDL (SQL). **Widget values are always strings.** SQL parameter markers (`:param`, introduced in DBR 15.2) protect against injection and are the recommended way to use widget values in SQL cells.
 
-Widgets add interactive input parameters to notebooks and dashboards. Four types exist (text, dropdown, combobox, multiselect). They're created via UI or the `dbutils.widgets` API (Python/Scala/R) or `CREATE WIDGET` DDL (SQL). Values are always strings. SQL parameter markers (`:param`) — introduced in DBR 15.2 — protect against injection and are the recommended way to use widget values in SQL cells.
-
-## Key points
-
-- **Four types:** text, dropdown, combobox, multiselect.
-- **Widgets only accept string values** — no integers, booleans, or other types.
-- SQL API (`CREATE WIDGET`, `REMOVE WIDGET`, `:param`) is equivalent to `dbutils.widgets` but different syntax.
-- SQL parameter markers require **DBR 15.2+**; DDL string clause markers (`LOCATION :path`) require **DBR 18.0+**.
-- Three on-change behaviors: Run Notebook, Run Accessed Commands (default), Do Nothing. **"Run Accessed Commands" does not rerun SQL cells.**
-- `%run` can pass widget values as `$X="10"` — but **not on SQL warehouses**.
-- Dashboards show all widgets at top; an **Update** button triggers notebook re-run with new values.
-
-## Notes
-
-### Widget types
+[![Widget in the notebook header](assets/notebook-widgets/01.png)](assets/notebook-widgets/01.png)
 
 | Type | Behavior |
 |---|---|
@@ -31,28 +17,17 @@ Widgets add interactive input parameters to notebooks and dashboards. Four types
 | combobox | Pick from list OR type a custom value |
 | multiselect | Pick one or more values from a list |
 
-### Creating widgets
-
-**Python**
+## Creating widgets
 
 ```python
-dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY", "OR", "VA"])
+dbutils.widgets.dropdown("state", "CA", ["CA", "IL", "MI", "NY", "OR", "VA"])             # Python
 ```
-
-**Scala**
-
 ```scala
-dbutils.widgets.dropdown("state", "CA", Seq("CA", "IL", "MI", "NY", "OR", "VA"))
+dbutils.widgets.dropdown("state", "CA", Seq("CA", "IL", "MI", "NY", "OR", "VA"))          // Scala
 ```
-
-**R**
-
 ```r
-dbutils.widgets.dropdown("state", "CA", list("CA", "IL", "MI", "NY", "OR", "VA"))
+dbutils.widgets.dropdown("state", "CA", list("CA", "IL", "MI", "NY", "OR", "VA"))         # R
 ```
-
-**SQL**
-
 ```sql
 CREATE WIDGET DROPDOWN state DEFAULT "CA" CHOICES SELECT * FROM
 (VALUES ("CA"), ("IL"), ("MI"), ("NY"), ("OR"), ("VA"))
@@ -60,139 +35,70 @@ CREATE WIDGET DROPDOWN state DEFAULT "CA" CHOICES SELECT * FROM
 
 > "The widget API in SQL is slightly different but equivalent to the other languages."
 
-**Via UI:** Edit > Add parameter. Configure: Parameter Name, Widget Label (display name), Type, Default value, Possible choices.
+Via UI: **Edit > Add parameter** → configure Parameter Name, Widget Label, Type, Default value, and Possible choices. Use the widget's kebab menu to edit/configure it.
 
-### Accessing widget values
+[![Create widget dialog](assets/notebook-widgets/03.png)](assets/notebook-widgets/03.png)
+[![Widget kebab menu](assets/notebook-widgets/02.png)](assets/notebook-widgets/02.png)
 
-**Python / Scala / R**
+## Accessing widget values
 
 ```python
 dbutils.widgets.get("state")    # single widget
 dbutils.widgets.getAll()        # dict of all widget values
 ```
 
-**SQL (parameter markers)**
-
 ```sql
-SELECT :state
+SELECT :state                                              -- parameter marker
+SHOW TABLES IN IDENTIFIER(:database)                       -- dynamic identifier
+SELECT * FROM IDENTIFIER(:database || '.' || :table) WHERE col == :filter_value LIMIT 100
+CREATE EXTERNAL TABLE my_table USING DELTA LOCATION :path  -- DDL string clause, DBR 18.0+
 ```
 
 > "Parameter markers protect your code from SQL injection attacks by clearly separating provided values from the SQL statements."
-
-**SQL IDENTIFIER() — dynamic table/schema names**
-
-```sql
-SHOW TABLES IN IDENTIFIER(:database)
-
-SELECT * FROM IDENTIFIER(:database || '.' || :table)
-WHERE col == :filter_value
-LIMIT 100
-```
-
-**SQL DDL string clauses (DBR 18.0+)**
-
-```sql
-CREATE EXTERNAL TABLE my_table USING DELTA LOCATION :path
-```
-
-For DBR 14.3–17.3 LTS: use `EXECUTE IMMEDIATE` to construct statements dynamically instead.
-
-**Version requirements**
 
 | Feature | Minimum DBR |
 |---|---|
 | SQL parameter markers (`:param` in queries) | 15.2 |
 | `:param` in DDL string clauses (`LOCATION`, etc.) | 18.0 |
 
-### Removing widgets
+For DBR 14.3–17.3 LTS, use `EXECUTE IMMEDIATE` to construct DDL dynamically instead.
 
-**Python / Scala / R**
+[![Interacting with a widget](assets/notebook-widgets/05.png)](assets/notebook-widgets/05.png)
+[![Widget tooltip](assets/notebook-widgets/04.png)](assets/notebook-widgets/04.png)
+
+## Removing widgets
 
 ```python
-dbutils.widgets.remove("state")
-dbutils.widgets.removeAll()
+dbutils.widgets.remove("state"); dbutils.widgets.removeAll()   # Python/Scala/R
 ```
-
-**SQL**
-
 ```sql
 REMOVE WIDGET state
 ```
 
-### On-change execution behavior
+## On-change execution behavior
 
-Configured per widget. Three options:
+Configured per widget, three options:
 
-**Run Notebook** — reruns the entire notebook on every value change.
+- **Run Notebook** — reruns the entire notebook on every value change.
+- **Run Accessed Commands** *(default)* — reruns only cells that call `dbutils.widgets.get()` for that widget. ⚠️ "SQL cells are not rerun in this configuration."
+- **Do Nothing** — no automatic re-execution.
 
-**Run Accessed Commands** *(default)* — reruns only cells that call `dbutils.widgets.get()` for that widget.
+[![Widget settings](assets/notebook-widgets/06.png)](assets/notebook-widgets/06.png)
 
-> ⚠️ "SQL cells are not rerun in this configuration."
-
-**Do Nothing** — no automatic re-execution; user must manually rerun cells.
-
-### Widgets in dashboards
+## Widgets in dashboards
 
 > "When you create a dashboard from a notebook with input widgets, all the widgets display at the top. In presentation mode, every time you update the value of a widget, you can click the **Update** button to re-run the notebook and update your dashboard with new values."
 
-See [[notebook-dashboards]] for the broader dashboard context.
+[![Dashboard with widgets](assets/notebook-widgets/07.png)](assets/notebook-widgets/07.png)
 
-### Passing widget values via %run
+## Passing widget values via `%run`
 
-Default behavior when calling `%run` on a notebook that has widgets:
-
-> "If you run a notebook that contains widgets, the specified notebook is run with the widget's default values."
-
-Override values with named arguments (cluster-attached notebooks only):
+By default "the specified notebook is run with the widget's default values." Override with named arguments (cluster-attached notebooks only):
 
 ```python
 %run /path/to/notebook $X="10" $Y="1"
 ```
 
-> ⚠️ **Not available for SQL warehouses.** Parameter passing via `%run` is a classic-compute-only feature.
+> ⚠️ **Not available for SQL warehouses** — parameter passing via `%run` is classic-compute-only.
 
-## Quotes worth keeping
-
-> "Widgets only accept string values."
-
-> "SQL cells are not rerun in this \[Run Accessed Commands\] configuration."
-
-> "Parameter markers protect your code from SQL injection attacks by clearly separating provided values from the SQL statements."
-
-## Open questions
-
-- ❓ Can `dbutils.widgets.getAll()` be called from SQL cells, or only Python/Scala/R?
-- ❓ For multiselect widgets, does `dbutils.widgets.get()` return a comma-separated string or a list?
-- ❓ Does "Run Accessed Commands" track `dbutils.widgets.getAll()` calls and rerun cells that use that?
-
-## Related sources
-
-- [[notebooks-overview]] — hub; widgets listed under "Popular pages"
-- [[notebook-dashboards]] — dashboards display widgets at top; Update button re-runs notebook
-- [[notebook-testing]] — pattern of passing parameters to notebooks complements `%run $X="10"` widget passing
-- [[workspace-walkthrough]] — DA-FREE M1; introduces the notebook UI where widgets appear
-
-
-## Images
-
-[![Widget in header](assets/notebook-widgets/01.png)](assets/notebook-widgets/01.png)
-*Widget in header (2228×312)*
-
-[![widget kebab menu](assets/notebook-widgets/02.png)](assets/notebook-widgets/02.png)
-*widget kebab menu (426×180)*
-
-[![create widget dialog](assets/notebook-widgets/03.png)](assets/notebook-widgets/03.png)
-*create widget dialog (596×702)*
-
-[![widget tooltip](assets/notebook-widgets/04.png)](assets/notebook-widgets/04.png)
-*widget tooltip (634×192)*
-
-[![Interact with widget](assets/notebook-widgets/05.png)](assets/notebook-widgets/05.png)
-*Interact with widget (218×144)*
-
-[![Widget settings](assets/notebook-widgets/06.png)](assets/notebook-widgets/06.png)
-*Widget settings (1274×696)*
-
-[![Dashboard with widgets](assets/notebook-widgets/07.png)](assets/notebook-widgets/07.png)
-*Dashboard with widgets (2260×1038)*
-
+Related: [[notebooks-overview]], [[notebook-dashboards]], [[notebook-testing]], [[workspace-walkthrough]].
