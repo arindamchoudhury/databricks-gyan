@@ -6,39 +6,26 @@
 > **Tags:** optimization, performance, disk-cache, delta-cache, dbio-cache, caching, ssd, spark-cache, A1
 > **Type:** documentation
 
-## Summary
-Disk caching accelerates data reads by copying remote Parquet files (incl. Delta) to a node's **local SSD storage** in a fast intermediate format. Caching is **automatic on first read**; successive reads of the same data are served locally. Works for all Parquet files on S3/ABFS/etc. Formerly called **Delta cache / DBIO cache** (renamed to avoid implying it's part of the Delta Lake protocol — it's a proprietary Databricks feature). Distinct from Apache Spark caching.
+> "The data is cached automatically whenever a file has to be fetched from a remote location. Successive reads of the same data are then performed locally…"
 
-## Key points
+Disk caching accelerates reads by copying remote Parquet files (incl. Delta) to a node's **local SSD** in a fast intermediate format. It's **automatic on first read** and auto-invalidates/evicts when files change — no manual cache busting. It was "formerly referred to as the Delta cache and the DBIO cache" (renamed to avoid implying it's part of the Delta protocol — it's a proprietary Databricks feature), and is distinct from Apache Spark caching.
 
-- Auto-caches on first read; auto-invalidates/evicts when files change → no manual cache busting needed.
-- Best enabled by choosing an **SSD-backed (cache-accelerated) worker type** — auto-configured, uses ≤ half the local SSD.
-- `CACHE SELECT` is **ignored** on SQL warehouses + DBR 14.2+ (enhanced algorithm used instead).
-- Disk cache ≠ Spark cache (`.cache()`/`.persist()`).
-- Autoscaling caveat: a decommissioned worker loses its cache → re-read from source.
-
-## Notes
-
-### Disk cache vs Apache Spark cache
+## Disk cache vs Apache Spark cache
 
 | Feature | Disk cache | Spark cache |
 |---|---|---|
-| Stored as | Local files on worker node | In-memory blocks (depends on storage level) |
+| Stored as | Local files on worker node | In-memory blocks |
 | Applied to | Any Parquet table (S3/ABFS/…) | Any DataFrame or RDD |
-| Triggered | Automatically, on first read (if enabled) | Manually, requires code changes |
+| Triggered | Automatically, on first read | Manually, requires code changes |
 | Evaluated | Lazily | Lazily |
-| Availability | Config flags; enabled by default on certain node types | Always available |
-| Evicted | Auto LRU or on file change; manually on cluster restart | Auto LRU; manually with `unpersist` |
+| Availability | Config flags; default-on certain node types | Always available |
+| Evicted | Auto LRU or on file change; manually on restart | Auto LRU; manually with `unpersist` |
 
-Databricks recommends **automatic disk caching** over Spark cache.
+Databricks recommends **automatic disk caching** over Spark cache. Disk cache auto-detects when files are created/deleted/modified/overwritten — you can write/modify/delete with no explicit invalidation.
 
-### Consistency
+## Instance types & configuration
 
-Disk cache auto-detects when files are created/deleted/modified/overwritten and updates accordingly. You can write/modify/delete table data with no explicit invalidation — stale entries are auto-evicted.
-
-### Instance types & configuration
-
-Easiest path: choose a worker type with SSD volumes — those are enabled + configured for disk caching. Cache uses **at most half** the local SSD space.
+Easiest path: choose an **SSD-backed (cache-accelerated) worker type** — those are enabled and configured for disk caching, using **at most half** the local SSD.
 
 ```ini
 spark.databricks.io.cache.maxDiskUsage 50g          # disk per node for cached data
@@ -46,27 +33,11 @@ spark.databricks.io.cache.maxMetaDataCache 1g       # disk per node for cached m
 spark.databricks.io.cache.compression.enabled false # store cached data compressed?
 ```
 
-Check / toggle:
-
 ```scala
 spark.conf.get("spark.databricks.io.cache.enabled")
 spark.conf.set("spark.databricks.io.cache.enabled", "[true | false]")
 ```
 
-Disabling does **not** drop already-cached data — it just stops adding to / reading from the cache.
+Disabling does **not** drop already-cached data — it just stops adding to / reading from the cache. Note: `CACHE SELECT` is **ignored** on SQL warehouses + DBR 14.2+ (an enhanced algorithm is used instead), and on autoscaling, a decommissioned worker loses its cache (re-read from source).
 
-## Quotes worth keeping
-
-> "The data is cached automatically whenever a file has to be fetched from a remote location. Successive reads of the same data are then performed locally…" (intro)
-
-> "Disk caching on Databricks was formerly referred to as the Delta cache and the DBIO cache." (rename note)
-
-## Open questions
-
-- Page last updated 2024-05-01 — older than its siblings; verify config flag names still current on DBR 18.
-
-## Related sources
-
-- [[optimization-recommendations]] — parent hub listing this as a runtime enhancement.
-- [[sql-warehouse-types]] — disk cache is part of why warehouses serve repeated BI queries fast.
-- [[long-spark-stage-io]] — Spark-UI note that flags delta-cache hit/miss when diagnosing I/O-bound stages.
+Related: [[optimization-recommendations]], [[sql-warehouse-types]], [[long-spark-stage-io]].
