@@ -13,8 +13,8 @@ A short Databricks-sponsored "For Dummies" booklet that pitches the **Data Intel
 
 | Ch | Title | PDF pp. | Status | Tags |
 |---|---|---|---|---|
-| 1 | [Understanding Data Intelligence](ch01-understanding-data-intelligence.md) | 9–18 | ✅ | data-intelligence, genai, concepts |
-| 2 | [Exploring the Lakehouse as the Foundation for Data and AI](ch02-lakehouse-foundation.md) | 19–28 | ✅ | lakehouse, genai-vs-classical-ai, B1 |
-| 3 | [Getting Started with the Databricks Data Intelligence Platform](ch03-databricks-platform.md) | 29–38 | ✅ | platform-components, unity-catalog, lakeflow, lakebase, dbsql, B1 |
-| 4 | [Building AI Applications on the Platform](ch04-building-ai-applications.md) | 39–48 | ✅ | agent-bricks, mlops, mcp, ai-bi, databricks-apps |
-| 5 | [Ten Reasons Why You Need a Data Intelligence Platform](ch05-ten-reasons.md) | 49–51 | ✅ | summary, benefits |
+| 1 | [Understanding Data Intelligence](ch01-understanding-data-intelligence/) | 9–18 | ✅ | data-intelligence, genai, concepts |
+| 2 | [Exploring the Lakehouse as the Foundation for Data and AI](ch02-lakehouse-foundation/) | 19–28 | ✅ | lakehouse, genai-vs-classical-ai, B1 |
+| 3 | [Getting Started with the Databricks Data Intelligence Platform](ch03-databricks-platform/) | 29–38 | ✅ | platform-components, unity-catalog, lakeflow, lakebase, dbsql, B1 |
+| 4 | [Building AI Applications on the Platform](ch04-building-ai-applications/) | 39–48 | ✅ | agent-bricks, mlops, mcp, ai-bi, databricks-apps |
+| 5 | [Ten Reasons Why You Need a Data Intelligence Platform](ch05-ten-reasons/) | 49–51 | ✅ | summary, benefits |

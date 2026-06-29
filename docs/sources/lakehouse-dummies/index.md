@@ -13,8 +13,8 @@ A short Databricks-sponsored "For Dummies" booklet that makes the case for the *
 
 | Ch | Title | PDF pp. | Status | Tags |
 |---|---|---|---|---|
-| 1 | [Making the Case for Data Lakehouses](01-making-the-case.md) | 3–8 | ✅ | data-warehouse, data-lake, silos, ACID, B1 |
-| 2 | [Explaining Data Lakehouses](02-explaining-lakehouses.md) | 9–14 | ✅ | lakehouse, maturity-curve, openness, serverless, B1 |
-| 3 | [Understanding the Underlying Technology](03-underlying-technology.md) | 15–20 | ✅ | delta-lake, unity-catalog, lakebase, mlops, B1, B5 |
-| 4 | [Bringing Data Intelligence to the Data Lakehouse](04-data-intelligence.md) | 21–26 | ✅ | data-intelligence, genie, agent-bricks, rag, databricks-apps |
-| 5 | [Ten Reasons Why You Need a Data Lakehouse](05-ten-reasons.md) | 27–29 | ✅ | summary, benefits |
+| 1 | [Making the Case for Data Lakehouses](01-making-the-case/) | 3–8 | ✅ | data-warehouse, data-lake, silos, ACID, B1 |
+| 2 | [Explaining Data Lakehouses](02-explaining-lakehouses/) | 9–14 | ✅ | lakehouse, maturity-curve, openness, serverless, B1 |
+| 3 | [Understanding the Underlying Technology](03-underlying-technology/) | 15–20 | ✅ | delta-lake, unity-catalog, lakebase, mlops, B1, B5 |
+| 4 | [Bringing Data Intelligence to the Data Lakehouse](04-data-intelligence/) | 21–26 | ✅ | data-intelligence, genie, agent-bricks, rag, databricks-apps |
+| 5 | [Ten Reasons Why You Need a Data Lakehouse](05-ten-reasons/) | 27–29 | ✅ | summary, benefits |

@@ -152,4 +152,4 @@ WHEN NOT MATCHED BY SOURCE AND created_at >= (current_date() - INTERVAL '5' DAY)
 
 The same boolean filter on source and target ensures only the bounded window is touched — unmatched records outside that window are left alone.
 
-[change-data-feed](change-data-feed.md) · [what-is-cdc](what-is-cdc.md) · [low-shuffle-merge](low-shuffle-merge.md) · [row-tracking](row-tracking.md)
+[change-data-feed](change-data-feed/) · [what-is-cdc](what-is-cdc/) · [low-shuffle-merge](low-shuffle-merge/) · [row-tracking](row-tracking/)

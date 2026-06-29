@@ -8,7 +8,7 @@
 
 ## Summary
 
-A practitioner deep-dive on **multi-statement, multi-table transactions (MSTs)** — grouping several SQL statements into one all-or-nothing unit so partial updates across tables never leak to downstream consumers. Databricks is positioned as the **first lakehouse to support MSTs on both Delta and Iceberg**. The piece pairs the *why* (a reliability gap that forced years of compensating logic and custom rollbacks) with the *how it actually lands on storage*: `BEGIN ATOMIC … END`, the `.mst.json` staged-commit file, and the success-vs-rollback walkthrough in the Delta log. Companion to the docs note [[transactions]] (full spec: `BEGIN ATOMIC`/`BEGIN TRANSACTION`, isolation, conflict detection, limits) and built directly on [[catalog-commits]] / [catalog-commits write mechanics](catalog-commits.md) — read those for the coordination substrate; read this for the SQL surface and the on-storage mechanics.
+A practitioner deep-dive on **multi-statement, multi-table transactions (MSTs)** — grouping several SQL statements into one all-or-nothing unit so partial updates across tables never leak to downstream consumers. Databricks is positioned as the **first lakehouse to support MSTs on both Delta and Iceberg**. The piece pairs the *why* (a reliability gap that forced years of compensating logic and custom rollbacks) with the *how it actually lands on storage*: `BEGIN ATOMIC … END`, the `.mst.json` staged-commit file, and the success-vs-rollback walkthrough in the Delta log. Companion to the docs note [[transactions]] (full spec: `BEGIN ATOMIC`/`BEGIN TRANSACTION`, isolation, conflict detection, limits) and built directly on [[catalog-commits]] / [catalog-commits write mechanics](catalog-commits/) — read those for the coordination substrate; read this for the SQL surface and the on-storage mechanics.
 
 ## Key points
 
@@ -43,7 +43,7 @@ END;
 
 ### How it works — catalog-managed commits
 
-The implementation idea is changing **who coordinates the commit**. **Catalog-managed commits** (an open-source Delta table feature) shift transaction coordination from the filesystem to the catalog, making the catalog the broker of table access *and* the source of truth for the table's latest metadata and commits. Unity Catalog is the first open lakehouse catalog to support catalog-managed tables. Databricks ties MSTs explicitly to this: moving coordination to the catalog "also allows Unity Catalog to orchestrate commits across multiple tables within a single transaction boundary while maintaining Delta Lake's ACID guarantees." (See [catalog-commits write mechanics](catalog-commits.md) for the staged-commits write sequence this builds on.)
+The implementation idea is changing **who coordinates the commit**. **Catalog-managed commits** (an open-source Delta table feature) shift transaction coordination from the filesystem to the catalog, making the catalog the broker of table access *and* the source of truth for the table's latest metadata and commits. Unity Catalog is the first open lakehouse catalog to support catalog-managed tables. Databricks ties MSTs explicitly to this: moving coordination to the catalog "also allows Unity Catalog to orchestrate commits across multiple tables within a single transaction boundary while maintaining Delta Lake's ACID guarantees." (See [catalog-commits write mechanics](catalog-commits/) for the staged-commits write sequence this builds on.)
 
 ### Seeing it in action
 
@@ -87,7 +87,7 @@ MSTs are a **reliability** feature, not a flashy one: they close a gap that forc
 ## Related sources
 
 - [[transactions]] — the **docs note** and full spec: `BEGIN ATOMIC` (row-level concurrency) vs `BEGIN TRANSACTION` (table-level), snapshot isolation, optimistic-concurrency conflicts, and the limit list (DML-only, ≤100 tables, 48 h, no DDL/streaming/time-travel/RLS). This SunnyData note is the *SQL-surface + on-storage* companion.
-- [catalog-commits write mechanics](catalog-commits.md) — the staged-commits write sequence (`stage → propose → UC winning commit → publish`) and `_delta_log/_staged_commits/` folder that MSTs ride on.
+- [catalog-commits write mechanics](catalog-commits/) — the staged-commits write sequence (`stage → propose → UC winning commit → publish`) and `_delta_log/_staged_commits/` folder that MSTs ride on.
 - [[catalog-commits]] — the docs note for the `catalogManaged` substrate MSTs require.
 - [[managed-tables]] — MSTs need UC managed tables.
 

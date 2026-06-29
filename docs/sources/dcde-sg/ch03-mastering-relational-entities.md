@@ -14,7 +14,7 @@
 
 > 📌 **Notes adapted to the 2026 platform.** The book targets DBR 13.3 LTS and demos everything against the legacy `hive_metastore` catalog with `dbfs:` / `/mnt/demo` mount paths. Key shifts flagged with ⚠️ throughout: (1) **Unity Catalog is the default** in all new 2026 workspaces — a "database" is a **schema** in the 3-level namespace `catalog.schema.table`; (2) **DBFS root + mounts are deprecated** (off by default for accounts created after 2025-12-19) — the book's `dbfs:/mnt/demo` and `dbfs:/Shared/...` paths won't run on a UC-only workspace; use **UC Volumes / external locations**; (3) UC **external tables** require the `LOCATION` to sit under a **registered external location** (path + storage credential), not an arbitrary mount path; (4) **global temporary views are not supported on serverless compute** (the new default compute) and are treated as legacy; (5) UC adds **informational `PRIMARY KEY` / `FOREIGN KEY`** constraints on top of the book's enforced `NOT NULL` / `CHECK`. See [research-cache](../../research-cache/dcde-sg-ch03-facts/).
 
-> 📎 **Overlaps:** builds directly on [Ch 2 — Managing Data with Delta Lake](ch02-managing-data-with-delta-lake.md) (every table here is a Delta table). Data governance / Unity Catalog gets full treatment in Ch 8.
+> 📎 **Overlaps:** builds directly on [Ch 2 — Managing Data with Delta Lake](ch02-managing-data-with-delta-lake/) (every table here is a Delta table). Data governance / Unity Catalog gets full treatment in Ch 8.
 
 ---
 
@@ -37,7 +37,7 @@ A schema is a logical container for tables, views, and functions.
 
 **The metastore.** Every workspace ships with a local catalog called **`hive_metastore`** that all clusters can read/write. The Hive metastore is a metadata repository — it stores table/view/partition definitions, data formats, and storage locations. It stores *metadata only*, never the data itself.
 
-> ⚠️ **`hive_metastore` is legacy — and on new workspaces it's gone entirely.** In 2026 the metastore concept is **Unity Catalog**, and the namespace is **three levels**: `catalog.schema.table`. A "database" maps to the **schema** level. Whether `hive_metastore` shows up as a top-level catalog depends on the **"Disable legacy features"** account setting: where HMS is *enabled*, it appears alongside the UC catalogs (UC runs next to it); where it's *disabled* — the **default for accounts created after 2025-12-19, with no opt-out** — `hive_metastore` does **not appear at all** and the Catalog Explorer shows only UC catalogs (e.g. `main`, `system`, the workspace catalog). The book's `USE CATALOG hive_metastore` line only works on a workspace where an admin has left HMS enabled; on a UC-only workspace it errors. See [Ch 2 §2.1](ch02-managing-data-with-delta-lake.md) for the full HMS/DBFS deprecation note.
+> ⚠️ **`hive_metastore` is legacy — and on new workspaces it's gone entirely.** In 2026 the metastore concept is **Unity Catalog**, and the namespace is **three levels**: `catalog.schema.table`. A "database" maps to the **schema** level. Whether `hive_metastore` shows up as a top-level catalog depends on the **"Disable legacy features"** account setting: where HMS is *enabled*, it appears alongside the UC catalogs (UC runs next to it); where it's *disabled* — the **default for accounts created after 2025-12-19, with no opt-out** — `hive_metastore` does **not appear at all** and the Catalog Explorer shows only UC catalogs (e.g. `main`, `system`, the workspace catalog). The book's `USE CATALOG hive_metastore` line only works on a workspace where an admin has left HMS enabled; on a UC-only workspace it errors. See [Ch 2 §2.1](ch02-managing-data-with-delta-lake/) for the full HMS/DBFS deprecation note.
 
 ### 2.1 The default database
 
@@ -237,7 +237,7 @@ CREATE TABLE new_users
 - **`PARTITIONED BY`** — splits data into subfolders by column value. Helps *large* tables via efficient retrieval, but for small/medium tables the **small-files problem** (many tiny files → poor compaction + data skipping) usually outweighs the benefit. Apply partitioning selectively.
 - **`LOCATION`** — makes the table external (as in §3).
 
-> ⚠️ **2026:** prefer **liquid clustering** over `PARTITIONED BY` for new tables (see [Ch 2 §7](ch02-managing-data-with-delta-lake.md)). Partitioning is discouraged for tables < 1 TB.
+> ⚠️ **2026:** prefer **liquid clustering** over `PARTITIONED BY` for new tables (see [Ch 2 §7](ch02-managing-data-with-delta-lake/)). Partitioning is discouraged for tables < 1 TB.
 
 ### 5.1 `CREATE TABLE` vs CTAS
 

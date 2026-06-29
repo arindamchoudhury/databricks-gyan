@@ -9,4 +9,4 @@ Notes captured from research papers underpinning the Databricks platform — the
 
 | Paper | Venue | Added | Tags |
 |---|---|---|---|
-| [Lakehouse: A New Generation of Open Platforms…](lakehouse-cidr-2021.md) | CIDR 2021 | 2026-06-21 | lakehouse, architecture, delta-lake, metadata-layer, tpc-ds, foundations, B1 |
+| [Lakehouse: A New Generation of Open Platforms…](lakehouse-cidr-2021/) | CIDR 2021 | 2026-06-21 | lakehouse, architecture, delta-lake, metadata-layer, tpc-ds, foundations, B1 |

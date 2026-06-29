@@ -9,4 +9,4 @@ Notes captured from individual Databricks blog posts — foundational concept pi
 
 | Post | Added | Tags |
 |---|---|---|
-| [What Is a Data Lakehouse?](what-is-a-lakehouse.md) | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
+| [What Is a Data Lakehouse?](what-is-a-lakehouse/) | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
