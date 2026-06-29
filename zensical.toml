@@ -159,6 +159,7 @@ nav = [
                     { "Aggregate data" = "sources/databricks-docs/aggregation.md" },
                     { "Tables and views" = "sources/databricks-docs/tables-views.md" },
                     { "Merge data" = "sources/databricks-docs/merge.md" },
+                    { "Selective overwrite" = "sources/databricks-docs/selective-overwrite.md" },
                 ]},
                 { "Lakeflow Jobs" = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },

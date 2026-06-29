@@ -98,4 +98,5 @@ Grouped by topic. Nav mirrors these groups.
 | [Checkpoint V2](checkpoint-v2/) | 2026-06-24 | tables, delta, table-features, checkpoint-v2, concurrency, transaction-log, liquid-clustering, automatic-upgrades, v2Checkpoint, REORG, B4 |
 | [Column mapping (rename & drop columns)](column-mapping/) | 2026-06-24 | tables, delta, column-mapping, rename-column, drop-column, schema-evolution, delta-protocol, streaming, schema-tracking-location, uniform, I5, A4 |
 | [Row tracking](row-tracking/) | 2026-06-24 | tables, delta, iceberg, row-tracking, row-id, row-commit-version, row-lineage, delta-protocol, materialized-views, change-data-feed, I5 |
-| [Merge (upsert into Delta)](merge/) | 2026-06-29 | delta, merge,
+| [Merge (upsert into Delta)](merge/) | 2026-06-29 | delta, merge, upsert, scd, deduplication, when-matched, when-not-matched-by-source, incremental-sync, foreachBatch, I5, I4 |
+| [Selective overwrite](selective-overwrite/) | 2026-06-29 | delta, overwrite, replace-where, replace-using, replace-on, dynamic-partition-overwrite, selective-overwrite, I5, I1 |
