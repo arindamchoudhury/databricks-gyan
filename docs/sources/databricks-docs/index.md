@@ -101,3 +101,6 @@ Grouped by topic. Nav mirrors these groups.
 | [Merge (upsert into Delta)](merge/) | 2026-06-29 | delta, merge, upsert, scd, deduplication, when-matched, when-not-matched-by-source, incremental-sync, foreachBatch, I5, I4 |
 | [Selective overwrite](selective-overwrite/) | 2026-06-29 | delta, overwrite, replace-where, replace-using, replace-on, dynamic-partition-overwrite, selective-overwrite, I5, I1 |
 | [What is Lakeflow Connect?](lakeflow-connect-overview/) | 2026-06-29 | ingestion, lakeflow-connect, managed-connectors, standard-connectors, community-connectors, auto-loader, kafka, etl, incremental, A3, I1 |
+
+| [File upload (Add data UI)](create-or-modify-table/) | 2026-06-29 | ingestion, file-upload, add-data-ui, delta, managed-table, csv, json, parquet, avro, unity-catalog, A3 |
+| [Managed connectors in Lakeflow Connect](lakeflow-connect-managed/) | 2026-06-29 | ingestion, lakeflow-connect, managed-connectors, cdc, saas, database, kafka, streaming, query-based, file-connectors, serverless, A3 |

@@ -163,6 +163,8 @@ nav = [
                 ]},
                 { "Lakeflow Connect" = [
                     { "What is Lakeflow Connect?" = "sources/databricks-docs/lakeflow-connect-overview.md" },
+                    { "Managed connectors" = "sources/databricks-docs/lakeflow-connect-managed.md" },
+                    { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
                 ]},
                 { "Lakeflow Jobs" = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
