@@ -209,4 +209,15 @@ nav = [
     ]},
     { "Reference" = [
         { "Glossary" = "reference/glossary.md" },
-        { "Resources" = "referen
+        { "Resources" = "reference/resources.md" },
+    ]},
+]
+
+[project.markdown_extensions.wikilinks]
+base_url = ""
+end_url = ""
+
+[project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]

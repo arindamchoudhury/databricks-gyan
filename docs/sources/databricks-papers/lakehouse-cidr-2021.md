@@ -113,6 +113,6 @@ Delta Engine is **comparable-or-better on time and cheapest on cost**. Footnote:
 
 ## Related sources
 
-- [what-is-a-lakehouse](../databricks-blog/what-is-a-lakehouse/) — the 2020 Databricks blog post; same thesis for a general audience. This paper is its peer-reviewed, mechanism-level version (metadata layer internals, TPC-DS numbers, research agenda). Stonebraker's "data swamp" critique cited here (ref [48]) is the lake's failure mode the blog also names.
+- [what-is-a-lakehouse](../databricks-blog/what-is-a-lakehouse/) — the 2020 Databricks blog post; same thesis for a general audience. This paper is its peer-reviewed, mechanism-level version (metadata layer internals, TPC-DS numbers, research agenda). Stonebraker's "data swamp" critique cited here (ref \[48\]) is the lake's failure mode the blog also names.
 - [ch01-databricks-platform-workspace](../../book/ch01-databricks-platform-workspace/) — personal book Ch 1 builds its warehouse→lake→lakehouse narrative and Delta-transaction-log explanation directly on this paper's framing.
-- [[02-explaining-lakehouses]] —
+- [[02-explaining-lakehouses]] — Lakehouse-Dummies Ch 2 restates the same defining features for a business audience.

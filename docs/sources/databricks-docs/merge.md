@@ -14,15 +14,28 @@ The Python API chains builder methods on a `DeltaTable` object and requires `.ex
 
 | SQL clause | Python method |
 |---|---|
-| `WHEN MATCHED THEN UPDATE SET col=val` | `.whenMatchedUpdate(condition=..., set={...})` |
+| `WHEN MATCHED THEN UPDATE SET target.lastSeen = source.timestamp` | `.whenMatchedUpdate(set={"target.lastSeen": "source.timestamp"})` |
 | `WHEN MATCHED THEN UPDATE SET *` | `.whenMatchedUpdateAll()` |
 | `WHEN MATCHED THEN DELETE` | `.whenMatchedDelete(condition=...)` |
-| `WHEN NOT MATCHED THEN INSERT (cols) VALUES (vals)` | `.whenNotMatchedInsert(condition=..., values={...})` |
+| `WHEN NOT MATCHED THEN INSERT (target.key, target.lastSeen, target.status) VALUES (source.key, source.timestamp, 'active')` | `.whenNotMatchedInsert(values={"target.key": "source.key", "target.lastSeen": "source.timestamp", "target.status": "'active'"})` |
 | `WHEN NOT MATCHED THEN INSERT *` | `.whenNotMatchedInsertAll()` |
-| `WHEN NOT MATCHED BY SOURCE THEN UPDATE SET col=val` | `.whenNotMatchedBySourceUpdate(condition=..., set={...})` |
+| `WHEN NOT MATCHED BY SOURCE AND target.lastSeen >= (current_date() - INTERVAL '5' DAY) THEN UPDATE SET target.status = 'inactive'` | `.whenNotMatchedBySourceUpdate(condition="target.lastSeen >= (current_date() - INTERVAL '5' DAY)", set={"target.status": "'inactive'"})` |
 | `WHEN NOT MATCHED BY SOURCE THEN DELETE` | `.whenNotMatchedBySourceDelete(condition=...)` |
 
-Basic upsert:
+Column values in `set`/`values` dicts are **SQL expression strings** (not Python values) — string literals need inner quotes: `"'active'"`.
+
+## Basic upsert
+
+```sql
+MERGE INTO people10m
+USING people10mupdates
+ON people10m.id = people10mupdates.id
+WHEN MATCHED THEN
+  UPDATE SET firstName = people10mupdates.firstName, salary = people10mupdates.salary
+WHEN NOT MATCHED THEN
+  INSERT (id, firstName, salary)
+  VALUES (people10mupdates.id, people10mupdates.firstName, people10mupdates.salary)
+```
 
 ```python
 from delta.tables import DeltaTable
@@ -33,41 +46,16 @@ updates = spark.table("people10mupdates")
 (target.alias("people")
   .merge(updates.alias("updates"), "people.id = updates.id")
   .whenMatchedUpdate(set={"firstName": "updates.firstName", "salary": "updates.salary"})
-  .whenNotMatchedInsert(values={"id": "updates.id", "firstName": "updates.firstName", "salary": "updates.salary"})
+  .whenNotMatchedInsert(values={
+      "id": "updates.id",
+      "firstName": "updates.firstName",
+      "salary": "updates.salary",
+  })
   .execute()
 )
 ```
 
-With `WHEN NOT MATCHED BY SOURCE` (DBR 12.2 LTS+):
-
-```python
-(targetDF
-  .merge(sourceDF, "source.key = target.key")
-  .whenMatchedUpdate(set={"target.lastSeen": "source.timestamp"})
-  .whenNotMatchedInsert(values={"target.key": "source.key", "target.lastSeen": "source.timestamp", "target.status": "'active'"})
-  .whenNotMatchedBySourceUpdate(
-    condition="target.lastSeen >= (current_date() - INTERVAL '5' DAY)",
-    set={"target.status": "'inactive'"}
-  )
-  .execute()
-)
-```
-
-Column values in `set`/`values` dicts are **SQL expression strings** (not Python values) — string literals need inner quotes: `"'active'"`.
-
-## Basic upsert (SQL)
-
-```sql
-MERGE INTO people10m
-USING people10mupdates
-ON people10m.id = people10mupdates.id
-WHEN MATCHED THEN
-  UPDATE SET id = people10mupdates.id, firstName = people10mupdates.firstName, ...
-WHEN NOT MATCHED THEN
-  INSERT (id, firstName, ...) VALUES (people10mupdates.id, people10mupdates.firstName, ...)
-```
-
-**Important:** Only a single source row can match a given target row. In **DBR 16.0+**, MERGE evaluates conditions in both the `WHEN MATCHED` and `ON` clauses to detect duplicate matches. In **DBR 15.4 LTS and below**, only the `ON` clause is used — a source with multiple rows matching the same target key will fail on those older runtimes if any `WHEN MATCHED` condition is also true for more than one.
+**Important:** Only a single source row can match a given target row. In **DBR 16.0+**, MERGE evaluates conditions in both the `WHEN MATCHED` and `ON` clauses to detect duplicate matches. In **DBR 15.4 LTS and below**, only the `ON` clause is used.
 
 `MERGE` on a SQL VIEW is only supported when the view is defined as `CREATE VIEW viewName AS SELECT * FROM deltaTable`.
 
@@ -83,14 +71,29 @@ WHEN NOT MATCHED THEN INSERT *
 WHEN NOT MATCHED BY SOURCE THEN DELETE
 ```
 
-**Always add a condition** to `WHEN NOT MATCHED BY SOURCE` to avoid fully rewriting the target table:
+**Always add a condition** to `WHEN NOT MATCHED BY SOURCE` to avoid fully rewriting the target table. `WHEN NOT MATCHED BY SOURCE` clauses **cannot reference source columns** — actions must use literals or target-column expressions only:
 
 ```sql
 WHEN NOT MATCHED BY SOURCE AND target.lastSeen >= (current_date() - INTERVAL '5' DAY)
   THEN UPDATE SET target.status = 'inactive'
 ```
 
-`WHEN NOT MATCHED BY SOURCE` clauses **cannot reference source columns** (there is no matching source row); actions must use literals or expressions on target columns only (e.g. `SET target.deleted_count = target.deleted_count + 1`).
+```python
+(targetDF
+  .merge(sourceDF, "source.key = target.key")
+  .whenMatchedUpdate(set={"target.lastSeen": "source.timestamp"})
+  .whenNotMatchedInsert(values={
+      "target.key": "source.key",
+      "target.lastSeen": "source.timestamp",
+      "target.status": "'active'",
+  })
+  .whenNotMatchedBySourceUpdate(
+      condition="target.lastSeen >= (current_date() - INTERVAL '5' DAY)",
+      set={"target.status": "'inactive'"},
+  )
+  .execute()
+)
+```
 
 ## Merge operation semantics
 
@@ -112,7 +115,7 @@ WHEN NOT MATCHED BY SOURCE AND target.lastSeen >= (current_date() - INTERVAL '5'
 
 ## Deduplication pattern
 
-Insert-only merge: inserts source rows only if no match exists in the target. Source must already be deduplicated within itself — MERGE won't deduplicate across new rows.
+Insert-only merge: inserts source rows only if no match exists in the target. Source must already be deduplicated within itself.
 
 ```sql
 MERGE INTO logs
@@ -120,7 +123,15 @@ USING newDedupedLogs ON logs.uniqueId = newDedupedLogs.uniqueId
 WHEN NOT MATCHED THEN INSERT *
 ```
 
-For large tables where duplicates are time-bounded, scope the match to a recent window to avoid scanning the full target:
+```python
+(DeltaTable.forName(spark, "logs").alias("logs")
+  .merge(newDedupedLogs.alias("newLogs"), "logs.uniqueId = newLogs.uniqueId")
+  .whenNotMatchedInsertAll()
+  .execute()
+)
+```
+
+For large tables, scope the match to a recent window to avoid scanning the full target:
 
 ```sql
 MERGE INTO logs
@@ -131,11 +142,36 @@ WHEN NOT MATCHED AND newDedupedLogs.date > current_date() - INTERVAL 7 DAYS
   THEN INSERT *
 ```
 
-This insert-only merge can be used with Structured Streaming via `foreachBatch` for **continuous deduplication** — the target is append-only from the MERGE perspective, so a second stream can safely read from it.
+```python
+(DeltaTable.forName(spark, "logs").alias("logs")
+  .merge(
+      newDedupedLogs.alias("newLogs"),
+      "logs.uniqueId = newLogs.uniqueId AND logs.date > current_date() - INTERVAL 7 DAYS",
+  )
+  .whenNotMatchedInsert(
+      condition="newLogs.date > current_date() - INTERVAL 7 DAYS",
+      values="*",
+  )
+  .execute()
+)
+```
+
+Use with Structured Streaming via `foreachBatch` for **continuous deduplication**:
+
+```python
+def merge_dedup(batch_df, batch_id):
+    (DeltaTable.forName(spark, "logs").alias("logs")
+      .merge(batch_df.alias("newLogs"), "logs.uniqueId = newLogs.uniqueId")
+      .whenNotMatchedInsertAll()
+      .execute()
+    )
+
+stream.writeStream.foreachBatch(merge_dedup).start()
+```
 
 ## SCD and CDC
 
-For **Slowly Changing Dimensions (SCD Type 1/2)** and **Change Data Capture (CDC)**, prefer `AUTO CDC ... INTO` in Lakeflow Spark Declarative Pipelines — it handles out-of-order records correctly. See [[what-is-cdc]].
+For **Slowly Changing Dimensions (SCD Type 1/2)** and **Change Data Capture (CDC)**, prefer `AUTO CDC ... INTO` in Lakeflow Spark Declarative Pipelines — it handles out-of-order records correctly. See [what-is-cdc](what-is-cdc/).
 
 ## Incrementally sync with source (DBR 12.2 LTS+)
 
@@ -147,7 +183,23 @@ USING (SELECT * FROM source WHERE created_at >= (current_date() - INTERVAL '5' D
 ON t.key = s.key
 WHEN MATCHED THEN UPDATE SET *
 WHEN NOT MATCHED THEN INSERT *
-WHEN NOT MATCHED BY SOURCE AND created_at >= (current_date() - INTERVAL '5' DAY) THEN DELETE
+WHEN NOT MATCHED BY SOURCE AND t.created_at >= (current_date() - INTERVAL '5' DAY) THEN DELETE
+```
+
+```python
+source_df = spark.table("source").filter(
+    "created_at >= (current_date() - INTERVAL '5' DAY)"
+)
+
+(DeltaTable.forName(spark, "target").alias("t")
+  .merge(source_df.alias("s"), "t.key = s.key")
+  .whenMatchedUpdateAll()
+  .whenNotMatchedInsertAll()
+  .whenNotMatchedBySourceDelete(
+      condition="t.created_at >= (current_date() - INTERVAL '5' DAY)"
+  )
+  .execute()
+)
 ```
 
 The same boolean filter on source and target ensures only the bounded window is touched — unmatched records outside that window are left alone.

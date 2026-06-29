@@ -60,6 +60,6 @@ def build():
 build()  # initial build on startup
 
 server = Server()
-server.watch("docs/", build)
-server.watch("zensical.toml", build)
+server.watch("docs/", build, delay=5)
+server.watch("zensical.toml", build, delay=5)
 server.serve(root="site", port=8000, host="0.0.0.0")
