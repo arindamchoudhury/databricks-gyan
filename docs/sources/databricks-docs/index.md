@@ -100,3 +100,4 @@ Grouped by topic. Nav mirrors these groups.
 | [Row tracking](row-tracking/) | 2026-06-24 | tables, delta, iceberg, row-tracking, row-id, row-commit-version, row-lineage, delta-protocol, materialized-views, change-data-feed, I5 |
 | [Merge (upsert into Delta)](merge/) | 2026-06-29 | delta, merge, upsert, scd, deduplication, when-matched, when-not-matched-by-source, incremental-sync, foreachBatch, I5, I4 |
 | [Selective overwrite](selective-overwrite/) | 2026-06-29 | delta, overwrite, replace-where, replace-using, replace-on, dynamic-partition-overwrite, selective-overwrite, I5, I1 |
+| [What is Lakeflow Connect?](lakeflow-connect-overview/) | 2026-06-29 | ingestion, lakeflow-connect, managed-connectors, standard-connectors, community-connectors, auto-loader, kafka, etl, incremental, A3, I1 |
