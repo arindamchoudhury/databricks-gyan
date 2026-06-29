@@ -154,6 +154,7 @@ nav = [
                 { "Concepts" = [
                     { "Batch vs. streaming" = "sources/databricks-docs/batch-vs-streaming.md" },
                     { "Procedural vs. declarative" = "sources/databricks-docs/procedural-vs-declarative.md" },
+                    { "Schema evolution" = "sources/databricks-docs/schema-evolution.md" },
                     { "Tables and views" = "sources/databricks-docs/tables-views.md" },
                 ]},
                 { "Lakeflow Jobs" = [
