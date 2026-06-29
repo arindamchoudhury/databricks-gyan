@@ -99,4 +99,7 @@ Grouped by topic. Nav mirrors these groups.
 | [Column mapping (rename & drop columns)](column-mapping.md) | 2026-06-24 | tables, delta, column-mapping, rename-column, drop-column, schema-evolution, delta-protocol, streaming, schema-tracking-location, uniform, I5, A4 |
 | [Row tracking](row-tracking.md) | 2026-06-24 | tables, delta, iceberg, row-tracking, row-id, row-commit-version, row-lineage, delta-protocol, materialized-views, change-data-feed, I5 |
 
-To add another: *"take notes on &lt;docs.databricks.com URL&gt;."*
+### Data engineering concepts
+
+| Page | Added | Tags |
+|---|---|---

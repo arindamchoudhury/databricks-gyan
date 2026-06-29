@@ -155,6 +155,8 @@ nav = [
                     { "Batch vs. streaming" = "sources/databricks-docs/batch-vs-streaming.md" },
                     { "Procedural vs. declarative" = "sources/databricks-docs/procedural-vs-declarative.md" },
                     { "Schema evolution" = "sources/databricks-docs/schema-evolution.md" },
+                    { "Change data capture and snapshots" = "sources/databricks-docs/what-is-cdc.md" },
+                    { "Aggregate data" = "sources/databricks-docs/aggregation.md" },
                     { "Tables and views" = "sources/databricks-docs/tables-views.md" },
                 ]},
                 { "Lakeflow Jobs" = [
@@ -211,10 +213,4 @@ nav = [
 ]
 
 [project.markdown_extensions.wikilinks]
-base_url = ""
-end_url = ""
-
-[project.markdown_extensions.pymdownx.superfences]
-custom_fences = [
-  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
-]
+base
