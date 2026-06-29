@@ -98,8 +98,4 @@ Grouped by topic. Nav mirrors these groups.
 | [Checkpoint V2](checkpoint-v2.md) | 2026-06-24 | tables, delta, table-features, checkpoint-v2, concurrency, transaction-log, liquid-clustering, automatic-upgrades, v2Checkpoint, REORG, B4 |
 | [Column mapping (rename & drop columns)](column-mapping.md) | 2026-06-24 | tables, delta, column-mapping, rename-column, drop-column, schema-evolution, delta-protocol, streaming, schema-tracking-location, uniform, I5, A4 |
 | [Row tracking](row-tracking.md) | 2026-06-24 | tables, delta, iceberg, row-tracking, row-id, row-commit-version, row-lineage, delta-protocol, materialized-views, change-data-feed, I5 |
-
-### Data engineering concepts
-
-| Page | Added | Tags |
-|---|---|---
+| [Merge (upsert into Delta)](merge.md) | 2026-06-29 | delta, merge,

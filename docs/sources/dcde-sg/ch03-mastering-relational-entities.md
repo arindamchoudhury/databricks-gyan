@@ -433,7 +433,7 @@ Temp and global temp views drop automatically (session end / cluster restart) bu
 | `CREATE VIEW` | Stored view (persisted, cross-session) |
 | `CREATE TEMP VIEW` | Session-scoped view |
 | `CREATE GLOBAL TEMP VIEW` | Cluster-scoped view in `global_temp` (legacy; unsupported on serverless) |
-| `SHOW TABLES [IN db]` | List tables + views (default DB unless `IN` given) |
+| SHOW TABLES \[IN db\] | List tables + views (default DB unless `IN` given) |
 | `DESCRIBE EXTENDED` / `DESCRIBE DATABASE EXTENDED` | Inspect type, location, provider |
 
 ---

@@ -21,7 +21,7 @@ An end-to-end walkthrough applying software-engineering discipline to a Databric
 ## The principles
 
 - **Work in Git branches** — "this branch enables you to work on files and code independently from your repo's `main` branch, which is a software engineering best practice." Every step branches before changing anything.
-- **Extract reusable logic into workspace files** (e.g. `covid_analysis/transforms.py`) so functions can be reused and "more easily test[ed]… which… can raise the overall quality of your code."
+- **Extract reusable logic into workspace files** (e.g. `covid_analysis/transforms.py`) so functions can be reused and "more easily test\[ed\]… which… can raise the overall quality of your code."
 - **Pin dependency versions** — "declaring dependencies improves reproducibility by using precisely defined versions of libraries."
 - **Test with pytest against fake data** in `tests/testdata.csv`, not production.
 - **Two-task job** — test task → main notebook task; the dependency enforces tests-pass-before-run.
@@ -95,4 +95,4 @@ jobs:
           run-name: 'EDA transforms helper module unit tests'
 ```
 
-Related: [[notebook-testing]], [[notebook-share-code]], [[notebook-workflows]], [[lakeflow-jobs]], [[notebook-best-practices]].
+Related: [[notebook-testing]], [[notebook-share-code]], [[notebook-workflows]], [[lakeflow-jobs]], [[notebook-best-practices]]

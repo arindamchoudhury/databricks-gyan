@@ -158,6 +158,7 @@ nav = [
                     { "Change data capture and snapshots" = "sources/databricks-docs/what-is-cdc.md" },
                     { "Aggregate data" = "sources/databricks-docs/aggregation.md" },
                     { "Tables and views" = "sources/databricks-docs/tables-views.md" },
+                    { "Merge data" = "sources/databricks-docs/merge.md" },
                 ]},
                 { "Lakeflow Jobs" = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
@@ -208,9 +209,4 @@ nav = [
     ]},
     { "Reference" = [
         { "Glossary" = "reference/glossary.md" },
-        { "Resources" = "reference/resources.md" },
-    ]},
-]
-
-[project.markdown_extensions.wikilinks]
-base
+        { "Resources" = "referen
