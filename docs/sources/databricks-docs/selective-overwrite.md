@@ -53,11 +53,25 @@ spark.conf.set("spark.databricks.delta.replaceWhere.constraintCheck.enabled", Fa
 
 Dynamic data overwrite — replaces rows where the specified columns compare **equal**. Works on partitioned, unpartitioned, and liquid-clustered tables. No session configuration needed; compute-independent.
 
+The columns in `REPLACE USING (...)` define an **implicit join key**: the engine matches `target.col = source.col` for each named column. So:
+
 ```sql
 INSERT INTO TABLE events
   REPLACE USING (event_id, start_date)
   SELECT * FROM source_data
 ```
+
+is equivalent to:
+
+```sql
+MERGE INTO events AS t
+USING source_data AS s
+ON t.event_id = s.event_id AND t.start_date = s.start_date
+WHEN MATCHED THEN UPDATE SET *
+WHEN NOT MATCHED THEN INSERT *
+```
+
+`REPLACE USING` collapses that entire `ON … WHEN MATCHED … WHEN NOT MATCHED` structure into a single clause — the trade-off is the match must always be column-equality. When you need NULL-safe matching (`<=>`) or any other boolean expression, use `REPLACE ON` instead.
 
 ```python
 (sourceDataDF.write
