@@ -1,5 +1,6 @@
 import glob as _glob
 import os
+import threading
 from livereload import Server
 
 import zensical.config as _zc
@@ -51,15 +52,32 @@ from zensical import build as _zensical_build
 
 _CONFIG_FILE = os.path.abspath("zensical.toml")
 
+# Debounce state: resets on every file-change event so rapid saves
+# don't trigger multiple consecutive builds.
+_build_timer = None
+_build_lock = threading.Lock()
 
-def build():
+
+def _do_build():
+    """The actual build, called after the debounce window expires."""
     _refresh_slug_index(_docs_dir)
     _zensical_build(_CONFIG_FILE, {"clean": False, "strict": False})
 
 
-build()  # initial build on startup
+def build():
+    """Debounced wrapper: waits 5 s of quiet before calling _do_build."""
+    global _build_timer
+    with _build_lock:
+        if _build_timer is not None:
+            _build_timer.cancel()
+        _build_timer = threading.Timer(5.0, _do_build)
+        _build_timer.daemon = True
+        _build_timer.start()
+
+
+_do_build()  # initial build on startup (immediate, not debounced)
 
 server = Server()
-server.watch("docs/", build, delay=5)
-server.watch("zensical.toml", build, delay=5)
+server.watch("docs/", build)
+server.watch("zensical.toml", build)
 server.serve(root="site", port=8000, host="0.0.0.0")
