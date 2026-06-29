@@ -7,7 +7,7 @@
 
 > *A scene-setting chapter: what the Databricks lakehouse is, its four-layer architecture, the control/data plane split, Spark + DBFS, and a hands-on tour of the workspace — clusters, notebooks, magic commands, `dbutils`, versioning, and Git folders.*
 
-> 📌 **Notes adapted to the 2026 platform.** The book targets the older DCDEA exam aligned to **DBR 13.3 LTS** and references **Community Edition**. Concepts are unchanged, but several names/defaults moved on by mid-2026 — flagged inline with ⚠️ and summarized in [research-cache](../../research-cache/dcde-sg-ch01-facts.md). Key shifts: access modes renamed **Standard/Dedicated**, **Community Edition → Free Edition**, **DBFS deprecated** in favor of UC Volumes, **DLT → Lakeflow Spark Declarative Pipelines**.
+> 📌 **Notes adapted to the 2026 platform.** The book targets the older DCDEA exam aligned to **DBR 13.3 LTS** and references **Community Edition**. Concepts are unchanged, but several names/defaults moved on by mid-2026 — flagged inline with ⚠️ and summarized in [research-cache](../../research-cache/dcde-sg-ch01-facts/). Key shifts: access modes renamed **Standard/Dedicated**, **Community Edition → Free Edition**, **DBFS deprecated** in favor of UC Volumes, **DLT → Lakeflow Spark Declarative Pipelines**.
 
 > 📎 **Overlaps:** the personal book chapter [[ch01-databricks-platform-workspace]] (full explanatory version) and the course note [[workspace-walkthrough]] (DA-FREE M1) cover the same ground.
 
@@ -330,4 +330,4 @@ display(files)   # tabular: filename, size, type — plus CSV download & chart v
 
 - [[ch01-databricks-platform-workspace]] — personal book chapter (full explanatory version of this material)
 - [[workspace-walkthrough]] — DA-FREE M1 course note on the same UI tour
-- [research-cache](../../research-cache/dcde-sg-ch01-facts.md) — verified 2026 deltas vs. the 2025 book
+- [research-cache](../../research-cache/dcde-sg-ch01-facts/) — verified 2026 deltas vs. the 2025 book

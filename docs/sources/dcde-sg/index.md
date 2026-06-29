@@ -3,7 +3,7 @@
 > **Author:** Derar Alhussein · **Publisher:** O'Reilly · **Edition:** 1st (February 2025)
 > **Type:** book · **Repo:** <https://github.com/derar-alhussein/oreilly-databricks-dea>
 
-Reading notes for the O'Reilly DCDEA study guide. Detailed-outline style, one file per chapter. Notes are adapted to the **2026 platform** where the 2025 book has gone stale — see [research-cache](../../research-cache/dcde-sg-ch01-facts.md).
+Reading notes for the O'Reilly DCDEA study guide. Detailed-outline style, one file per chapter. Notes are adapted to the **2026 platform** where the 2025 book has gone stale — see [research-cache](../../research-cache/dcde-sg-ch01-facts/).
 
 > 📌 **Version context:** the book targets the older DCDEA exam aligned to **DBR 13.3 LTS** and references **Community Edition**. A **new exam version goes live May 4, 2026**. Community Edition was retired Jan 1, 2026 (→ **Free Edition**); use the latest DBR + UC Volumes when practicing.
 

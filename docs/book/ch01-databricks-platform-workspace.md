@@ -23,7 +23,7 @@ The **lakehouse** is the architecture that collapses that trade-off into one sys
 
 ### 1.1 The data warehouse era — reliable but rigid
 
-Data warehouses have powered decision support and BI since the late 1980s. Massively parallel processing (MPP) let them scale, and they excel at one thing: **structured data served fast and reliably**. ACID transactions, schema enforcement, governance, and mature SQL/BI tooling all came built in. Data was loaded **schema-on-write** — validated and structured *as it lands*, optimised for downstream BI ([Lakehouse CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021.md)). The CIDR paper calls this the **first generation** of data analytics platforms.
+Data warehouses have powered decision support and BI since the late 1980s. Massively parallel processing (MPP) let them scale, and they excel at one thing: **structured data served fast and reliably**. ACID transactions, schema enforcement, governance, and mature SQL/BI tooling all came built in. Data was loaded **schema-on-write** — validated and structured *as it lands*, optimised for downstream BI ([Lakehouse CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021/)). The CIDR paper calls this the **first generation** of data analytics platforms.
 
 Their limits showed as data changed shape. Warehouses are **not suited — and not cost-efficient — for unstructured and semi-structured data** (text, JSON, images, audio, video) arriving at high variety, velocity, and volume. Storage and compute are coupled, so scaling one means paying for both. And proprietary formats mean **vendor lock-in**: your data is only readable by the warehouse that owns it.
 
@@ -66,7 +66,7 @@ This duplication — paying to move and re-store the same data across systems �
 
 ### 1.4 The lakehouse — one system, one copy
 
-A **lakehouse** is *"a new, open architecture that combines the best elements of data lakes and data warehouses … implementing similar data structures and data management features to those in a data warehouse directly on top of low-cost cloud storage in open formats"* ([Databricks, 2020](../sources/databricks-blog/what-is-a-lakehouse.md)). The authors framed it as **"what you would get if you had to redesign data warehouses in the modern world,"** now that cheap, reliable object stores exist.
+A **lakehouse** is *"a new, open architecture that combines the best elements of data lakes and data warehouses … implementing similar data structures and data management features to those in a data warehouse directly on top of low-cost cloud storage in open formats"* ([Databricks, 2020](../sources/databricks-blog/what-is-a-lakehouse/)). The authors framed it as **"what you would get if you had to redesign data warehouses in the modern world,"** now that cheap, reliable object stores exist.
 
 The payoff is consolidation: **one system, one copy** of the data serving SQL/BI, data science, ML, and streaming — covering the *whole* maturity curve (descriptive → predictive → **prescriptive** → **GenAI on proprietary data**) on a single architecture, instead of a different system at each stage.
 
@@ -88,9 +88,9 @@ Two of these properties do the heavy lifting and are worth fixing early:
 - **Decoupled storage & compute** (feature 4) — storage (cheap object store) and compute (clusters/warehouses) scale independently, so you pay for one without the other. This is what lets one copy serve many concurrent workloads *at lake economics*.
 - **Openness → no lock-in** (feature 5) — data stays in open formats (Parquet under Delta/Iceberg) readable by any engine. *Lock-in* = dependence on one vendor so switching is prohibitively costly (license fees, forced data copies, custom integration code); open formats are the escape hatch.
 
-> 💡 **The data & AI maturity curve** ([Lakehouse-Dummies Ch 2](../sources/lakehouse-dummies/02-explaining-lakehouses.md)) places the lakehouse cleanly: organisations climb **descriptive** (DB/DW) → **predictive** (lakes) → **prescriptive** → **GenAI on proprietary data**. Legacy stacks force a different system at each stage; the lakehouse covers the whole curve on one architecture.
+> 💡 **The data & AI maturity curve** ([Lakehouse-Dummies Ch 2](../sources/lakehouse-dummies/02-explaining-lakehouses/)) places the lakehouse cleanly: organisations climb **descriptive** (DB/DW) → **predictive** (lakes) → **prescriptive** → **GenAI on proprietary data**. Legacy stacks force a different system at each stage; the lakehouse covers the whole curve on one architecture.
 
-> 📎 Primary source: [What Is a Lakehouse? (Databricks, 2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — the post that named the architecture. The same warehouse→lake→lakehouse case is retold for a business audience in [Lakehouse-Dummies Ch 1–2](../sources/lakehouse-dummies/01-making-the-case.md).
+> 📎 Primary source: [What Is a Lakehouse? (Databricks, 2020)](../sources/databricks-blog/what-is-a-lakehouse/) — the post that named the architecture. The same warehouse→lake→lakehouse case is retold for a business audience in [Lakehouse-Dummies Ch 1–2](../sources/lakehouse-dummies/01-making-the-case/).
 
 ---
 
@@ -111,7 +111,7 @@ Delta is **open** (a Linux Foundation project, Parquet underneath) so it isn't a
 
 This is the "**Delta lakehouse**": the lakehouse architecture made concrete by the Delta table format. Chapters 5 and 12 go deep on the transaction log, `OPTIMIZE`, `MERGE`, time travel, and CDC. For now, hold one idea: **Delta Lake is what turns a folder of files into a table you can trust.**
 
-> 💡 **The deliberate trade-off:** a classic warehouse hides its storage format so it can optimise freely (*data independence*). A lakehouse **gives that up on purpose** — the open format becomes part of the public API so ML and analytics engines can read it directly. The [Lakehouse paper](../sources/databricks-papers/lakehouse-cidr-2021.md) shows the lost performance is won back with format-independent optimisations (caching, data-skipping statistics, data layout) — and proves it on **TPC-DS**, where the Databricks **Delta Engine** matched or beat four cloud warehouses at lower cost. Delta Engine is the direct ancestor of **Photon** (§6.3).
+> 💡 **The deliberate trade-off:** a classic warehouse hides its storage format so it can optimise freely (*data independence*). A lakehouse **gives that up on purpose** — the open format becomes part of the public API so ML and analytics engines can read it directly. The [Lakehouse paper](../sources/databricks-papers/lakehouse-cidr-2021/) shows the lost performance is won back with format-independent optimisations (caching, data-skipping statistics, data layout) — and proves it on **TPC-DS**, where the Databricks **Delta Engine** matched or beat four cloud warehouses at lower cost. Delta Engine is the direct ancestor of **Photon** (§6.3).
 
 > 📌 The **Databricks Runtime (DBR)** ships Spark + Delta Lake pre-installed, so every table you create on Databricks is a Delta table by default.
 
@@ -119,7 +119,7 @@ This is the "**Delta lakehouse**": the lakehouse architecture made concrete by t
 
 ## 3. Databricks: the Data Intelligence Platform
 
-**Databricks** is the unified platform built on the lakehouse, founded by the original creators of Apache Spark. Its current name is the **Data Intelligence Platform (DIP)** — the lakehouse *plus* an AI layer that learns your organisation's semantics (table/column descriptions, metrics, jargon, usage, human feedback) so search, BI, and agents understand *your* business, not just generic SQL ([DIP-Dummies Ch 1, 3](../sources/dip-dummies/ch03-databricks-platform.md)).
+**Databricks** is the unified platform built on the lakehouse, founded by the original creators of Apache Spark. Its current name is the **Data Intelligence Platform (DIP)** — the lakehouse *plus* an AI layer that learns your organisation's semantics (table/column descriptions, metrics, jargon, usage, human feedback) so search, BI, and agents understand *your* business, not just generic SQL ([DIP-Dummies Ch 1, 3](../sources/dip-dummies/ch03-databricks-platform/)).
 
 You don't need every surface for data engineering, but knowing the map stops you reaching for the wrong tool. The platform is a stack of surfaces over one governed copy of data:
 
@@ -144,7 +144,7 @@ You don't need every surface for data engineering, but knowing the map stops you
 
 Underneath the surfaces, every Databricks deployment is organised the same way: an **account** at the top, **workspaces** where work happens, **Unity Catalog metastores** governing the data, and a **control plane / compute plane** split that determines where your data is processed.
 
-> 📎 Primary source: [Databricks high-level architecture](../sources/databricks-docs/high-level-architecture.md) (docs).
+> 📎 Primary source: [Databricks high-level architecture](../sources/databricks-docs/high-level-architecture/) (docs).
 
 ### 4.1 The object hierarchy: account → workspace → metastore
 
@@ -274,7 +274,7 @@ Serverless SQL Warehouses always run on Photon. **Pro** is required when a SQL W
 
 ### 6.3 Photon
 
-**Photon** is a C++ vectorised query engine that replaces JVM-based Spark execution for SQL and DataFrame operations. Enabled at the cluster level, it speeds up aggregations, sorts, and joins — but does **not** accelerate Python UDFs, which still run on the JVM/Python interpreter. It's available on classic clusters and SQL Warehouses (always on for Serverless SQL). Photon is the productised descendant of the **Delta Engine** that carried the [Lakehouse paper's](../sources/databricks-papers/lakehouse-cidr-2021.md) TPC-DS performance results (§2) — the proof that an open-format lakehouse can match a closed warehouse. *Ch 23* covers internals and cost trade-offs.
+**Photon** is a C++ vectorised query engine that replaces JVM-based Spark execution for SQL and DataFrame operations. Enabled at the cluster level, it speeds up aggregations, sorts, and joins — but does **not** accelerate Python UDFs, which still run on the JVM/Python interpreter. It's available on classic clusters and SQL Warehouses (always on for Serverless SQL). Photon is the productised descendant of the **Delta Engine** that carried the [Lakehouse paper's](../sources/databricks-papers/lakehouse-cidr-2021/) TPC-DS performance results (§2) — the proof that an open-format lakehouse can match a closed warehouse. *Ch 23* covers internals and cost trade-offs.
 
 ### 6.4 Compute pools
 
@@ -437,10 +437,10 @@ Each `auth login` saves a named profile; pass `-p <profile>` to target one. Work
 
 ## References
 
-- [Lakehouse: A New Generation of Open Platforms… — Armbrust, Ghodsi, Xin, Zaharia, CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021.md) — the peer-reviewed paper: three platform generations, the four two-tier problems, the transactional-metadata-layer design, and TPC-DS results proving feasibility.
-- [What Is a Lakehouse? — Databricks blog (2020)](../sources/databricks-blog/what-is-a-lakehouse.md) — general-audience companion to the paper; the lakehouse architecture and its eight features.
-- [The Data Lakehouse For Dummies — Ch 1–2 (Kaplan & Kara, 2026)](../sources/lakehouse-dummies/01-making-the-case.md) — warehouse→lake→lakehouse case, the data & AI maturity curve, decoupled storage/compute, lock-in.
-- [Databricks high-level architecture (docs)](../sources/databricks-docs/high-level-architecture.md) — account/workspace/metastore hierarchy and the control-plane / compute-plane split.
-- [DCDE-SG Ch 1 — Getting Started with Databricks (Alhussein, 2025)](../sources/dcde-sg/ch01-getting-started-with-databricks.md) — certification-angle framing of the same architecture, clusters, and workspace tour.
+- [Lakehouse: A New Generation of Open Platforms… — Armbrust, Ghodsi, Xin, Zaharia, CIDR 2021](../sources/databricks-papers/lakehouse-cidr-2021/) — the peer-reviewed paper: three platform generations, the four two-tier problems, the transactional-metadata-layer design, and TPC-DS results proving feasibility.
+- [What Is a Lakehouse? — Databricks blog (2020)](../sources/databricks-blog/what-is-a-lakehouse/) — general-audience companion to the paper; the lakehouse architecture and its eight features.
+- [The Data Lakehouse For Dummies — Ch 1–2 (Kaplan & Kara, 2026)](../sources/lakehouse-dummies/01-making-the-case/) — warehouse→lake→lakehouse case, the data & AI maturity curve, decoupled storage/compute, lock-in.
+- [Databricks high-level architecture (docs)](../sources/databricks-docs/high-level-architecture/) — account/workspace/metastore hierarchy and the control-plane / compute-plane split.
+- [DCDE-SG Ch 1 — Getting Started with Databricks (Alhussein, 2025)](../sources/dcde-sg/ch01-getting-started-with-databricks/) — certification-angle framing of the same architecture, clusters, and workspace tour.
 
 The next chapter goes one layer down — **Apache Spark's execution model** (drivers, executors, DAGs, stages, and tasks) and how Databricks extends it with AQE and Photon.

@@ -10,7 +10,7 @@ Databricks defines tables along two axes: **table type** (managed, external, for
 
 The quick test for table type: *"If I drop this table, who deletes the data?"* — **Unity Catalog → managed**, **nobody (files stay in your bucket) → external**, **another system → foreign**. Type is about *who controls the files' lifecycle* (create, delete, location, layout, optimize), not the file format and not where the files physically sit.
 
-> 📌 Corrects the DCDE-SG Ch 3 book (DBR 13.3-era): the book frames tables as **managed vs external on `hive_metastore`**. The current model is **three types under Unity Catalog**, managed is the recommended default (the book leans external), and Iceberg is a first-class format. There's no `hive_metastore` on this page at all. See the [Ch 3 reading notes](../dcde-sg/ch03-mastering-relational-entities.md).
+> 📌 Corrects the DCDE-SG Ch 3 book (DBR 13.3-era): the book frames tables as **managed vs external on `hive_metastore`**. The current model is **three types under Unity Catalog**, managed is the recommended default (the book leans external), and Iceberg is a first-class format. There's no `hive_metastore` on this page at all. See the [Ch 3 reading notes](../dcde-sg/ch03-mastering-relational-entities/).
 
 ## Example managed table
 
@@ -63,4 +63,4 @@ Most table operations require **`USE CATALOG`** + **`USE SCHEMA`** on the contai
 
 SQL syntax refs: `CREATE TABLE [USING]`, `ALTER TABLE`, `DROP TABLE`, `SHOW TABLES`.
 
-Related: [[managed-tables]], [[external-tables]], [[foreign-tables]], [[temporary-tables]], [DCDE-SG Ch 3 notes](../dcde-sg/ch03-mastering-relational-entities.md).
+Related: [[managed-tables]], [[external-tables]], [[foreign-tables]], [[temporary-tables]], [DCDE-SG Ch 3 notes](../dcde-sg/ch03-mastering-relational-entities/).

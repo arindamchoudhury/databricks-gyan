@@ -64,4 +64,4 @@ DBR 18.0+ only, via drop-table-feature + protocol downgrade.
 - **Materialized views cannot** have catalog commits.
 - **Single-user clusters cannot** access streaming tables with catalog commits enabled.
 
-Related: [[transactions]], [[managed-tables]], [[tables-concepts]], [[convert-external-managed]], [catalog-commits write mechanics (SunnyData)](../sunnydata/catalog-commits.md).
+Related: [[transactions]], [[managed-tables]], [[tables-concepts]], [[convert-external-managed]], [catalog-commits write mechanics (SunnyData)](../sunnydata/catalog-commits/).
