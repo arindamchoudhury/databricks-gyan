@@ -143,3 +143,4 @@ Course notebooks and external sources captured as structured notes.
 | [Monitor managed ingestion pipeline cost](databricks-docs/lakeflow-connect-monitor-costs/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, cost-monitoring, system-tables, billing, dbu, A3, A6 |
 | [Create multi-destination pipelines](databricks-docs/lakeflow-connect-multi-destination/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, multi-destination, fan-out, destination-table, A3 |
 | [Name a destination table](databricks-docs/lakeflow-connect-table-rename/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, destination-table, table-rename, A3 |
+| [Common pipeline maintenance tasks](databricks-docs/lakeflow-connect-pipeline-maintenance/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, pipeline-maintenance, operations, staging-files, A3 |
