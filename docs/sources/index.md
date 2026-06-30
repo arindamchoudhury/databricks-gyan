@@ -145,3 +145,4 @@ Course notebooks and external sources captured as structured notes.
 | [Name a destination table](databricks-docs/lakeflow-connect-table-rename/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, destination-table, table-rename, A3 |
 | [Common pipeline maintenance tasks](databricks-docs/lakeflow-connect-pipeline-maintenance/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, pipeline-maintenance, operations, staging-files, A3 |
 | [Apply tags to managed ingestion pipelines](databricks-docs/lakeflow-connect-pipeline-tags/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, pipeline-tags, cost-attribution, A3 |
+| [Select rows to ingest (row filtering)](databricks-docs/lakeflow-connect-row-filtering/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, row-filtering, ingestion, A3 |
