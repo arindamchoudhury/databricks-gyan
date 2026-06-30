@@ -1,7 +1,7 @@
 # Databricks Release Notes
 
 Captured from [docs.databricks.com/aws/en/release-notes/](https://docs.databricks.com/aws/en/release-notes/).
-Last full refresh: **2026-06-11**.
+Last full refresh: **2026-06-30**.
 
 > Run `/databricks-release-notes` to fetch the latest and update this section.
 
@@ -25,6 +25,7 @@ Last full refresh: **2026-06-11**.
 
 | Version | File | Spark | Python | Delta | Notes |
 |---|---|---|---|---|---|
+| DBR 19 (Beta) | [dbr-19](runtime/dbr-19/) | 4.2.0 | 3.12.3 | 4.2.0 | JDK 21 only (17 fallback removed), ~90 Python pkgs removed, standard-mode env/config restrictions, DSv2 transactions |
 | DBR 18 | [dbr-18](runtime/dbr-18/) | 4.1.0 | 3.12.3 | 4.2.0 | JDK 21, Arrow default for UDFs (breaking), SQL scripting GA |
 | DBR 17.3 LTS | [dbr-17-3-lts](runtime/dbr-17-3-lts/) | 4.0.0 | 3.12.3 | 4.0.0 | `input_file_name()` removed — use `_metadata.file_name` |
 | DBR 16.4 LTS | [dbr-16-4-lts](runtime/dbr-16-4-lts/) | 3.5.2 | 3.12.3 | 3.3.1 | Auto Loader type widening, `listagg`, filter pushdown |
@@ -35,9 +36,9 @@ Last full refresh: **2026-06-11**.
 
 | Feature | File | Coverage |
 |---|---|---|
-| Lakeflow Spark Declarative Pipelines | [lakeflow/2026](lakeflow/2026/) | Jan–Apr 2026 monthly notes |
+| Lakeflow Spark Declarative Pipelines | [lakeflow/2026](lakeflow/2026/) | Jan–May 2026 monthly notes |
 | Databricks SQL | [sql/2026](sql/2026/) | Jan–Jun 2026; SQL scripting GA, sketches, vector functions |
-| Declarative Automation Bundles (DABs) | [dabs/changelog](dabs/changelog/) | 2024–2026; Python GA, direct deploy, selective deploy |
+| Declarative Automation Bundles (DABs) | [dabs/changelog](dabs/changelog/) | 2024–2026; Python GA, direct deploy GA, Genie spaces |
 | Serverless Compute | [serverless/changelog](serverless/changelog/) | v14.3–18.2; all version notes |
 
 ---
@@ -56,3 +57,7 @@ Issues found while reviewing these notes that affect the learning path:
 | I5 (Delta advanced) | **Breaking: DBR 18 NULL struct** | NULL structs now preserved as NULL (not materialized with all-NULL fields) in MERGE/INSERT/streaming. |
 | I5 | **Breaking: DBR 18 time travel** | Time travel queries blocked beyond `deletedFileRetentionDuration`. Previously could go further back. |
 | I5 | **New: `OPTIMIZE FULL`** | Serverless 16.1+: `OPTIMIZE FULL` forces full reclustering (vs incremental). |
+| I5 (selective overwrite) | **New: SQL `INSERT INTO ... REPLACE ON/USING`** | DBR 19 / Spark 4.2.0: SQL upsert-style replace syntax, complementing the `replaceOn`/`replaceUsing` DataFrame APIs (GA serverless 18.2). |
+| B2/B3 | **Breaking: DBR 19 JDK 17 fallback removed** | DBR 18 shipped JDK 17 as a `JNAME` fallback; DBR 19 is JDK 21 only. Remove `JNAME=zulu17-*` before upgrading. |
+| B3/A1 | **Breaking: DBR 19 ~90 Python packages removed** | `plotly`, `seaborn`, `openai`, `langchain-core`, `langchain-openai`, `huggingface_hub`, `psycopg2`, `pyodbc` no longer preinstalled. Install explicitly via cluster library / init script. |
+| A5 (DABs) | **New GA: direct deployment engine** | Terraform-free engine (Preview since Dec 2025) is GA and the default for new bundles created with CLI 1.3.0+ (June 2026). |

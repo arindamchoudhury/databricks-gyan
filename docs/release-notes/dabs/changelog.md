@@ -8,6 +8,13 @@
 
 ## 2026
 
+**Direct deployment engine (GA)** — June 10, 2026 (CLI 1.3.0)
+New bundles created with CLI 1.3.0+ use the direct deployment engine by default instead of Terraform. See Migrate to the direct deployment engine.
+> **Learning path note (A5):** The Terraform-free engine (Preview since Dec 2025) is now GA and the default for new bundles.
+
+**Genie space resource** — June 10, 2026 (CLI 1.3.0)
+`genie_space` resource — define Genie spaces in bundle configuration.
+
 **Selective deployment — `--select` option** (June 4, 2026)
 `databricks bundle plan --select <resource>` and `databricks bundle deploy --select <resource>` — deploy specific resources without deploying the whole bundle.
 
