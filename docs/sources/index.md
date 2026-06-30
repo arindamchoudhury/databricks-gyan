@@ -139,3 +139,4 @@ Course notebooks and external sources captured as structured notes.
 | [Select columns to ingest (Lakeflow Connect)](databricks-docs/lakeflow-connect-column-selection/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, ingestion, column-selection, table-configuration, A3 |
 | [Fully refresh target tables (Lakeflow Connect)](databricks-docs/lakeflow-connect-full-refresh/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, full-refresh, cdc, ingestion, A3 |
 | [Monitor ingestion gateway progress with event logs](databricks-docs/lakeflow-connect-gateway-event-logs/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, gateway, event-log, monitoring, cdc, snapshot, A3, A6 |
+| [Enable history tracking / SCD Type 2 (Lakeflow Connect)](databricks-docs/lakeflow-connect-scd/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, scd, scd-type-2, history-tracking, sequence-by, A3 |
