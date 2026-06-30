@@ -171,6 +171,7 @@ nav = [
                             { "Full refresh" = "sources/databricks-docs/lakeflow-connect-full-refresh.md" },
                             { "Gateway event logs" = "sources/databricks-docs/lakeflow-connect-gateway-event-logs.md" },
                             { "History tracking (SCD 2)" = "sources/databricks-docs/lakeflow-connect-scd.md" },
+                            { "Monitor costs" = "sources/databricks-docs/lakeflow-connect-monitor-costs.md" },
                         ]},
                     ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
