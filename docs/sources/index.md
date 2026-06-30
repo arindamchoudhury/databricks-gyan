@@ -153,3 +153,4 @@ Course notebooks and external sources captured as structured notes.
 | [foreachBatch — write to arbitrary data sinks](databricks-docs/structured-streaming-foreach/) | documentation | 2026-06-30 | structured-streaming, foreach-batch, idempotency, dead-letter-queue, I2, I5 |
 | [Delta Lake table streaming reads and writes](databricks-docs/structured-streaming-delta-lake/) | documentation | 2026-06-30 | structured-streaming, delta-lake, skipChangeCommits, withEventTimeOrder, I2, I5 |
 | [Subscribe to Google Pub/Sub](databricks-docs/streaming-pub-sub/) | documentation | 2026-06-30 | structured-streaming, pub-sub, google-cloud, I2 |
+| [Connect to Lakebase (streaming sink)](databricks-docs/streaming-lakebase/) | documentation | 2026-06-30 | structured-streaming, lakebase, postgresql, streaming-sink, E8, I2 |

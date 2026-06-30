@@ -187,6 +187,7 @@ nav = [
                     { "Standard connectors" = [
                         { "Delta Lake" = "sources/databricks-docs/structured-streaming-delta-lake.md" },
                         { "foreachBatch (arbitrary sinks)" = "sources/databricks-docs/structured-streaming-foreach.md" },
+                        { "Lakebase and PostgreSQL" = "sources/databricks-docs/streaming-lakebase.md" },
                         { "Pub/Sub" = "sources/databricks-docs/streaming-pub-sub.md" },
                     ]},
                 ]},
