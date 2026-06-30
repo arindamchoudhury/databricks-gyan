@@ -152,3 +152,4 @@ Course notebooks and external sources captured as structured notes.
 | [Query-based connectors](databricks-docs/lakeflow-connect-query-based-overview/) | documentation | 2026-06-30 | lakeflow-connect, query-based-connectors, cursor-column, lakehouse-federation, scd, A3 |
 | [foreachBatch — write to arbitrary data sinks](databricks-docs/structured-streaming-foreach/) | documentation | 2026-06-30 | structured-streaming, foreach-batch, idempotency, dead-letter-queue, I2, I5 |
 | [Delta Lake table streaming reads and writes](databricks-docs/structured-streaming-delta-lake/) | documentation | 2026-06-30 | structured-streaming, delta-lake, skipChangeCommits, withEventTimeOrder, I2, I5 |
+| [Subscribe to Google Pub/Sub](databricks-docs/streaming-pub-sub/) | documentation | 2026-06-30 | structured-streaming, pub-sub, google-cloud, I2 |
