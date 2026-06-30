@@ -185,6 +185,7 @@ nav = [
                     ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
                     { "Standard connectors" = [
+                        { "Delta Lake" = "sources/databricks-docs/structured-streaming-delta-lake.md" },
                         { "foreachBatch (arbitrary sinks)" = "sources/databricks-docs/structured-streaming-foreach.md" },
                     ]},
                 ]},
