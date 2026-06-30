@@ -141,3 +141,4 @@ Course notebooks and external sources captured as structured notes.
 | [Monitor ingestion gateway progress with event logs](databricks-docs/lakeflow-connect-gateway-event-logs/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, gateway, event-log, monitoring, cdc, snapshot, A3, A6 |
 | [Enable history tracking / SCD Type 2 (Lakeflow Connect)](databricks-docs/lakeflow-connect-scd/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, scd, scd-type-2, history-tracking, sequence-by, A3 |
 | [Monitor managed ingestion pipeline cost](databricks-docs/lakeflow-connect-monitor-costs/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, cost-monitoring, system-tables, billing, dbu, A3, A6 |
+| [Create multi-destination pipelines](databricks-docs/lakeflow-connect-multi-destination/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, multi-destination, fan-out, destination-table, A3 |
