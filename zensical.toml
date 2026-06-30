@@ -163,9 +163,14 @@ nav = [
                 ]},
                 { "Lakeflow Connect" = [
                     { "What is Lakeflow Connect?" = "sources/databricks-docs/lakeflow-connect-overview.md" },
-                    { "Managed connectors" = "sources/databricks-docs/lakeflow-connect-managed.md" },
-                    { "Common patterns" = "sources/databricks-docs/lakeflow-connect-common-patterns.md" },
-                    { "Column selection" = "sources/databricks-docs/lakeflow-connect-column-selection.md" },
+                    { "Managed connectors" = [
+                        { "Overview" = "sources/databricks-docs/lakeflow-connect-managed.md" },
+                        { "Common patterns" = [
+                            { "Overview" = "sources/databricks-docs/lakeflow-connect-common-patterns.md" },
+                            { "Column selection" = "sources/databricks-docs/lakeflow-connect-column-selection.md" },
+                            { "Full refresh" = "sources/databricks-docs/lakeflow-connect-full-refresh.md" },
+                        ]},
+                    ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
                 ]},
                 { "Lakeflow Jobs" = [

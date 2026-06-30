@@ -139,21 +139,38 @@ def extract_tab_panels(page) -> str:
                 '[class*="tab__panel"]',
                 '[class*="tab-panel"]',
                 '[class*="tabpanel"]',
+                '.tabbed-block',
             ];
+            const seen = new Set();
+            const allResults = [];
             for (const sel of selectors) {
                 const els = Array.from(document.querySelectorAll(sel));
                 if (els.length < 2) continue;
-                const results = [];
+                const groupResults = [];
                 for (const el of els) {
-                    const prev = el.style.display;
+                    if (seen.has(el)) continue;
+                    seen.add(el);
+                    // Save state
+                    const prevDisplay = el.style.display;
+                    const prevVisibility = el.style.visibility;
+                    const hadHidden = el.hasAttribute('hidden');
+                    const prevAriaHidden = el.getAttribute('aria-hidden');
+                    // Force visible — cover display:none, visibility:hidden, hidden attr, aria-hidden
                     el.style.display = 'block';
-                    const text = el.innerText.trim();
-                    el.style.display = prev;
-                    if (text.length > 30) results.push(text);
+                    el.style.visibility = 'visible';
+                    el.removeAttribute('hidden');
+                    el.removeAttribute('aria-hidden');
+                    const text = (el.innerText || el.textContent || '').trim();
+                    // Restore state
+                    el.style.display = prevDisplay;
+                    el.style.visibility = prevVisibility;
+                    if (hadHidden) el.setAttribute('hidden', '');
+                    if (prevAriaHidden !== null) el.setAttribute('aria-hidden', prevAriaHidden);
+                    if (text.length > 30) groupResults.push(text);
                 }
-                if (results.length >= 2) return results;
+                if (groupResults.length >= 2) allResults.push(...groupResults);
             }
-            return [];
+            return allResults;
         }
         """)
     except Exception:

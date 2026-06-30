@@ -19,18 +19,103 @@ By default, managed connectors ingest **all current and future columns**. Use `t
 
 Set these inside the `table_configuration` block of a `table` (or `report`) object in the `ingestion_definition`.
 
-## Key distinction
+---
 
-`include_columns` freezes the schema at definition time — safer for strict schema control but requires maintenance when source adds columns.
+## Example: Google Analytics
 
-`exclude_columns` is schema-forward — new source columns flow through automatically, only named columns are suppressed.
-
-## DABs YAML pattern (applicable to all SaaS/DB connectors)
+**DABs (YAML)**
 
 ```yaml
 resources:
   pipelines:
-    my_pipeline:
+    pipeline_ga4:
+      name: <pipeline-name>
+      catalog: <target-catalog>
+      schema: <target-schema>
+      ingestion_definition:
+        connection_name: <connection-name>
+        objects:
+          - table:
+              source_url: <project-id>
+              source_schema: <property-name>
+              destination_catalog: <destination-catalog>
+              destination_schema: <destination-schema>
+              table_configuration:
+                include_columns:
+                  - <column_a>
+                  - <column_b>
+                  - <column_c>
+```
+
+**Databricks notebook (Python)**
+
+```python
+pipeline_spec = """
+{
+  "name": "<pipeline-name>",
+  "ingestion_definition": {
+    "connection_name": "<connection-name>",
+    "objects": [
+      {
+        "table": {
+          "source_catalog": "<project-id>",
+          "source_schema": "<property-name>",
+          "source_table": "<source-table>",
+          "destination_catalog": "<target-catalog>",
+          "destination_schema": "<target-schema>",
+          "table_configuration": {
+            "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+          }
+        }
+      }
+    ]
+  }
+}
+"""
+```
+
+**Databricks CLI (JSON)**
+
+```json
+{
+  "resources": {
+    "pipelines": {
+      "pipeline_ga4": {
+        "name": "<pipeline-name>",
+        "catalog": "<target-catalog>",
+        "schema": "<target-schema>",
+        "ingestion_definition": {
+          "connection_name": "<connection-name>",
+          "objects": [
+            {
+              "table": {
+                "source_url": "<project-id>",
+                "source_schema": "<property-name>",
+                "destination_catalog": "<destination-catalog>",
+                "destination_schema": "<destination-schema>",
+                "table_configuration": {
+                  "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Example: Salesforce
+
+**DABs (YAML)**
+
+```yaml
+resources:
+  pipelines:
+    pipeline_sfdc:
       name: <pipeline-name>
       catalog: <target-catalog>
       schema: <target-schema>
@@ -43,19 +128,154 @@ resources:
               destination_catalog: <destination-catalog>
               destination_schema: <destination-schema>
               table_configuration:
-                include_columns:       # or exclude_columns
+                include_columns:
                   - <column_a>
                   - <column_b>
                   - <column_c>
 ```
 
-For Workday (report-based), replace `table:` with `report:` and use `source_url` instead of `source_schema`/`source_table`.
+**Databricks notebook (Python)**
 
-## Connector differences
+```python
+pipeline_spec = """
+{
+  "name": "<pipeline-name>",
+  "ingestion_definition": {
+    "connection_name": "<connection-name>",
+    "objects": [
+      {
+        "table": {
+          "source_catalog": "<source-catalog>",
+          "source_schema": "<source-schema>",
+          "source_table": "<source-table>",
+          "destination_catalog": "<target-catalog>",
+          "destination_schema": "<target-schema>",
+          "table_configuration": {
+            "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+          }
+        }
+      }
+    ]
+  }
+}
+"""
+```
 
-- **SaaS (Salesforce, Google Analytics, Workday, etc.)** — supported; examples on the page.
-- **Database connectors** — supported.
-- **Query-based connectors** — supported.
-- Not all connectors support this pattern — check connector-specific docs.
+**Databricks CLI (JSON)**
+
+```json
+{
+  "resources": {
+    "pipelines": {
+      "pipeline_sfdc": {
+        "name": "<pipeline-name>",
+        "catalog": "<target-catalog>",
+        "schema": "<target-schema>",
+        "ingestion_definition": {
+          "connection_name": "<connection-name>",
+          "objects": [
+            {
+              "table": {
+                "source_schema": "<source-schema>",
+                "source_table": "<source-table>",
+                "destination_catalog": "<destination-catalog>",
+                "destination_schema": "<destination-schema>",
+                "table_configuration": {
+                  "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Example: Workday
+
+Workday uses `report` (not `table`) with `source_url` pointing to the report URL.
+
+**DABs (YAML)**
+
+```yaml
+resources:
+  pipelines:
+    pipeline_workday:
+      name: <pipeline-name>
+      catalog: <target-catalog>
+      schema: <target-schema>
+      ingestion_definition:
+        connection_name: <connection-name>
+        objects:
+          - report:
+              source_url: <report-url>
+              destination_catalog: <destination-catalog>
+              destination_schema: <destination-schema>
+              table_configuration:
+                include_columns:
+                  - <column_a>
+                  - <column_b>
+                  - <column_c>
+```
+
+**Databricks notebook (Python)**
+
+```python
+pipeline_spec = """
+{
+  "name": "<pipeline-name>",
+  "ingestion_definition": {
+    "connection_name": "<connection-name>",
+    "objects": [
+      {
+        "report": {
+          "source_url": "<report-url>",
+          "destination_catalog": "<target-catalog>",
+          "destination_schema": "<target-schema>",
+          "table_configuration": {
+            "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+          }
+        }
+      }
+    ]
+  }
+}
+"""
+```
+
+**Databricks CLI (JSON)**
+
+```json
+{
+  "resources": {
+    "pipelines": {
+      "pipeline_workday": {
+        "name": "<pipeline-name>",
+        "catalog": "<target-catalog>",
+        "schema": "<target-schema>",
+        "ingestion_definition": {
+          "connection_name": "<connection-name>",
+          "objects": [
+            {
+              "report": {
+                "source_url": "<report-url>",
+                "destination_catalog": "<destination-catalog>",
+                "destination_schema": "<destination-schema>",
+                "table_configuration": {
+                  "include_columns": ["<column_a>", "<column_b>", "<column_c>"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
 
 [[lakeflow-connect-common-patterns]] · [[lakeflow-connect-managed]]
