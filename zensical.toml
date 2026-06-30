@@ -169,6 +169,7 @@ nav = [
                             { "Overview" = "sources/databricks-docs/lakeflow-connect-common-patterns.md" },
                             { "Column selection" = "sources/databricks-docs/lakeflow-connect-column-selection.md" },
                             { "Full refresh" = "sources/databricks-docs/lakeflow-connect-full-refresh.md" },
+                            { "Gateway event logs" = "sources/databricks-docs/lakeflow-connect-gateway-event-logs.md" },
                         ]},
                     ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
