@@ -166,6 +166,7 @@ nav = [
                     { "Managed connectors" = [
                         { "Overview" = "sources/databricks-docs/lakeflow-connect-managed.md" },
                         { "FAQ" = "sources/databricks-docs/lakeflow-connect-faq.md" },
+                        { "Database connectors (CDC)" = "sources/databricks-docs/lakeflow-connect-cdc-overview.md" },
                         { "Common patterns" = [
                             { "Overview" = "sources/databricks-docs/lakeflow-connect-common-patterns.md" },
                             { "Column selection" = "sources/databricks-docs/lakeflow-connect-column-selection.md" },
