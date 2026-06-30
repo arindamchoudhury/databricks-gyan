@@ -149,3 +149,4 @@ Course notebooks and external sources captured as structured notes.
 | [Configure the Run as identity](databricks-docs/lakeflow-connect-run-as/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, run-as, service-principal, identity, A3 |
 | [Managed connector FAQs](databricks-docs/lakeflow-connect-faq/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, faq, schema-evolution, pricing, A3 |
 | [Managed database connectors (CDC)](databricks-docs/lakeflow-connect-cdc-overview/) | documentation | 2026-06-30 | lakeflow-connect, database-connectors, cdc, ingestion-gateway, staging-storage, A3 |
+| [Query-based connectors](databricks-docs/lakeflow-connect-query-based-overview/) | documentation | 2026-06-30 | lakeflow-connect, query-based-connectors, cursor-column, lakehouse-federation, scd, A3 |
