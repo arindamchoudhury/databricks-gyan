@@ -160,7 +160,6 @@ nav = [
                     { "Tables and views" = "sources/databricks-docs/tables-views.md" },
                     { "Merge data" = "sources/databricks-docs/merge.md" },
                     { "Selective overwrite" = "sources/databricks-docs/selective-overwrite.md" },
-                    { "foreachBatch (arbitrary sinks)" = "sources/databricks-docs/structured-streaming-foreach.md" },
                 ]},
                 { "Lakeflow Connect" = [
                     { "What is Lakeflow Connect?" = "sources/databricks-docs/lakeflow-connect-overview.md" },
@@ -185,6 +184,9 @@ nav = [
                         ]},
                     ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
+                    { "Standard connectors" = [
+                        { "foreachBatch (arbitrary sinks)" = "sources/databricks-docs/structured-streaming-foreach.md" },
+                    ]},
                 ]},
                 { "Lakeflow Jobs" = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
