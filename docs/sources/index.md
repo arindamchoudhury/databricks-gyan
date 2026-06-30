@@ -147,3 +147,4 @@ Course notebooks and external sources captured as structured notes.
 | [Apply tags to managed ingestion pipelines](databricks-docs/lakeflow-connect-pipeline-tags/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, pipeline-tags, cost-attribution, A3 |
 | [Select rows to ingest (row filtering)](databricks-docs/lakeflow-connect-row-filtering/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, row-filtering, ingestion, A3 |
 | [Configure the Run as identity](databricks-docs/lakeflow-connect-run-as/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, run-as, service-principal, identity, A3 |
+| [Managed connector FAQs](databricks-docs/lakeflow-connect-faq/) | documentation | 2026-06-30 | lakeflow-connect, managed-connectors, faq, schema-evolution, pricing, A3 |
