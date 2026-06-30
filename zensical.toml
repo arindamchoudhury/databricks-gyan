@@ -173,6 +173,7 @@ nav = [
                             { "History tracking (SCD 2)" = "sources/databricks-docs/lakeflow-connect-scd.md" },
                             { "Monitor costs" = "sources/databricks-docs/lakeflow-connect-monitor-costs.md" },
                             { "Multi-destination pipelines" = "sources/databricks-docs/lakeflow-connect-multi-destination.md" },
+                            { "Name a destination table" = "sources/databricks-docs/lakeflow-connect-table-rename.md" },
                         ]},
                     ]},
                     { "File upload (Add data UI)" = "sources/databricks-docs/create-or-modify-table.md" },
