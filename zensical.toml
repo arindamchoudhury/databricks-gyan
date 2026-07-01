@@ -206,6 +206,7 @@ nav = [
         { "Databricks Blog" = [
             { "Overview" = "sources/databricks-blog/index.md" },
             { "What Is a Data Lakehouse?" = "sources/databricks-blog/what-is-a-lakehouse.md" },
+            { "From Monolith to Lakebase to LTAP" = "sources/databricks-blog/lakebase-ltap-rethinking-database-storage.md" },
         ]},
         { "Databricks Papers" = [
             { "Overview" = "sources/databricks-papers/index.md" },

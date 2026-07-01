@@ -47,6 +47,7 @@ Course notebooks and external sources captured as structured notes.
 | Title | Type | Added | Tags |
 |---|---|---|---|
 | [What Is a Data Lakehouse?](databricks-blog/what-is-a-lakehouse/) | blog | 2026-06-20 | lakehouse, architecture, data-lake, data-warehouse, foundations, B1 |
+| [From Monolith to Lakebase to LTAP](databricks-blog/lakebase-ltap-rethinking-database-storage/) | blog | 2026-07-01 | lakebase, ltap, postgres, safekeeper, pageserver, oltp, olap, htap, E8 |
 
 ## SunnyData — practitioner blog (Hubert Dudek)
 
