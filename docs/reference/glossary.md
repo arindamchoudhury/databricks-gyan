@@ -5,6 +5,7 @@ Terms added as they are encountered. Source column shows where the definition ca
 | Term | Definition | Source |
 |---|---|---|
 | **Lakeflow Spark Declarative Pipelines** | The declarative ETL framework in Databricks (formerly Delta Live Tables / DLT); defines pipelines as SQL or Python table definitions with built-in data quality expectations | Databricks DAIS 2025 |
+| **Apache Spark Declarative Pipelines** | The open-source declarative-pipelines project now upstream in Apache Spark. Lakeflow SDP extends and is interoperable with it, running on the Databricks Runtime — SDP is a Runtime-optimized superset, not a Databricks-only proprietary framework. | Databricks docs — [[ldp-overview]] |
 | **Lakeflow Jobs** | Databricks orchestration system for multi-task workflows (formerly Databricks Workflows / Jobs) | Databricks 2025 |
 | **Lakeflow Connect** | Managed ingestion connectors for ingesting from enterprise sources (databases, SaaS) into Databricks | Databricks 2025 |
 | **Delta Lake** | Open-source storage format adding ACID transactions, versioning, and schema enforcement to Parquet files | delta.io |

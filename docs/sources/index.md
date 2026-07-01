@@ -155,3 +155,4 @@ Course notebooks and external sources captured as structured notes.
 | [Delta Lake table streaming reads and writes](databricks-docs/structured-streaming-delta-lake/) | documentation | 2026-06-30 | structured-streaming, delta-lake, skipChangeCommits, withEventTimeOrder, I2, I5 |
 | [Subscribe to Google Pub/Sub](databricks-docs/streaming-pub-sub/) | documentation | 2026-06-30 | structured-streaming, pub-sub, google-cloud, I2 |
 | [Connect to Lakebase (streaming sink)](databricks-docs/streaming-lakebase/) | documentation | 2026-06-30 | structured-streaming, lakebase, postgresql, streaming-sink, E8, I2 |
+| [Lakeflow Spark Declarative Pipelines (hub)](databricks-docs/ldp-overview/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, hub, dlt-to-ldp-rename, apache-spark-declarative-pipelines, I3 |

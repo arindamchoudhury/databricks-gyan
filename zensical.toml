@@ -195,6 +195,7 @@ nav = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
                 ]},
                 { "Lakeflow Declarative Pipelines" = [
+                    { "Overview" = "sources/databricks-docs/ldp-overview.md" },
                     { "Serverless Compute" = "sources/databricks-docs/serverless-pipelines.md" },
                     { "Materialized views (standalone + serverless)" = "sources/databricks-docs/materialized-views.md" },
                 ]},
