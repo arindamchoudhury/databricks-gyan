@@ -156,3 +156,4 @@ Course notebooks and external sources captured as structured notes.
 | [Subscribe to Google Pub/Sub](databricks-docs/streaming-pub-sub/) | documentation | 2026-06-30 | structured-streaming, pub-sub, google-cloud, I2 |
 | [Connect to Lakebase (streaming sink)](databricks-docs/streaming-lakebase/) | documentation | 2026-06-30 | structured-streaming, lakebase, postgresql, streaming-sink, E8, I2 |
 | [Lakeflow Spark Declarative Pipelines (hub)](databricks-docs/ldp-overview/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, hub, dlt-to-ldp-rename, apache-spark-declarative-pipelines, I3 |
+| [Pipelines (SDP concepts)](databricks-docs/ldp-concepts-pipelines/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, pipeline-graph, dag, pipeline-types, lakebase, standalone-pipelines, pipelines-editor, I3, E8 |
