@@ -38,9 +38,9 @@ Key naming notes (use the new names in all content):
 - Delta Live Tables (DLT) is now **Lakeflow Spark Declarative Pipelines** as of DAIS 2025.
 - Delta Sharing is now **OpenSharing** as of June 2026 (announced 2026-06-10; same open protocol, now a Linux Foundation project extended to AI models, agent skills, and unstructured data). Use "OpenSharing" in new content; "Databricks-to-Databricks" remains the term for the DB↔DB sub-protocol. Keep "Delta Sharing" only in point-in-time release notes dated before June 2026.
 
-## `[project.theme]` intentionally absent — Zensical 0.0.x raises an error if set.
-
 ## Site customisation
+
+**Dark mode** (`[[project.theme.palette]]` in `zensical.toml`) — light "default" + dark "slate" schemes with a sun/moon toggle next to search. Verified working on the pinned `zensical>=0.0.30,<0.1` range (container resolves to 0.0.46): clean build, toggle renders, confirmed against [zensical.org/docs/setup/colors](https://zensical.org/docs/setup/colors/). Note: `theme.palette` became a **list** (breaking change) in [zensical 0.0.34](https://github.com/zensical/zensical/releases/tag/v0.0.34) — pre-0.0.34 it was a single dict with no toggle support. If a future pin drops below 0.0.34, this config needs the old single-dict form instead.
 
 Custom CSS and JS are loaded via `zensical.toml`:
 
