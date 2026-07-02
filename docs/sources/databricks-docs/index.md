@@ -15,6 +15,12 @@ Grouped by topic. Nav mirrors these groups.
 |---|---|---|
 | [High-level architecture](high-level-architecture/) | 2026-06-20 | architecture, control-plane, compute-plane, account, workspace, unity-catalog, serverless, classic, B1 |
 
+### Administration
+
+| Page | Added | Tags |
+|---|---|---|
+| [Disable access to legacy features in new workspaces](legacy-features/) | 2026-07-02 | administration, unity-catalog, dbfs, hive-metastore, no-isolation-clusters, legacy, account-settings, B1 |
+
 ### Compute
 
 | Page | Added | Tags |

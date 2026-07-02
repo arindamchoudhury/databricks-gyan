@@ -57,6 +57,9 @@ nav = [
             { "Architecture" = [
                 { "High-level Architecture" = "sources/databricks-docs/high-level-architecture.md" },
             ]},
+            { "Administration" = [
+                { "Disable access to legacy features in new workspaces" = "sources/databricks-docs/legacy-features.md" },
+            ]},
             { "Compute" = [
                 { "Classic compute" = [
                     { "Overview" = "sources/databricks-docs/classic-compute-overview.md" },
