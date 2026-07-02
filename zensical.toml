@@ -202,6 +202,7 @@ nav = [
                     { "Concepts" = [
                         {"Pipelines" = "sources/databricks-docs/ldp-concepts-pipelines.md" },
                         { "Flows" = "sources/databricks-docs/ldp-concepts-flows.md" },
+                        { "Streaming tables" = "sources/databricks-docs/ldp-concepts-streaming-tables.md" },
                     ]},
                     { "Serverless Compute" = "sources/databricks-docs/serverless-pipelines.md" },
                     { "Materialized views (standalone + serverless)" = "sources/databricks-docs/materialized-views.md" },

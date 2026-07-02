@@ -110,3 +110,11 @@ Grouped by topic. Nav mirrors these groups.
 
 | [File upload (Add data UI)](create-or-modify-table/) | 2026-06-29 | ingestion, file-upload, add-data-ui, delta, managed-table, csv, json, parquet, avro, unity-catalog, A3 |
 | [Managed connectors in Lakeflow Connect](lakeflow-connect-managed/) | 2026-06-29 | ingestion, lakeflow-connect, managed-connectors, cdc, saas, database, kafka, streaming, query-based, file-connectors, serverless, A3 |
+
+### Lakeflow Spark Declarative Pipelines — Concepts
+
+| Page | Added | Tags |
+|---|---|---|
+| [Pipelines (SDP concepts)](ldp-concepts-pipelines/) | 2026-07-01 | lakeflow, declarative-pipelines, sdp, pipeline-graph, dag, pipeline-types, I3 |
+| [Flows (SDP concepts)](ldp-concepts-flows/) | 2026-07-01 | lakeflow, declarative-pipelines, sdp, flows, append-flow, auto-cdc, update-flow, I3 |
+| [Streaming tables (SDP concepts)](ldp-concepts-streaming-tables/) | 2026-07-02 | lakeflow, declarative-pipelines, sdp, streaming-tables, auto-loader, real-time-mode, watermarks, I3 |

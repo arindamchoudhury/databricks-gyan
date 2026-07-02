@@ -164,4 +164,5 @@ Course notebooks and external sources captured as structured notes.
 | [Lakeflow Spark Declarative Pipelines (hub)](databricks-docs/ldp-overview/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, hub, dlt-to-ldp-rename, apache-spark-declarative-pipelines, I3 |
 | [Pipelines (SDP concepts)](databricks-docs/ldp-concepts-pipelines/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, pipeline-graph, dag, pipeline-types, lakebase, standalone-pipelines, pipelines-editor, I3, E8 |
 | [Flows (SDP concepts)](databricks-docs/ldp-concepts-flows/) | documentation | 2026-07-01 | lakeflow, declarative-pipelines, sdp, flows, append-flow, auto-cdc, update-flow, once-flow, I3 |
+| [Streaming tables (SDP concepts)](databricks-docs/ldp-concepts-streaming-tables/) | documentation | 2026-07-02 | lakeflow, declarative-pipelines, sdp, streaming-tables, auto-loader, real-time-mode, watermarks, I3 |
 | [Disable access to legacy features in new workspaces](databricks-docs/legacy-features/) | documentation | 2026-07-02 | administration, unity-catalog, dbfs, hive-metastore, no-isolation-clusters, legacy, account-settings, B1 |
