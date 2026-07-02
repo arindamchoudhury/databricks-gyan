@@ -220,6 +220,10 @@ nav = [
             { "Overview" = "sources/databricks-papers/index.md" },
             { "Lakehouse (CIDR 2021)" = "sources/databricks-papers/lakehouse-cidr-2021.md" },
         ]},
+        { "Databricks Labs" = [
+            { "Overview" = "sources/databricks-labs/index.md" },
+            { "dbldatagen — synthetic data generator" = "sources/databricks-labs/dbldatagen.md" },
+        ]},
         { "SunnyData" = [
             { "Overview" = "sources/sunnydata/index.md" },
             { "Unity Catalog commits — write mechanics" = "sources/sunnydata/catalog-commits.md" },

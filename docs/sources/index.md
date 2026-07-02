@@ -63,6 +63,12 @@ Course notebooks and external sources captured as structured notes.
 |---|---|---|---|
 | [Lakehouse: A New Generation of Open Platforms…](databricks-papers/lakehouse-cidr-2021/) | paper | 2026-06-21 | lakehouse, architecture, delta-lake, metadata-layer, tpc-ds, foundations, B1 |
 
+## Databricks Labs — community-supported OSS projects (github.com/databrickslabs)
+
+| Title | Type | Added | Tags |
+|---|---|---|---|
+| [dbldatagen — synthetic data generator](databricks-labs/dbldatagen/) | other | 2026-07-02 | synthetic-data, testing, pyspark, delta-live-tables, faker, unity-catalog, E3 |
+
 ## Databricks Docs — official documentation (docs.databricks.com)
 
 | Title | Type | Added | Tags |
