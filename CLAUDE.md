@@ -21,7 +21,14 @@ Zensical static site. Content in `docs/` as Markdown. `zensical.toml` holds all 
 
 Book chapters live in `docs/book/`. One chapter per learning-path topic. The book skill (`databricks-book`) writes these.
 
-Reading notes from doc-site pages live in `docs/sources/databricks-docs/`. The `research-notes` skill writes these; nav is grouped by each page's own breadcrumb (see research-notes "Documentation-site sources" rule).
+Reading notes from doc-site pages live in `docs/sources/databricks-docs/`. The `research-notes` skill writes these.
+
+**Nav placement for `docs.databricks.com` pages: mirror the page's breadcrumb verbatim, to full depth.** The site is Docusaurus, which generates the breadcrumb from the same `sidebars.js` that renders the sidebar — the two cannot disagree. So the generic research-notes warning that "a breadcrumb is not an information architecture" (written from HashiCorp docs, where it *is* lossy) **does not apply here**. `scripts/fetch_page.py` writes the trail as a `=== Breadcrumb ===` line at the top of `cache/web/<slug>.txt`; read it and use it.
+
+Two rules that follow, both learned by getting them wrong:
+
+- **Create the intermediate nav group even when it holds a single note.** The source's tree beats research-notes' "don't bury one note under an empty header" heuristic. `Schedule refreshes` was first filed flat for exactly that reason; it belongs under `Data engineering › Lakeflow Spark Declarative Pipelines › Standalone pipelines`.
+- **Don't reach for `fetch_nav.py` on this site.** It works (rung 3, `ul.theme-doc-sidebar-menu`, ~5s), but the breadcrumb is already in the cache file and is the same signal. If you do run it, never add an "expand collapsed categories" pass — the ancestor chain is already expanded and the rest are off-screen, so every click fails actionability and burns ~50s for zero new links.
 
 **Note structure is dynamic — mirror the source page, don't impose a skeleton.** A note's body should follow the *page's own* headings/sections (and its tables, images, and order), not a fixed `Summary / Key points / Notes / Quotes worth keeping / Related sources` template. Keep only the metadata header (Source / Added / Source updated / Tags / Type) and a light trailing line of `[[wikilink]]` cross-references; everything between is shaped by the page. A short page gets a short note; a page with four sections gets four sections.
 

@@ -186,6 +186,50 @@ def extract_tab_panels(page) -> str:
     return "\n\n=== Tab Panels ===\n\n" + "\n\n---\n\n".join(panels)
 
 
+def extract_breadcrumb(page) -> str:
+    """Read the page's breadcrumb trail as a separator-joined path.
+
+    On Docusaurus sites (docs.databricks.com) the breadcrumb is generated from
+    the same sidebars config that renders the sidebar, so it is an authoritative
+    view of where the page sits in the docs tree — use it to place the note in
+    zensical.toml nav. inner_text() on the container runs the crumbs together
+    ("Data engineeringConceptsPipelines"), so read each crumb separately.
+    """
+    try:
+        crumbs = page.evaluate("""
+        () => {
+            const selectors = [
+                '.theme-doc-breadcrumbs',
+                'nav[aria-label="Breadcrumbs" i]',
+                'nav[aria-label="breadcrumb" i]',
+                '[class*="breadcrumb" i]',
+                'ol[itemtype*="BreadcrumbList"]',
+            ];
+            for (const sel of selectors) {
+                const root = document.querySelector(sel);
+                if (!root) continue;
+                const items = [...root.querySelectorAll('li, a, span[itemprop="name"]')]
+                    .map(el => (el.innerText || el.textContent || '').trim())
+                    .filter(t => t && t.length < 80);
+                // Deduplicate: an <li> and its child <a> yield the same text.
+                const seen = [];
+                for (const t of items) if (!seen.includes(t)) seen.push(t);
+                if (seen.length >= 2) return seen;
+            }
+            return [];
+        }
+        """)
+    except Exception:
+        return ""
+
+    if not crumbs:
+        return ""
+
+    trail = " > ".join(crumbs)
+    print(f"Breadcrumb: {trail}", file=sys.stderr)
+    return f"=== Breadcrumb ===\n{trail}\n\n"
+
+
 def extract_carousel_cards(page) -> str:
     """Walk through flashcard carousels (next-slide button pattern) and collect all cards.
 
@@ -340,6 +384,10 @@ def fetch(url: str, slug: str, out_dir: Path, timeout_ms: int) -> Path:
         page.wait_for_timeout(1000)
         _ts("initial wait done")
 
+        # Read the breadcrumb before any clicking can navigate away from it
+        breadcrumb = extract_breadcrumb(page)
+        _ts("breadcrumb done")
+
         # Collect carousel/flashcard content (hidden-by-CSS slides)
         carousel_text = extract_carousel_cards(page)
         _ts("carousel done")
@@ -388,6 +436,9 @@ def fetch(url: str, slug: str, out_dir: Path, timeout_ms: int) -> Path:
             content = content + "\n\n" + tab_panel_text
         if image_block:
             content = content + image_block
+
+        if breadcrumb:
+            content = breadcrumb + content
 
         if not content.strip():
             print("WARNING: extracted content is empty.", file=sys.stderr)
