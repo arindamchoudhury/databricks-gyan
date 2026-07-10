@@ -118,3 +118,9 @@ Grouped by topic. Nav mirrors these groups.
 | [Pipelines (SDP concepts)](ldp-concepts-pipelines/) | 2026-07-01 | lakeflow, declarative-pipelines, sdp, pipeline-graph, dag, pipeline-types, I3 |
 | [Flows (SDP concepts)](ldp-concepts-flows/) | 2026-07-01 | lakeflow, declarative-pipelines, sdp, flows, append-flow, auto-cdc, update-flow, I3 |
 | [Streaming tables (SDP concepts)](ldp-concepts-streaming-tables/) | 2026-07-02 | lakeflow, declarative-pipelines, sdp, streaming-tables, auto-loader, real-time-mode, watermarks, I3 |
+
+### Lakeflow Spark Declarative Pipelines — Standalone pipelines
+
+| Page | Added | Tags |
+|---|---|---|
+| [Schedule refreshes](ldp-dbsql-schedule-refreshes/) | 2026-07-10 | lakeflow, sdp, standalone-pipelines, trigger-on-update, schedule-cron, statement-timeout, performance-mode, I3, E8 |
