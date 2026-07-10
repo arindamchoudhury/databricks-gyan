@@ -197,14 +197,16 @@ nav = [
                 { "Lakeflow Jobs" = [
                     { "Serverless Compute" = "sources/databricks-docs/serverless-jobs.md" },
                 ]},
-                { "Lakeflow Declarative Pipelines" = [
+                { "Lakeflow Spark Declarative Pipelines" = [
                     { "Overview" = "sources/databricks-docs/ldp-overview.md" },
                     { "Concepts" = [
                         {"Pipelines" = "sources/databricks-docs/ldp-concepts-pipelines.md" },
                         { "Flows" = "sources/databricks-docs/ldp-concepts-flows.md" },
                         { "Streaming tables" = "sources/databricks-docs/ldp-concepts-streaming-tables.md" },
                     ]},
-                    { "Schedule refreshes (standalone pipelines)" = "sources/databricks-docs/ldp-dbsql-schedule-refreshes.md" },
+                    { "Standalone pipelines" = [
+                        { "Schedule refreshes" = "sources/databricks-docs/ldp-dbsql-schedule-refreshes.md" },
+                    ]},
                     { "Serverless Compute" = "sources/databricks-docs/serverless-pipelines.md" },
                     { "Materialized views (standalone + serverless)" = "sources/databricks-docs/materialized-views.md" },
                 ]},
