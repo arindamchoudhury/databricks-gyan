@@ -19,6 +19,9 @@ import sys
 from pathlib import Path
 
 CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+if not Path(CHROME_PATH).exists():
+    # Fall back to Playwright's bundled Chromium.
+    CHROME_PATH = None
 DEFAULT_CACHE_DIR = Path(__file__).parent.parent / "cache" / "web"
 
 # JS that returns innerText of the container holding the next-slide button.
